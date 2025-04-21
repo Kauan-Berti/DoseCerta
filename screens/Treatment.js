@@ -1,10 +1,21 @@
-import { Text, View, StyleSheet } from "react-native";
+import { StyleSheet, FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { GlobalStyles } from "../constants/colors";
+
+import NavigationHeader from "../components/NavigationHeader";
+import AlertCard from "../components/AlertCard";
 
 function Treatment() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Treatment</Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <NavigationHeader title={new Date().toISOString().slice(0, 10)} />
+      <FlatList
+        data={[{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }, { id: "5" }]}
+        renderItem={({ item }) => <AlertCard />}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.contentContainer}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -12,12 +23,15 @@ export default Treatment;
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: GlobalStyles.colors.background,
+    paddingHorizontal: 20,
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   text: {
     fontSize: 20,
     color: "#000",
+  },
+  contentContainer: {
+    paddingBottom: 100,
   },
 });

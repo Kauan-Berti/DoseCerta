@@ -1,0 +1,62 @@
+import { TextInput, View, Text, StyleSheet } from "react-native";
+import { GlobalStyles } from "../constants/colors";
+
+function Input({ label, style, textInputConfig, invalid }) {
+  const inputStyles = [styles.input];
+
+  if (textInputConfig && textInputConfig.multiline) {
+    inputStyles.push(styles.inputMultiline);
+  }
+
+  if (invalid) {
+    inputStyles.push(styles.invalidInput);
+  }
+
+  return (
+    <View style={[styles.inputContainer, style]}>
+      <Text style={[styles.label, invalid && styles.invalidLabel]}>
+        {label}
+      </Text>
+      <TextInput
+        style={inputStyles}
+        {...textInputConfig}
+        placeholderTextColor={GlobalStyles.colors.disabledText}
+      />
+    </View>
+  );
+}
+
+export default Input;
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    marginVertical: 8,
+  },
+  label: {
+    fontSize: 12,
+    color: GlobalStyles.colors.textSecondary,
+    marginBottom: 4,
+    fontWeight: "bold",
+  },
+
+  input: {
+    backgroundColor: GlobalStyles.colors.card,
+    color: GlobalStyles.colors.text,
+    padding: 6,
+    borderRadius: 6,
+    fontSize: 18,
+    borderColor: GlobalStyles.colors.border,
+    borderWidth: 2,
+    width: "100%",
+  },
+  inputMultiline: {
+    minHeight: 100,
+    textAlignVertical: "top",
+  },
+  invalidLabel: {
+    color: GlobalStyles.colors.error,
+  },
+  invalidInput: {
+    backgroundColor: GlobalStyles.colors.card,
+  },
+});

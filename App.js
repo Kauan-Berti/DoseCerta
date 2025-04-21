@@ -6,6 +6,7 @@ import Config from "./screens/Config";
 import Journal from "./screens/Journal";
 import Stock from "./screens/Stock";
 import CreateJournalEntry from "./screens/CreateJournalEntry";
+import Medication from "./screens/Medication";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -13,6 +14,15 @@ import AuthContextProvider, { AuthContext } from "./store/auth-context";
 import { useContext, useState, useEffect, useCallback } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GlobalStyles } from "./constants/colors";
+import {
+  CalendarDots,
+  DotsThreeCircle,
+  Hospital,
+  Plus,
+  Pill,
+} from "phosphor-react-native";
+import CustomTabBarButton from "./components/CustomTabBarButton";
 
 SplashScreen.preventAutoHideAsync(); //Aplicar quando o login estiver pronto
 
@@ -21,31 +31,70 @@ const Stack = createNativeStackNavigator();
 
 function AuthenticatedStack() {
   return (
-    <BottomTabs.Navigator screenOptions={{ headerShown: false }}>
+    <BottomTabs.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: GlobalStyles.colors.primary,
+          borderTopWidth: 0,
+          position: "absolute",
+          height: 60,
+        },
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: GlobalStyles.colors.card,
+        tabBarInactiveTintColor: GlobalStyles.colors.background,
+      }}
+    >
       <BottomTabs.Screen
         name="Treatment"
         component={Treatment}
-        options={{ title: "Tratamento" }}
+        options={{
+          title: "Tratamento",
+          tabBarIcon: ({ color, size }) => {
+            return <Pill color={color} size={size} />;
+          },
+        }}
       />
       <BottomTabs.Screen
         name="Journal"
         component={Journal}
-        options={{ title: "Histórico" }}
+        options={{
+          title: "Histórico",
+          tabBarIcon: ({ color, size }) => {
+            return <CalendarDots color={color} size={size} />;
+          },
+        }}
       />
       <BottomTabs.Screen
-        name="CreateJournalEntry"
-        component={CreateJournalEntry}
-        options={{ title: "Novo Registro" }}
+        name="Medication"
+        component={Medication}
+        options={{
+          tabBarIcon: ({ color, size }) => {
+            return <Plus color={color} size={size * 1.5} />;
+          },
+          tabBarButton: (props) => <CustomTabBarButton {...props} />,
+          tabBarLabel: () => null,
+        }}
       />
       <BottomTabs.Screen
         name="Stock"
         component={Stock}
-        options={{ title: "Estoque" }}
+        options={{
+          title: "Estoque",
+          tabBarIcon: ({ color, size }) => {
+            return <Hospital color={color} size={size} />;
+          },
+        }}
       />
       <BottomTabs.Screen
         name="Config"
         component={Config}
-        options={{ title: "Mais" }}
+        options={{
+          title: "Mais",
+          tabBarIcon: ({ color, size }) => {
+            return <DotsThreeCircle color={color} size={size} />;
+          },
+        }}
       />
     </BottomTabs.Navigator>
   );
@@ -53,7 +102,11 @@ function AuthenticatedStack() {
 
 function AuthStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="CreateUser" component={CreateUserScreen} />
     </Stack.Navigator>
@@ -113,7 +166,7 @@ function Root() {
 export default function App() {
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <AuthContextProvider>
         <Root />
       </AuthContextProvider>

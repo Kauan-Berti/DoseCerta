@@ -1,0 +1,70 @@
+import { View, Text, Image, StyleSheet } from "react-native";
+import SquareIconButton from "./SquareIconButton";
+import { GlobalStyles } from "../constants/colors";
+
+function AlertCard() {
+  return (
+    <View style={styles.card}>
+      <View style={styles.titlesContainer}>
+        <Image
+          source={require("../assets/custom/PillYellowIcon.png")}
+          style={styles.image}
+        />
+        <Text style={styles.text}>Rivotril 2mg</Text>
+        <SquareIconButton
+          icon="ArrowCircleRight"
+          size={30}
+          color={GlobalStyles.colors.buttonSecondary}
+        />
+      </View>
+      <View style={styles.buttonsContainer}>
+        <SquareIconButton title="08:00" icon="SunHorizon" />
+        <SquareIconButton title="1 Pílula" icon="Pill" />
+        <SquareIconButton title="Pré-refeição" icon="ForkKnife" />
+      </View>
+    </View>
+  );
+}
+
+export default AlertCard;
+
+const styles = StyleSheet.create({
+  card: {
+    marginVertical: 6,
+    marginHorizontal: 10,
+    backgroundColor: GlobalStyles.colors.card,
+    padding: 10,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  titlesContainer: {
+    marginHorizontal: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  buttonsContainer: {
+    marginTop: 10,
+    marginHorizontal: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  image: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  text: {
+    fontSize: 16,
+    color: GlobalStyles.colors.text,
+  },
+});
