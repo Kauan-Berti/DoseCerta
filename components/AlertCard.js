@@ -2,7 +2,7 @@ import { View, Text, Image, StyleSheet } from "react-native";
 import SquareIconButton from "./SquareIconButton";
 import { GlobalStyles } from "../constants/colors";
 
-function AlertCard() {
+function AlertCard({ name, time, dose, preMeal }) {
   return (
     <View style={styles.card}>
       <View style={styles.titlesContainer}>
@@ -10,7 +10,7 @@ function AlertCard() {
           source={require("../assets/custom/PillYellowIcon.png")}
           style={styles.image}
         />
-        <Text style={styles.text}>Rivotril 2mg</Text>
+        <Text style={styles.text}>{name}</Text>
         <SquareIconButton
           icon="ArrowCircleRight"
           size={30}
@@ -18,9 +18,9 @@ function AlertCard() {
         />
       </View>
       <View style={styles.buttonsContainer}>
-        <SquareIconButton title="08:00" icon="SunHorizon" />
-        <SquareIconButton title="1 Pílula" icon="Pill" />
-        <SquareIconButton title="Pré-refeição" icon="ForkKnife" />
+        <SquareIconButton title={time} icon="SunHorizon" />
+        <SquareIconButton title={dose} icon="Pill" />
+        <SquareIconButton title={preMeal} icon="ForkKnife" />
       </View>
     </View>
   );

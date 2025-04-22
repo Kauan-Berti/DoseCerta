@@ -5,8 +5,7 @@ import CreateUserScreen from "./screens/CreateUserScreen";
 import Config from "./screens/Config";
 import Journal from "./screens/Journal";
 import Stock from "./screens/Stock";
-import CreateJournalEntry from "./screens/CreateJournalEntry";
-import Medication from "./screens/Medication";
+import MedicationScreen from "./screens/MedicationScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -23,6 +22,12 @@ import {
   Pill,
 } from "phosphor-react-native";
 import CustomTabBarButton from "./components/CustomTabBarButton";
+import MedicationsContextProvider from "./store/medication-context";
+import SignupScreen from "./screens/SignupScreen";
+import { useFonts } from "expo-font";
+import { DefaultTheme } from "@react-navigation/native";
+import LoadingOverlay from "./components/ui/LoadingOverlay";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync(); //Aplicar quando o login estiver pronto
 
@@ -67,7 +72,7 @@ function AuthenticatedStack() {
       />
       <BottomTabs.Screen
         name="Medication"
-        component={Medication}
+        component={MedicationScreen}
         options={{
           tabBarIcon: ({ color, size }) => {
             return <Plus color={color} size={size * 1.5} />;
@@ -105,10 +110,12 @@ function AuthStack() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
+        contentStyle: { backgroundColor: "#000" },
+        animation: "default",
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="CreateUser" component={CreateUserScreen} />
+      <Stack.Screen name="Signup" component={SignupScreen} />
     </Stack.Navigator>
   );
 }
@@ -117,12 +124,17 @@ function Navigation() {
   const authContext = useContext(AuthContext);
 
   return (
-    <NavigationContainer>
-      {
-        /* {!authContext.isAuthenticated && <AuthStack />}
-      {authContext.isAuthenticated && <AuthenticatedStack />} */
-        <AuthenticatedStack /> //TODO: Descomentar a linha acima e comentar esta linha para usar a autenticação
-      }
+    <NavigationContainer
+      theme={{
+        ...DefaultTheme,
+        colors: {
+          ...DefaultTheme.colors,
+          background: GlobalStyles.colors.background,
+        },
+      }}
+    >
+      {!authContext.isAuthenticated && <AuthStack />}
+      {authContext.isAuthenticated && <AuthenticatedStack />}
     </NavigationContainer>
   );
 }
@@ -150,7 +162,7 @@ function Root() {
   useEffect(() => {
     async function hideSplash() {
       if (!isTryingLogin) {
-        await SplashScreen.hideAsync();
+        SplashScreen.hideAsync();
       }
     }
     hideSplash();
@@ -167,9 +179,15 @@ export default function App() {
   return (
     <>
       <StatusBar style="light" />
-      <AuthContextProvider>
-        <Root />
-      </AuthContextProvider>
+      <GestureHandlerRootView
+        style={{ flex: 1, backgroundColor: GlobalStyles.colors.background }}
+      >
+        <AuthContextProvider>
+          <MedicationsContextProvider>
+            <Root />
+          </MedicationsContextProvider>
+        </AuthContextProvider>
+      </GestureHandlerRootView>
     </>
   );
 }

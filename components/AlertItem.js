@@ -1,29 +1,34 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 
-function AlertItem() {
+function AlertItem({ time, dose, preMeal, id, onPress }) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.itemLabel}>Alerta 1</Text>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Horário da dose</Text>
-        <Pressable style={styles.buttonText}>
-          <Text style={styles.buttonText}>08:00</Text>
-        </Pressable>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [pressed && styles.pressed]}
+    >
+      <View style={styles.container}>
+        <Text style={styles.itemLabel}>Alerta {id}</Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Horário da dose:</Text>
+          <Pressable style={styles.buttonText}>
+            <Text style={styles.buttonText}>{time}</Text>
+          </Pressable>
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Dose:</Text>
+          <Pressable style={styles.buttonText}>
+            <Text style={styles.buttonText}>{dose}</Text>
+          </Pressable>
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Quando tomar:</Text>
+          <Pressable>
+            <Text style={styles.buttonText}>{preMeal}</Text>
+          </Pressable>
+        </View>
       </View>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Dose</Text>
-        <Pressable style={styles.buttonText}>
-          <Text style={styles.buttonText}>1 comprimido</Text>
-        </Pressable>
-      </View>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Quando tomar</Text>
-        <Pressable>
-          <Text style={styles.buttonText}>Antes do almoço</Text>
-        </Pressable>
-      </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -56,5 +61,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: GlobalStyles.colors.lightYellow,
     fontWeight: "bold",
+  },
+  pressed: {
+    opacity: 0.8,
   },
 });

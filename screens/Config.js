@@ -1,9 +1,24 @@
-import { Text, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { GlobalStyles } from "../constants/colors";
+import IconButton from "../components/IconButton";
+import { AuthContext } from "../store/auth-context";
+import { useContext } from "react";
 
 function Config() {
+
+  const authContext = useContext(AuthContext);
+  function logoutHandler() {
+    authContext.logout();
+  }
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Config</Text>
+      <IconButton
+        size={24}
+        color={GlobalStyles.colors.primary}
+        onPress={logoutHandler}
+        title={"Sair"}
+        icon="SignOut"
+      />
     </View>
   );
 }
@@ -15,9 +30,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: GlobalStyles.colors.background,
   },
   text: {
     fontSize: 20,
-    color: "#000",
+    color: GlobalStyles.colors.text,
   },
 });

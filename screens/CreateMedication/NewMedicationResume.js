@@ -4,8 +4,44 @@ import DoubleLabelBox from "../../components/DoubleLabelBox";
 import SquareIconButton from "../../components/SquareIconButton";
 import Input from "../../components/Input";
 import IconButton from "../../components/IconButton";
+import { useContext } from "react";
+import { MedicationsContext } from "../../store/medication-context";
+import Medication from "../../models/medication";
+import { useState } from "react";
+import { storeMedication } from "../../util/http";
 
-function NewMedicationResume({ onFinish }) {
+function NewMedicationResume({ onFinish, medicationData }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState();
+
+  const medicationContext = useContext(MedicationsContext);
+
+  async function handleSave() {
+    const newMedication = new Medication(
+      medicationData.id || Date.now().toString(),
+      medicationData.name,
+      medicationData.amount,
+      medicationData.minAmount,
+      medicationData.form,
+      medicationData.unit,
+      medicationData.treatmentTime,
+      medicationData.treatmentStartDate,
+      medicationData.alerts
+    );
+
+    setIsSubmitting(true);
+    try {
+      const id = await storeMedication(newMedication);
+      medicationContext.addMedication({ ...newMedication, id: id });
+    } catch (error) {
+      setError("Não foi possível salvar o medicamento.");
+    } finally {
+      setIsSubmitting(false);
+    }
+
+    onFinish();
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.imageContainer}>
@@ -17,37 +53,37 @@ function NewMedicationResume({ onFinish }) {
 
       <Text style={styles.title}>Paracetamol 500mg</Text>
       <View style={styles.contentContainer}>
-        <View style={styles.squareButtonsContainer}>
-          <SquareIconButton
-            icon={"SunHorizon"}
-            color={GlobalStyles.colors.card}
-            textColor="white"
-            title={"08:00"}
-            size={100}
-          />
-          <SquareIconButton
-            icon={"Pill"}
-            color={GlobalStyles.colors.card}
-            textColor="white"
-            title={"1 Pílula"}
-            size={100}
-          />
-          <SquareIconButton
-            icon={"ForkKnife"}
-            color={GlobalStyles.colors.card}
-            textColor="white"
-            title={"Pré-refeição"}
-            size={100}
-          />
-        </View>
-        <DoubleLabelBox title={"Periodicidade"} text={"Duas vezes ao dia"} />
-        <DoubleLabelBox title={"Duração do tratamento"} text={"7 dias"} />
-        <DoubleLabelBox title={"Quantidade em estoque"} text={"10"} />
-        <DoubleLabelBox title={"Alarme"} text={"5"} />
-        <Input
-          label={"Anotação rápida"}
-          textInputConfig={{ multiline: true }}
+        <Text style={styles.title}>{medicationData.name}</Text>
+        <DoubleLabelBox title={"Forma"} text={medicationData.form} />
+        <DoubleLabelBox title={"Unidade"} text={medicationData.unit} />
+        <DoubleLabelBox
+          title={"Quantidade em estoque"}
+          text={medicationData.amount}
         />
+        <DoubleLabelBox
+          title={"Quantidade mínima"}
+          text={medicationData.minAmount}
+        />
+        <DoubleLabelBox
+          title={"Duração do tratamento"}
+          text={`${medicationData.treatmentTime} dias`}
+        />
+        <DoubleLabelBox
+          title={"Data de início"}
+          text={medicationData.treatmentStartDate}
+        />
+
+        <Text style={styles.subtitle}>Alertas</Text>
+
+        {medicationData.alerts?.map((alert) => (
+          <View key={alert.id} style={styles.alertContainer}>
+            <SquareIconButton title={alert.time} icon="SunHorizon" />
+            <SquareIconButton title={alert.dose} icon="Pill" />
+            <SquareIconButton title={alert.preMeal} icon="ForkKnife" />
+          </View>
+        ))}
+
+        <Input label={"Observações"} textInputConfig={{ multiline: true }} />
         <View style={styles.saveButtonContainer}>
           <IconButton
             color={GlobalStyles.colors.accent}
@@ -55,7 +91,7 @@ function NewMedicationResume({ onFinish }) {
             icon="CheckCircle"
             title="Salvar"
             fullWidth={true}
-            onPress={onFinish}
+            onPress={handleSave}
           />
         </View>
       </View>
@@ -109,5 +145,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
+  },
+  alertContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 5,
   },
 });

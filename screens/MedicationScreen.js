@@ -4,16 +4,39 @@ import NewMedicationAlertForm from "./CreateMedication/NewMedicationAlertForm";
 import NewMedicationResume from "./CreateMedication/NewMedicationResume";
 import { GlobalStyles } from "../constants/colors";
 import NavigationHeader from "../components/NavigationHeader";
-import { useState } from "react";
-import IconButton from "../components/IconButton";
+import { useEffect, useState } from "react";
 import SuccesScreen from "./CreateMedication/SuccesScreen";
 import { useNavigation } from "@react-navigation/native";
+import Medication from "../models/medication";
 
-function Medication() {
+function MedicationScreen() {
   const [step, setStep] = useState(1); // 1: Medication Form, 2: Alert Form
   const [isSuccess, setIsSuccess] = useState(false); // Para controlar o estado de sucesso
+
+  const [medicationData, setMedicationData] = useState({
+    id: "",
+    name: "",
+    amount: "",
+    minAmount: "",
+    form: "",
+    unit: "",
+    treatmentTime: "",
+    treatmentStartDate: "",
+    alerts: [],
+  });
+
   const navigator = useNavigation(); // Hook para navegação
-  const handleNext = () => {
+
+  function handleNextStep(data) {
+    if (step === 1) {
+      setMedicationData(data); // Salva os dados do medicamento
+    } else if (step === 2) {
+      setMedicationData((currentData) => ({ ...currentData, ...data })); // Adiciona os alertas
+    }
+    setStep((prevStep) => prevStep + 1); // Avança para o próximo passo
+  }
+
+  const handleNext = (data) => {
     setStep((prevStep) => (prevStep < 3 ? prevStep + 1 : prevStep)); // Avança até o último step
   };
   const handleBack = () => {
@@ -36,13 +59,13 @@ function Medication() {
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <NewMedicationForm />;
+        return <NewMedicationForm onNext={handleNextStep} />;
       case 2:
-        return <NewMedicationAlertForm />;
+        return <NewMedicationAlertForm onNext={handleNextStep} medicationData={medicationData}/>;
       case 3:
-        return <NewMedicationResume onFinish={handleFinish} />;
+        return <NewMedicationResume  onFinish={handleFinish} medicationData={medicationData} />;
       default:
-        return <NewMedicationForm />;
+        return <NewMedicationForm onNext={handleNextStep} />;
     }
   };
 
@@ -67,22 +90,11 @@ function Medication() {
         onBack={handleBack}
       />
       {renderStep()}
-
-      {step < 3 ? (
-        <View style={styles.buttonContainer}>
-          <IconButton
-            title={"Seguir"}
-            color={GlobalStyles.colors.primary}
-            icon={"ArrowCircleRight"}
-            onPress={handleNext}
-          />
-        </View>
-      ) : null}
     </View>
   );
 }
 
-export default Medication;
+export default MedicationScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -94,11 +106,5 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 20,
     color: GlobalStyles.colors.text,
-  },
-
-  buttonContainer: {
-    position: "absolute",
-    bottom: 80,
-    right: 20,
   },
 });
