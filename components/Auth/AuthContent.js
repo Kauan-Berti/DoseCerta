@@ -1,4 +1,14 @@
-import { Alert, View, StyleSheet, Image } from "react-native";
+import {
+  Alert,
+  View,
+  StyleSheet,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import IconButton from "../IconButton";
 import { GlobalStyles } from "../../constants/colors";
@@ -52,30 +62,42 @@ function AuthContent({ isLogin, onAuthenticate }) {
   }
 
   return (
-    <View style={styles.authContent}>
-      <Image
-        source={require("../../assets/custom/Logo.png")}
-        style={styles.logo}
-      />
-      <AuthForm
-        isLogin={isLogin}
-        onSubmit={submitHandler}
-        credentialsInvalid={credentialsInvalid}
-      />
-      <View style={styles.buttons}>
-        <IconButton
-          onPress={switchAuthModeHandler}
-          title={isLogin ? "Criar conta" : "Já tem uma conta?"}
-          textColor="white"
-          color={GlobalStyles.colors.button}
-        ></IconButton>
-      </View>
-    </View>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={styles.scrollView}>
+          <View style={styles.authContent}>
+            <Image
+              source={require("../../assets/custom/Logo.png")}
+              style={styles.logo}
+            />
+            <AuthForm
+              isLogin={isLogin}
+              onSubmit={submitHandler}
+              credentialsInvalid={credentialsInvalid}
+            />
+            <View style={styles.buttons}>
+              <IconButton
+                onPress={switchAuthModeHandler}
+                title={isLogin ? "Criar conta" : "Já tem uma conta?"}
+                textColor="white"
+                color={GlobalStyles.colors.button}
+              ></IconButton>
+            </View>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 export default AuthContent;
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
   authContent: {
     flex: 1,
     backgroundColor: GlobalStyles.colors.background,
