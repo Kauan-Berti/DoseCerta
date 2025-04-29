@@ -9,7 +9,7 @@ function Input({ label, style, textInputConfig, invalid }) {
   }
 
   if (invalid) {
-    inputStyles.push(styles.invalidInput);
+    inputStyles.push(styles.invalidInput); // Adiciona o estilo de invalidez
   }
 
   return (
@@ -18,7 +18,7 @@ function Input({ label, style, textInputConfig, invalid }) {
         {label}
       </Text>
       <TextInput
-        style={inputStyles}
+        style={StyleSheet.flatten(inputStyles)} // Garante que os estilos sejam mesclados corretamente
         {...textInputConfig}
         placeholderTextColor={GlobalStyles.colors.disabledText}
       />
@@ -38,7 +38,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontWeight: "bold",
   },
-
   input: {
     backgroundColor: GlobalStyles.colors.card,
     color: GlobalStyles.colors.text,
@@ -54,9 +53,10 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   invalidLabel: {
-    color: GlobalStyles.colors.error,
+    color: GlobalStyles.colors.error, // Cor do texto do label inválido
   },
   invalidInput: {
-    backgroundColor: GlobalStyles.colors.card,
+    backgroundColor: GlobalStyles.colors.inputErrorBackground, // Cor de fundo para inputs inválidos
+    borderColor: GlobalStyles.colors.error, // Adiciona uma borda vermelha para inputs inválidos
   },
 });

@@ -110,7 +110,7 @@ function AuthStack() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: "#000" },
+        contentStyle: { backgroundColor: GlobalStyles.colors.background },
         animation: "default",
       }}
     >

@@ -13,5 +13,6 @@ export const GlobalStyles = {
     lightYellow: "#FEDE6F",
     disabled: "#3A3A3C", // cor de fundo dos botões desativados
     disabledText: "#8E8E93", // cor do texto dos botões desativados
+    inputErrorBackground: "#ff8a84", // fundo do input de erro
   },
 };

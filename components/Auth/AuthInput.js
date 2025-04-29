@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   labelInvalid: {
-    color: GlobalStyles.colors.error,
+    color: GlobalStyles.colors.inputErrorBackground,
   },
   input: {
     paddingVertical: 8,
@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   inputInvalid: {
-    backgroundColor: GlobalStyles.colors.error,
+    backgroundColor: GlobalStyles.colors.inputErrorBackground,
+    placeholderTextColor: "white",
   },
 });
