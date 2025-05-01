@@ -162,7 +162,7 @@ function Root() {
   useEffect(() => {
     async function hideSplash() {
       if (!isTryingLogin) {
-        SplashScreen.hideAsync();
+        await SplashScreen.hideAsync();
       }
     }
     hideSplash();

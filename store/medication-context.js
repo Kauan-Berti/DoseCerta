@@ -56,7 +56,7 @@ function medicationReducer(state, action) {
       const updatableMedicationIndex = state.findIndex(
         (medication) => medication.id === action.payload.id
       );
-      const updatableMedication = state[updatableMedication];
+      const updatableMedication = state[updatableMedicationIndex]; // Corrigido
       const updatedItem = { ...updatableMedication, ...action.payload.data };
       const updatedMedications = [...state];
       updatedMedications[updatableMedicationIndex] = updatedItem;
