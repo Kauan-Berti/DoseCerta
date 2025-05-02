@@ -1,13 +1,13 @@
 import { View, StyleSheet } from "react-native";
-import { GlobalStyles } from "../constants/colors";
-import NavigationHeader from "../components/NavigationHeader";
+import { GlobalStyles } from "../../constants/colors";
+import NavigationHeader from "../../components/NavigationHeader";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import MedicationForm from "./CreateMedication/MedicationForm";
-import MedicationResume from "./CreateMedication/MedicationResume";
-import SuccesScreen from "./SuccesScreen";
+import MedicationForm from "./MedicationForm";
+import MedicationResume from "./MedicationResume";
+import SuccesScreen from "../SuccesScreen";
 
-function MedicationScreen() {
+function CreateMedication() {
   const [step, setStep] = useState(1); // 1: Medication Form, 2: Alert Form
   const [isSuccess, setIsSuccess] = useState(false); // Para controlar o estado de sucesso
 
@@ -91,7 +91,7 @@ function MedicationScreen() {
   );
 }
 
-export default MedicationScreen;
+export default CreateMedication;
 
 const styles = StyleSheet.create({
   container: {

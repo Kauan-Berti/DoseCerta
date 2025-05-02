@@ -24,7 +24,7 @@ function LoginScreen() {
   }
 
   if (isAuthenticating) {
-    return <LoadingOverlay message="Loggin you in..." />;
+    return <LoadingOverlay message="Acessando seus dados..." />;
   }
   return <AuthContent isLogin onAuthenticate={loginHandler} />;
 }

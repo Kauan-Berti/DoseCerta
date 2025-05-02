@@ -1,13 +1,14 @@
 import { View, StyleSheet } from "react-native";
-import { GlobalStyles } from "../constants/colors";
-import NavigationHeader from "../components/NavigationHeader";
+import { GlobalStyles } from "../../constants/colors";
+import NavigationHeader from "../../components/NavigationHeader";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import MedicationForm from "./CreateMedication/MedicationForm";
-import MedicationResume from "./CreateMedication/MedicationResume";
-import SuccesScreen from "./SuccesScreen";
+import SuccesScreen from "../SuccesScreen";
+import CreateAlerts from "./CreateAlerts";
+import TreatmentResume from "./TreatmentResume";
+import MedicationList from "./MedicationList";
 
-function MedicationScreen() {
+function CreateTreatment() {
   const [step, setStep] = useState(1); // 1: Medication Form, 2: Alert Form
   const [isSuccess, setIsSuccess] = useState(false); // Para controlar o estado de sucesso
 
@@ -49,20 +50,17 @@ function MedicationScreen() {
       navigator.navigate("Treatment"); // Reseta o estado de sucesso após 2 segundos
     }, 2000);
 
-    return <SuccesScreen text={"Medicamento adicionado com sucesso!"} />; // Renderiza a tela de sucesso
+    return <SuccesScreen text={"Alertas adicionados com sucesso!"} />; // Renderiza a tela de sucesso
   }
 
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <MedicationForm onNext={handleNextStep} />;
+        return <MedicationList onNext={handleNextStep} />;
       case 2:
-        return (
-          <MedicationResume
-            onFinish={handleFinish}
-            medicationData={medicationData}
-          />
-        );
+        return <CreateAlerts onNext={handleNextStep} />;
+      case 3:
+        return <TreatmentResume text={"Alertas adicionados com sucesso!"} />;
       default:
         return;
     }
@@ -71,8 +69,10 @@ function MedicationScreen() {
   const getTitle = () => {
     switch (step) {
       case 1:
-        return "Dados do medicamento";
+        return "Escolha um medicamento";
       case 2:
+        return "Definir alertas";
+      case 3:
         return "Resumo";
       default:
         return "";
@@ -83,15 +83,14 @@ function MedicationScreen() {
     <View style={styles.container}>
       <NavigationHeader
         title={getTitle()}
-        onNext={handleNext}
-        onBack={handleBack}
+        onBack={step > 1 ? handleBack : null} // Desabilita o botão de voltar no primeiro passo
       />
       {renderStep()}
     </View>
   );
 }
 
-export default MedicationScreen;
+export default CreateTreatment;
 
 const styles = StyleSheet.create({
   container: {

@@ -10,7 +10,7 @@ import Medication from "../../models/medication";
 import { useState } from "react";
 import { storeMedication } from "../../util/http";
 
-function NewMedicationResume({ onFinish, medicationData }) {
+function TreatmentResume({ onFinish, medicationData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState();
 
@@ -23,10 +23,7 @@ function NewMedicationResume({ onFinish, medicationData }) {
       medicationData.amount,
       medicationData.minAmount,
       medicationData.form,
-      medicationData.unit,
-      medicationData.treatmentTime,
-      medicationData.treatmentStartDate,
-      medicationData.alerts
+      medicationData.unit
     );
 
     setIsSubmitting(true);
@@ -64,24 +61,6 @@ function NewMedicationResume({ onFinish, medicationData }) {
           title={"Quantidade mínima"}
           text={medicationData.minAmount}
         />
-        <DoubleLabelBox
-          title={"Duração do tratamento"}
-          text={`${medicationData.treatmentTime} dias`}
-        />
-        <DoubleLabelBox
-          title={"Data de início"}
-          text={medicationData.treatmentStartDate}
-        />
-
-        <Text style={styles.subtitle}>Alertas</Text>
-
-        {medicationData.alerts?.map((alert) => (
-          <View key={alert.id} style={styles.alertContainer}>
-            <SquareIconButton title={alert.time} icon="SunHorizon" />
-            <SquareIconButton title={alert.dose} icon="Pill" />
-            <SquareIconButton title={alert.preMeal} icon="ForkKnife" />
-          </View>
-        ))}
 
         <Input label={"Observações"} textInputConfig={{ multiline: true }} />
         <View style={styles.saveButtonContainer}>
@@ -99,7 +78,7 @@ function NewMedicationResume({ onFinish, medicationData }) {
   );
 }
 
-export default NewMedicationResume;
+export default TreatmentResume;
 
 const styles = StyleSheet.create({
   container: {

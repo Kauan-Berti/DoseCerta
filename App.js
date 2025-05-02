@@ -1,7 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import Treatment from "./screens/Treatment";
 import LoginScreen from "./screens/LoginScreen";
-import CreateUserScreen from "./screens/CreateUserScreen";
 import Config from "./screens/Config";
 import Journal from "./screens/Journal";
 import Stock from "./screens/Stock";
@@ -24,10 +23,11 @@ import {
 import CustomTabBarButton from "./components/CustomTabBarButton";
 import MedicationsContextProvider from "./store/medication-context";
 import SignupScreen from "./screens/SignupScreen";
-import { useFonts } from "expo-font";
 import { DefaultTheme } from "@react-navigation/native";
-import LoadingOverlay from "./components/ui/LoadingOverlay";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import CreateMedication from "./screens/CreateMedication/CreateMedication";
+import CreateTreatment from "./screens/CreateAlert/CreateTreatment";
+import CreateJournal from "./screens/CreateJournal/CreateJournal";
 
 SplashScreen.preventAutoHideAsync(); //Aplicar quando o login estiver pronto
 
@@ -54,7 +54,7 @@ function AuthenticatedStack() {
         name="Treatment"
         component={Treatment}
         options={{
-          title: "Tratamento",
+          title: "Alertas",
           tabBarIcon: ({ color, size }) => {
             return <Pill color={color} size={size} />;
           },
@@ -71,8 +71,8 @@ function AuthenticatedStack() {
         }}
       />
       <BottomTabs.Screen
-        name="Medication"
-        component={MedicationScreen}
+        name="Add"
+        component={AddStack}
         options={{
           tabBarIcon: ({ color, size }) => {
             return <Plus color={color} size={size * 1.5} />;
@@ -82,10 +82,10 @@ function AuthenticatedStack() {
         }}
       />
       <BottomTabs.Screen
-        name="Stock"
+        name="Medications"
         component={Stock}
         options={{
-          title: "Estoque",
+          title: "Medicamentos",
           tabBarIcon: ({ color, size }) => {
             return <Hospital color={color} size={size} />;
           },
@@ -120,11 +120,27 @@ function AuthStack() {
   );
 }
 
+function AddStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: GlobalStyles.colors.background },
+        animation: "default",
+      }}
+    >
+      <Stack.Screen name="CreateJournal" component={CreateJournal} />
+      <Stack.Screen name="CreateMedication" component={CreateMedication} />
+      <Stack.Screen name="CreateTreatment" component={CreateTreatment} />
+    </Stack.Navigator>
+  );
+}
+
 function Navigation() {
   const authContext = useContext(AuthContext);
-
   return (
     <NavigationContainer
+      screenOptions={{ detachPreviousScreen: false }}
       theme={{
         ...DefaultTheme,
         colors: {

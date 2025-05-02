@@ -1,21 +1,40 @@
 import { Pressable, View, StyleSheet } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import * as PhosphorIcons from "phosphor-react-native";
+import { Children } from "react";
 
-function RoundButton({ onClick, icon, size = 24, color }) {
+function RoundButton({
+  onPress,
+  icon,
+  size = 24,
+  color,
+  children,
+  backgroundColor,
+  borderColor,
+}) {
   const IconComponent = PhosphorIcons[icon];
   return (
     <Pressable
-      onPress={onClick}
+      onPress={onPress}
       style={({ pressed }) => [pressed && styles.pressed]}
     >
-      <View style={styles.button}>
+      <View
+        style={[
+          styles.button,
+          { backgroundColor: backgroundColor || GlobalStyles.colors.button },
+          { width: size, height: size, borderRadius: size / 2 },
+          { borderColor: borderColor || GlobalStyles.colors.border },
+          { borderWidth: 2 },
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         {IconComponent && (
           <IconComponent
-            size={size} // Ajusta o tamanho do ícone
+            size={size * 0.75} // Ajusta o tamanho do ícone
             color={color} // Cor do ícone
           />
         )}
+        {children}
       </View>
     </Pressable>
   );

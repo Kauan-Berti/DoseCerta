@@ -1,11 +1,19 @@
-import { View, StyleSheet, Text, ScrollView, Alert } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+} from "react-native";
 import Input from "../../components/Input";
 import { useState } from "react";
 import { GlobalStyles } from "../../constants/colors";
 import IconButton from "../../components/IconButton";
 import Medication from "../../models/medication";
+import { Platform } from "react-native";
 
-function NewMedicationForm({ onNext }) {
+function MedicationForm({ onNext }) {
   const [formData, setFormData] = useState(new Medication());
 
   function handleInputChange(inputIdentifier, enteredValue) {
@@ -17,24 +25,8 @@ function NewMedicationForm({ onNext }) {
 
   function handleNext() {
     // Validação simples
-    const {
-      name,
-      form,
-      unit,
-      amount,
-      minAmount,
-      treatmentTime,
-      treatmentStartDate,
-    } = formData;
-    if (
-      !name ||
-      !form ||
-      !unit ||
-      !amount ||
-      !minAmount ||
-      !treatmentTime ||
-      !treatmentStartDate
-    ) {
+    const { name, form, unit, amount, minAmount } = formData;
+    if (!name || !form || !unit || !amount || !minAmount) {
       Alert.alert("Erro", "Por favor, preencha todos os campos obrigatórios.");
       return;
     }
@@ -44,7 +36,10 @@ function NewMedicationForm({ onNext }) {
   }
 
   return (
-    <>
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <ScrollView style={styles.screen}>
         <View style={styles.container}>
           <Text style={styles.text}>
@@ -98,26 +93,6 @@ function NewMedicationForm({ onNext }) {
               onChangeText: (text) => handleInputChange("minAmount", text),
             }}
           />
-          <Input
-            label="Data de início do tratamento"
-            textInputConfig={{
-              placeholder: "YYYY-MM-DD",
-              autoCapitalize: "none",
-              autoCorrect: false,
-              onChangeText: (text) =>
-                handleInputChange("treatmentStartDate", text),
-            }}
-          />
-
-          <Input
-            label="Duração do tratamento"
-            textInputConfig={{
-              autoCapitalize: "sentences",
-              autoCorrect: false,
-              maxLength: 10,
-              onChangeText: (text) => handleInputChange("treatmentTime", text),
-            }}
-          />
         </View>
       </ScrollView>
       <View style={styles.nextButtonContainer}>
@@ -128,22 +103,24 @@ function NewMedicationForm({ onNext }) {
           onPress={handleNext}
         />
       </View>
-    </>
+    </KeyboardAvoidingView>
   );
 }
 
-export default NewMedicationForm;
+export default MedicationForm;
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: GlobalStyles.colors.background,
+    paddingBottom: 60,
   },
   container: {
     paddingHorizontal: 10,
     flex: 1,
     backgroundColor: GlobalStyles.colors.background,
     paddingTop: 10,
+    paddingBottom: 150,
   },
   text: {
     fontSize: 20,

@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
-import { GlobalStyles } from "../../constants/colors";
+import { GlobalStyles } from "../constants/colors";
 import { CheckCircle } from "phosphor-react-native";
 
 function SuccesScreen({ text }) {

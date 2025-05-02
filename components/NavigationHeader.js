@@ -5,17 +5,25 @@ import RoundButton from "./RoundButton";
 function NavigationHeader({ title, onBack, onNext }) {
   return (
     <View style={styles.headerContainer}>
-      <RoundButton
-        icon="ArrowLeft"
-        onClick={onBack}
-        color={GlobalStyles.colors.lightYellow}
-      />
+      {onBack && (
+        <RoundButton
+          icon="ArrowLeft"
+          onPress={onBack}
+          color={GlobalStyles.colors.lightYellow}
+          size={30}
+        />
+      )}
+      {!onBack && <View style={{ width: 30 }} />}
       <Text style={styles.headerText}>{title}</Text>
-      <RoundButton
-        icon="ArrowRight"
-        onClick={onNext}
-        color={GlobalStyles.colors.lightYellow}
-      />
+      {!onNext && <View style={{ width: 30 }} />}
+      {onNext && (
+        <RoundButton
+          icon="ArrowRight"
+          onPress={onNext}
+          color={GlobalStyles.colors.lightYellow}
+          size={30}
+        />
+      )}
     </View>
   );
 }

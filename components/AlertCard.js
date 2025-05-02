@@ -1,15 +1,20 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import SquareIconButton from "./SquareIconButton";
 import { GlobalStyles } from "../constants/colors";
+import { Bell } from "phosphor-react-native";
+import RoundButton from "./RoundButton";
 
 function AlertCard({ name, time, dose, preMeal }) {
   return (
     <View style={styles.card}>
       <View style={styles.titlesContainer}>
-        <Image
-          source={require("../assets/custom/PillYellowIcon.png")}
-          style={styles.image}
+        <RoundButton
+          icon="Bell"
+          size={40}shadowOffset
+          color={GlobalStyles.colors.primary}
+          borderColor={GlobalStyles.colors.primary}
         />
+
         <Text style={styles.text}>{name}</Text>
         <SquareIconButton
           icon="ArrowCircleRight"

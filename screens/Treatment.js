@@ -1,4 +1,4 @@
-import { StyleSheet, FlatList } from "react-native";
+import { StyleSheet, FlatList, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GlobalStyles } from "../constants/colors";
 
@@ -65,25 +65,13 @@ function Treatment() {
   }
 
   function getAlertsForDate(date) {
-    const selectedISO = date.toISOString().split("T")[0];
-
     const alerts = medicationsContext.medications.flatMap((medication) => {
-      const treatmentStartDate = new Date(medication.treatmentStartDate);
-      const treatmentEndDate = new Date(
-        treatmentStartDate.getTime() +
-          medication.treatmentTime * 24 * 60 * 60 * 1000 // Adiciona os dias do tratamento
-      );
-
       // Verifica se hoje está dentro do intervalo de tratamento
-      if (date >= treatmentStartDate && date <= treatmentEndDate) {
-        return medication.alerts.map((alert) => ({
-          ...alert,
-          id: `${medication.id}-${alert.id}`, // Garante IDs únicos combinando o ID do medicamento e do alerta
-          name: medication.name, // Inclui o nome do medicamento no alerta
-        }));
-      }
-
-      return []; // Retorna vazio se o medicamento não está no intervalo de tratamento
+      return medication.alerts.map((alert) => ({
+        ...alert,
+        id: `${medication.id}-${alert.id}`, // Garante IDs únicos combinando o ID do medicamento e do alerta
+        name: medication.name, // Inclui o nome do medicamento no alerta
+      }));
     });
 
     // Ordena os alertas pelo horário
@@ -118,6 +106,10 @@ function Treatment() {
         onBack={handlePreviousDay}
         onNext={handleNextDay}
       />
+      {todayAlerts.length === 0 && (
+        <Text style={styles.text}>Nenhum alerta para hoje</Text>
+      )}
+
       <FlatList
         data={todayAlerts}
         renderItem={renderAlertCard}
@@ -138,7 +130,9 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 20,
-    color: "#000",
+    color: GlobalStyles.colors.text,
+    textAlign: "center",
+    marginTop: 20,
   },
   contentContainer: {
     paddingBottom: 100,

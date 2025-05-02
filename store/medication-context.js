@@ -3,31 +3,9 @@ import Medication from "../models/medication";
 
 export const MedicationsContext = createContext({
   medications: [],
-  addMedication: ({
-    id,
-    name,
-    amount,
-    minAmount,
-    form,
-    unit,
-    treatmentTime,
-    treatmentStartDate,
-    alerts,
-  }) => {},
+  addMedication: ({ id, name, amount, minAmount, form, unit, alerts }) => {},
   setMedication: (medications) => {},
-  updateMedication: (
-    id,
-    {
-      name,
-      amount,
-      minAmount,
-      form,
-      unit,
-      treatmentTime,
-      treatmentStartDate,
-      alerts,
-    }
-  ) => {},
+  updateMedication: (id, { name, amount, minAmount, form, unit, alerts }) => {},
   deleteMedication: (id) => {},
 });
 
@@ -77,8 +55,6 @@ function MedicationsContextProvider({ children }) {
       minAmount: 5,
       form: "Comprimido",
       unit: "mg",
-      treatmentTime: 5,
-      treatmentStartDate: "2025-04-19", // Data de início do tratamento
       alerts: [
         {
           id: "1",
@@ -101,8 +77,6 @@ function MedicationsContextProvider({ children }) {
       minAmount: 3,
       form: "Cápsula",
       unit: "mg",
-      treatmentTime: 5,
-      treatmentStartDate: "2025-04-20", // Data de início do tratamento
       alerts: [{ id: "1", time: "12:00", dose: 1, preMeal: "Após o almoço" }],
     },
     {
@@ -112,8 +86,6 @@ function MedicationsContextProvider({ children }) {
       minAmount: 2,
       form: "Suspensão",
       unit: "ml",
-      treatmentTime: 10,
-      treatmentStartDate: "2025-04-18", // Data de início do tratamento
       alerts: [
         { id: "1", time: "07:00", dose: 5, preMeal: "Antes do café" },
         { id: "2", time: "19:00", dose: 5, preMeal: "Antes do jantar" },
