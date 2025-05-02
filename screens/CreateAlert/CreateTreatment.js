@@ -1,7 +1,7 @@
 import { View, StyleSheet } from "react-native";
 import { GlobalStyles } from "../../constants/colors";
 import NavigationHeader from "../../components/NavigationHeader";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import SuccesScreen from "../SuccesScreen";
 import CreateAlerts from "./CreateAlerts";
@@ -11,78 +11,85 @@ import MedicationList from "./MedicationList";
 function CreateTreatment() {
   const [step, setStep] = useState(1); // 1: Medication Form, 2: Alert Form
   const [isSuccess, setIsSuccess] = useState(false); // Para controlar o estado de sucesso
-
-  const [medicationData, setMedicationData] = useState({
-    id: "",
-    name: "",
-    amount: "",
-    minAmount: "",
-    form: "",
-    unit: "",
+  const [treatmentData, setTreatmentData] = useState({
+    medication: {
+      id: "",
+      name: "",
+      amount: "",
+      minAmount: "",
+      form: "",
+      unit: "",
+    },
     alerts: [],
+    treatmentPeriod: {
+      startDate: null,
+      endDate: null,
+      isContinuous: false,
+    },
   });
 
   const navigator = useNavigation(); // Hook para navegação
 
   function handleNextStep(data) {
-    if (step === 1) {
-      setMedicationData(data); // Salva os dados do medicamento
-    } else if (step === 2) {
-      setMedicationData((currentData) => ({ ...currentData, ...data })); // Adiciona os alertas
-    }
+    setTreatmentData((currentData) => ({ ...currentData, ...data })); // Atualiza os dados do medicamento ou alertas
     setStep((prevStep) => prevStep + 1); // Avança para o próximo passo
   }
 
-  const handleNext = (data) => {
-    setStep((prevStep) => (prevStep < 3 ? prevStep + 1 : prevStep)); // Avança até o último step
-  };
-  const handleBack = () => {
-    setStep((prevStep) => (prevStep > 1 ? prevStep - 1 : prevStep)); // Volta até o primeiro step
-  };
+  function handleBack() {
+    setStep((prevStep) => Math.max(prevStep - 1, 1)); // Volta até o primeiro passo
+  }
 
   function handleFinish() {
     setIsSuccess(true); // Define o estado de sucesso como verdadeiro
-  }
-
-  if (isSuccess) {
     setTimeout(() => {
       setIsSuccess(false);
       navigator.navigate("Treatment"); // Reseta o estado de sucesso após 2 segundos
     }, 2000);
-
-    return <SuccesScreen text={"Alertas adicionados com sucesso!"} />; // Renderiza a tela de sucesso
   }
 
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return <MedicationList onNext={handleNextStep} />;
-      case 2:
-        return <CreateAlerts onNext={handleNextStep} />;
-      case 3:
-        return <TreatmentResume text={"Alertas adicionados com sucesso!"} />;
-      default:
-        return;
+  function renderStep() {
+    if (isSuccess) {
+      return <SuccesScreen text={"Alertas adicionados com sucesso!"} />;
     }
-  };
 
-  const getTitle = () => {
     switch (step) {
       case 1:
-        return "Escolha um medicamento";
+        return (
+          <MedicationList
+            onNext={(selectedMedication) =>
+              handleNextStep({ medication: selectedMedication })
+            }
+          />
+        );
       case 2:
-        return "Definir alertas";
+        return (
+          <CreateAlerts
+            onNext={(updatedData) => handleNextStep(updatedData)}
+            treatmentData={treatmentData}
+          />
+        );
       case 3:
-        return "Resumo";
+        return (
+          <TreatmentResume
+            onFinish={handleFinish}
+            treatmentData={treatmentData}
+          />
+        );
       default:
-        return "";
+        return null;
     }
+  }
+
+  const titleMap = {
+    1: "Escolha um medicamento",
+    2: "Definir alertas",
+    3: "Resumo",
   };
 
   return (
     <View style={styles.container}>
       <NavigationHeader
-        title={getTitle()}
+        title={titleMap[step] || ""}
         onBack={step > 1 ? handleBack : null} // Desabilita o botão de voltar no primeiro passo
       />
       {renderStep()}

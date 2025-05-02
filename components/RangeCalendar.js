@@ -7,7 +7,64 @@ import {
 } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import { Calendar } from "react-native-calendars";
-function RangeCalendar({ isVisible, onClose, onDayPress, markedDates }) {
+import { useState } from "react";
+function RangeCalendar({ isVisible, onClose, onDateRangeSelected }) {
+  const [startDate, setStartDate] = useState(null); // Data de início
+  const [endDate, setEndDate] = useState(null); // Data de término
+  const [selectingEndDate, setSelectingEndDate] = useState(false); // Estado para controlar a seleção da data de término
+
+  function handleDayPress(day) {
+    if (!selectingEndDate) {
+      // Seleciona a data de início
+      setStartDate(day.dateString);
+      setEndDate(null); // Reseta a data de término ao selecionar uma nova data de início
+      setSelectingEndDate(true); // Alterna para a seleção da data de término
+    } else {
+      // Seleciona a data de término
+      const selectedStartDate = startDate || day.dateString; // Garante que o startDate seja usado corretamente
+
+      setEndDate(day.dateString);
+      setSelectingEndDate(false);
+      onDateRangeSelected({
+        startDate: selectedStartDate,
+        endDate: day.dateString,
+      });
+      onClose(); // Fecha o calendário após selecionar o intervalo
+    }
+  }
+
+  // Marca as datas selecionadas e o intervalo
+  const markedDates = {};
+  if (startDate) {
+    markedDates[startDate] = {
+      startingDay: true,
+      color: GlobalStyles.colors.primary,
+      textColor: GlobalStyles.colors.background,
+    };
+  }
+  if (endDate) {
+    markedDates[endDate] = {
+      endingDay: true,
+      color: GlobalStyles.colors.primary,
+      textColor: GlobalStyles.colors.background,
+    };
+
+    // Marca o intervalo entre as datas
+    let currentDate = new Date(startDate);
+    const end = new Date(endDate);
+
+    while (currentDate <= end) {
+      const dateString = currentDate.toISOString().split("T")[0];
+      if (dateString !== startDate && dateString !== endDate) {
+        markedDates[dateString] = {
+          color: GlobalStyles.colors.primary,
+          textColor: GlobalStyles.colors.background,
+        };
+      }
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1); // Incrementa o dia sem problemas de fuso horário
+    }
+  }
+
   return (
     <Modal
       visible={isVisible}
@@ -21,7 +78,7 @@ function RangeCalendar({ isVisible, onClose, onDayPress, markedDates }) {
             <Calendar
               markingType="period"
               markedDates={markedDates}
-              onDayPress={onDayPress}
+              onDayPress={handleDayPress}
               style={styles.calendar}
               theme={{
                 backgroundColor: GlobalStyles.colors.card,

@@ -1,7 +1,7 @@
 import { TextInput, View, Text, StyleSheet } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 
-function Input({ label, style, textInputConfig, invalid }) {
+function Input({ label, style, textInputConfig, invalid, keyboardType }) {
   const inputStyles = [styles.input];
 
   if (textInputConfig && textInputConfig.multiline) {
@@ -21,6 +21,7 @@ function Input({ label, style, textInputConfig, invalid }) {
         style={StyleSheet.flatten(inputStyles)} // Garante que os estilos sejam mesclados corretamente
         {...textInputConfig}
         placeholderTextColor={GlobalStyles.colors.disabledText}
+        keyboardType={keyboardType || "default"} // Adiciona o tipo de teclado padrão
       />
     </View>
   );

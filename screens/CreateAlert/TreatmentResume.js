@@ -1,8 +1,6 @@
-import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Image, FlatList } from "react-native";
 import { GlobalStyles } from "../../constants/colors";
 import DoubleLabelBox from "../../components/DoubleLabelBox";
-import SquareIconButton from "../../components/SquareIconButton";
-import Input from "../../components/Input";
 import IconButton from "../../components/IconButton";
 import { useContext } from "react";
 import { MedicationsContext } from "../../store/medication-context";
@@ -10,7 +8,7 @@ import Medication from "../../models/medication";
 import { useState } from "react";
 import { storeMedication } from "../../util/http";
 
-function TreatmentResume({ onFinish, medicationData }) {
+function TreatmentResume({ onFinish, treatmentData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState();
 
@@ -18,12 +16,13 @@ function TreatmentResume({ onFinish, medicationData }) {
 
   async function handleSave() {
     const newMedication = new Medication(
-      medicationData.id || Date.now().toString(),
-      medicationData.name,
-      medicationData.amount,
-      medicationData.minAmount,
-      medicationData.form,
-      medicationData.unit
+      treatmentData.medication.id || Date.now().toString(),
+      treatmentData.medication.name,
+      treatmentData.medication.amount,
+      treatmentData.medication.minAmount,
+      treatmentData.medication.form,
+      treatmentData.medication.unit,
+      treatmentData.alerts.length > 0 ? treatmentData.alerts : [] // Se não houver alertas, envia um array vazio
     );
 
     setIsSubmitting(true);
@@ -31,7 +30,7 @@ function TreatmentResume({ onFinish, medicationData }) {
       const id = await storeMedication(newMedication);
       medicationContext.addMedication({ ...newMedication, id: id });
     } catch (error) {
-      setError("Não foi possível salvar o medicamento.");
+      setError("Não foi possível salvar o tratamento.");
     } finally {
       setIsSubmitting(false);
     }
@@ -39,8 +38,24 @@ function TreatmentResume({ onFinish, medicationData }) {
     onFinish();
   }
 
-  return (
-    <ScrollView style={styles.container}>
+  function renderAlertItem({ item }) {
+    return (
+      <View style={styles.alertContainer}>
+        <Text style={styles.text}>
+          Horário: {item.time} - Dose: {item.dose}
+        </Text>
+        {item.observations && (
+          <Text style={styles.text}>Observações: {item.observations}</Text>
+        )}
+        {item.days && (
+          <Text style={styles.text}>Dias: {item.days.join(", ")}</Text>
+        )}
+      </View>
+    );
+  }
+
+  const headerComponent = (
+    <>
       <View style={styles.imageContainer}>
         <Image
           style={styles.image}
@@ -48,33 +63,64 @@ function TreatmentResume({ onFinish, medicationData }) {
         />
       </View>
 
-      <Text style={styles.title}>Paracetamol 500mg</Text>
-      <View style={styles.contentContainer}>
-        <Text style={styles.title}>{medicationData.name}</Text>
-        <DoubleLabelBox title={"Forma"} text={medicationData.form} />
-        <DoubleLabelBox title={"Unidade"} text={medicationData.unit} />
-        <DoubleLabelBox
-          title={"Quantidade em estoque"}
-          text={medicationData.amount}
-        />
-        <DoubleLabelBox
-          title={"Quantidade mínima"}
-          text={medicationData.minAmount}
-        />
-
-        <Input label={"Observações"} textInputConfig={{ multiline: true }} />
-        <View style={styles.saveButtonContainer}>
-          <IconButton
-            color={GlobalStyles.colors.accent}
-            textColor="white"
-            icon="CheckCircle"
-            title="Salvar"
-            fullWidth={true}
-            onPress={handleSave}
-          />
+      <Text style={styles.title}>{treatmentData.medication.name}</Text>
+      {treatmentData.treatmentPeriod.isContinuous ? (
+        <View style={styles.continuousContainer}>
+          <Text style={styles.continuousText}>
+            Este é um tratamento contínuo.
+          </Text>
         </View>
+      ) : (
+        <>
+          <DoubleLabelBox
+            title={"Data de Início"}
+            text={treatmentData.treatmentPeriod.startDate || "Não especificado"}
+          />
+          <DoubleLabelBox
+            title={"Data de Término"}
+            text={treatmentData.treatmentPeriod.endDate || "Não especificado"}
+          />
+        </>
+      )}
+      <DoubleLabelBox
+        title={"Quantidade em estoque"}
+        text={`${treatmentData.medication.amount} ${treatmentData.medication.form}(s)`}
+      />
+      <DoubleLabelBox
+        title={"Quantidade mínima"}
+        text={`${treatmentData.medication.minAmount} ${treatmentData.medication.form}(s)`}
+      />
+
+      <Text style={styles.subtitle}>Alertas Criados:</Text>
+    </>
+  );
+
+  const footerComponent = (
+    <>
+      <View style={styles.saveButtonContainer}>
+        <IconButton
+          color={GlobalStyles.colors.accent}
+          textColor="white"
+          icon="CheckCircle"
+          title={isSubmitting ? "Salvando..." : "Salvar"}
+          fullWidth={true}
+          onPress={handleSave}
+          disabled={isSubmitting}
+        />
       </View>
-    </ScrollView>
+      {error && <Text style={styles.errorText}>{error}</Text>}
+    </>
+  );
+
+  return (
+    <FlatList
+      data={treatmentData.alerts}
+      keyExtractor={(item) => item.id}
+      renderItem={renderAlertItem}
+      ListHeaderComponent={headerComponent}
+      ListFooterComponent={footerComponent}
+      contentContainerStyle={styles.contentContainer}
+    />
   );
 }
 
@@ -105,15 +151,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: GlobalStyles.colors.text,
     textAlign: "center",
-  },
-  squareButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
+    fontWeight: "bold",
     marginBottom: 10,
   },
+  subtitle: {
+    fontSize: 18,
+    color: GlobalStyles.colors.text,
+    fontWeight: "bold",
+    marginVertical: 10,
+  },
   contentContainer: {
-    paddingTop: 10,
     paddingBottom: 200,
   },
   text: {
@@ -126,8 +173,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   alertContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: "column",
     marginVertical: 5,
+    padding: 10,
+    backgroundColor: GlobalStyles.colors.card,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: GlobalStyles.colors.border,
+  },
+  continuousContainer: {
+    padding: 10,
+    backgroundColor: GlobalStyles.colors.card,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: GlobalStyles.colors.border,
+    marginBottom: 10,
+  },
+  continuousText: {
+    fontSize: 16,
+    color: GlobalStyles.colors.text,
+    textAlign: "center",
+  },
+  errorText: {
+    color: GlobalStyles.colors.error,
+    textAlign: "center",
+    marginTop: 10,
   },
 });

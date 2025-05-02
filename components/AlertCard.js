@@ -10,7 +10,8 @@ function AlertCard({ name, time, dose, preMeal }) {
       <View style={styles.titlesContainer}>
         <RoundButton
           icon="Bell"
-          size={40}shadowOffset
+          size={40}
+          shadowOffset
           color={GlobalStyles.colors.primary}
           borderColor={GlobalStyles.colors.primary}
         />

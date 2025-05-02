@@ -37,7 +37,7 @@ function MedicationList({ onNext }) {
         medicationsContext.setMedications(medications);
       } catch (err) {
         console.log(err);
-        setError("Não foi possível carregar os medicamentos.");
+        Alert.alert("Erro", "Não foi possível carregar os medicamentos.");
       } finally {
         setIsFetching(false);
       }
@@ -51,8 +51,12 @@ function MedicationList({ onNext }) {
       return;
     }
 
-    // Envia os dados do medicamento e os alertas para a próxima etapa
-    onNext();
+    const selectedMedication = medicationsContext.medications.find(
+      (medication) => medication.id === selectedMedicationId
+    );
+
+    // Envia os dados do medicamento selecionado para a próxima etapa
+    onNext(selectedMedication);
   }
 
   return (

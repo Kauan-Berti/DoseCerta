@@ -4,7 +4,6 @@ import LoginScreen from "./screens/LoginScreen";
 import Config from "./screens/Config";
 import Journal from "./screens/Journal";
 import Stock from "./screens/Stock";
-import MedicationScreen from "./screens/MedicationScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -28,6 +27,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CreateMedication from "./screens/CreateMedication/CreateMedication";
 import CreateTreatment from "./screens/CreateAlert/CreateTreatment";
 import CreateJournal from "./screens/CreateJournal/CreateJournal";
+import { refreshIdToken } from "./util/auth";
 
 SplashScreen.preventAutoHideAsync(); //Aplicar quando o login estiver pronto
 
@@ -164,10 +164,11 @@ function Root() {
       try {
         const storedToken = await AsyncStorage.getItem("authToken");
         if (storedToken) {
-          authContext.authenticate(storedToken);
+          const newToken = await refreshIdToken(); // Renova o token ao iniciar
+          authContext.authenticate(newToken);
         }
       } catch (error) {
-        console.error("Error fetching token:", error);
+        console.error("Erro ao buscar ou renovar o token:", error);
       } finally {
         setIsTryingLogin(false);
       }

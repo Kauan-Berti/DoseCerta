@@ -6,94 +6,63 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
+  Pressable,
 } from "react-native";
 import { GlobalStyles } from "../../constants/colors";
 import AlertItem from "../../components/AlertItem";
 import IconButton from "../../components/IconButton";
 import Alert from "../../models/alert";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Alert as ReactAlert } from "react-native";
-import RoundButton from "../../components/RoundButton";
 import RangeCalendar from "../../components/RangeCalendar";
 import DoubleLabelBox from "../../components/DoubleLabelBox";
 import AlertForm from "./AlertForm";
+import Toggle from "../../components/Toggle";
 
-function CreateAlerts({ onNext, medicationData }) {
+function CreateAlerts({ onNext, treatmentData }) {
   const [alerts, setAlerts] = useState([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [editingAlert, setEditingAlert] = useState(null);
+  const [isContinuous, setIsContinuous] = useState(false);
+  const [dateRange, setDateRange] = useState({
+    startDate: null,
+    endDate: null,
+  });
 
-  const [startDate, setStartDate] = useState(null); // Data de início
-  const [endDate, setEndDate] = useState(null); // Data de término
-  const [selectingEndDate, setSelectingEndDate] = useState(false); // Estado para controlar a seleção da data de término
-  function handleDayPress(day) {
-    if (!selectingEndDate) {
-      // Seleciona a data de início
-      setStartDate(day.dateString);
-      setEndDate(null); // Reseta a data de término ao selecionar uma nova data de início
-      setSelectingEndDate(true); // Alterna para a seleção da data de término
-    } else {
-      // Seleciona a data de término
-      setEndDate(day.dateString);
-      setSelectingEndDate(false);
-      setIsCalendarVisible(false);
-    }
+  function toggleState(setState) {
+    setState((prev) => !prev);
   }
 
-  // Marca as datas selecionadas e o intervalo
-  const markedDates = {};
-  if (startDate) {
-    markedDates[startDate] = {
-      startingDay: true,
-      color: GlobalStyles.colors.primary,
-      textColor: GlobalStyles.colors.background,
-    };
-  }
-  if (endDate) {
-    markedDates[endDate] = {
-      endingDay: true,
-      color: GlobalStyles.colors.primary,
-      textColor: GlobalStyles.colors.background,
-    };
-
-    // Marca o intervalo entre as datas
-    let currentDate = new Date(startDate);
-    const end = new Date(endDate);
-
-    while (currentDate <= end) {
-      const dateString = currentDate.toISOString().split("T")[0];
-      if (dateString !== startDate && dateString !== endDate) {
-        markedDates[dateString] = {
-          color: GlobalStyles.colors.primary,
-          textColor: GlobalStyles.colors.background,
-        };
-      }
-      currentDate.setDate(currentDate.getDate() + 1); // Incrementa o dia
-    }
+  function handleDateRangeSelected(range) {
+    setDateRange(range);
   }
 
   function handleAddAlert() {
-    setEditingAlert(null); // Limpa o estado de edição
-    setIsFormVisible(true); // Exibe o formulário para adicionar um novo alerta
+    setEditingAlert(null);
+    setIsFormVisible(true);
   }
 
   function handleEditAlert(alert) {
-    setEditingAlert(alert); // Define o alerta a ser editado
-    setIsFormVisible(true); // Exibe o formulário para editar o alerta
-  }
-
-  function handleCalendarToggle() {
-    console.log("Calendar toggled"); // Log para depuração
-    setIsCalendarVisible((prev) => !prev); // Alterna a visibilidade do calendário
+    setEditingAlert(alert);
+    setIsFormVisible(true);
   }
 
   function formatDate(dateString) {
-    const date = new Date(dateString); // Converte a string para um objeto Date
-    return date.toLocaleDateString("pt-BR"); // Formata no estilo dd/MM/aaaa
+    const [year, month, day] = dateString.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString("pt-BR");
   }
 
   function handleSubmitAlert(alertData) {
+    if (!alertData.time || !alertData.dose) {
+      ReactAlert.alert(
+        "Erro",
+        "Por favor, preencha todos os campos do alerta."
+      );
+      return;
+    }
+
     if (editingAlert) {
       setAlerts((currentAlerts) =>
         currentAlerts.map((alert) =>
@@ -105,21 +74,42 @@ function CreateAlerts({ onNext, medicationData }) {
         `${alerts.length + 1}`,
         alertData.time,
         alertData.dose,
-        alertData.preMeal
+        alertData.observations,
+        alertData.days
       );
       setAlerts((currentAlerts) => [...currentAlerts, newAlert]);
     }
-    setIsFormVisible(false); // Fecha o formulário após adicionar ou editar o alerta
+    setIsFormVisible(false);
   }
+ 
 
-  function handleNext() {
+  function validateAndProceed() {
+    if (!isContinuous) {
+      if (!dateRange.startDate || !dateRange.endDate) {
+        ReactAlert.alert(
+          "Erro",
+          "Por favor, selecione as datas de início e término do tratamento."
+        );
+        return;
+      }
+    }
+
     if (alerts.length === 0) {
       ReactAlert.alert("Erro", "Por favor, adicione pelo menos um alerta.");
       return;
     }
 
-    // Envia os dados do medicamento e os alertas para a próxima etapa
-    onNext({ ...medicationData, alerts });
+    const updatedTreatmentData = {
+      ...treatmentData,
+      alerts,
+      treatmentPeriod: {
+        startDate: isContinuous ? null : dateRange.startDate,
+        endDate: isContinuous ? null : dateRange.endDate,
+        isContinuous,
+      },
+    };
+
+    onNext(updatedTreatmentData);
   }
 
   function renderAlertItem({ item }) {
@@ -127,9 +117,10 @@ function CreateAlerts({ onNext, medicationData }) {
       <AlertItem
         time={item.time}
         dose={item.dose}
-        preMeal={item.preMeal}
+        observations={item.observations}
         id={item.id}
-        onPress={() => handleEditAlert(item)} // Passa o alerta para edição
+        days={item.days}
+        onPress={() => handleEditAlert(item)}
       />
     );
   }
@@ -150,52 +141,40 @@ function CreateAlerts({ onNext, medicationData }) {
               <Text style={styles.titleText}>
                 Vamos ajustar os horários e frequência da medicação.
               </Text>
-              <IconButton
-                title="Uso contínuo"
-                icon="Check"
-                color={GlobalStyles.colors.primary}
-                onPress={handleCalendarToggle}
+              <Toggle
+                onToggle={() => toggleState(setIsContinuous)}
+                isEnabledText={"Uso Continuo"}
+                isDisabledText={"Uso Continuo"}
               />
-              <Text style={styles.text}>Duração do tratamento</Text>
-              <DoubleLabelBox
-                title={"Data de início"}
-                text={startDate ? formatDate(startDate) : ""}
-              />
-              <DoubleLabelBox
-                title={"Data de término"}
-                text={endDate ? formatDate(endDate) : ""}
-              />
-              <Text style={styles.text}>Dias da Semana</Text>
-              <View style={styles.weekDaysButtonContainer}>
-                <RoundButton size={40} color="white">
-                  <Text style={styles.text}>D</Text>
-                </RoundButton>
-                <RoundButton size={40} color="white">
-                  <Text style={styles.text}>S</Text>
-                </RoundButton>
-                <RoundButton size={40} color="white">
-                  <Text style={styles.text}>T</Text>
-                </RoundButton>
-                <RoundButton size={40} color="white">
-                  <Text style={styles.text}>Q</Text>
-                </RoundButton>
-                <RoundButton size={40} color="white">
-                  <Text style={styles.text}>Q</Text>
-                </RoundButton>
-                <RoundButton size={40} color="white">
-                  <Text style={styles.text}>S</Text>
-                </RoundButton>
-                <RoundButton size={40} color="white">
-                  <Text style={styles.text}>S</Text>
-                </RoundButton>
-              </View>
+
+              {!isContinuous && (
+                <Pressable onPress={() => toggleState(setIsCalendarVisible)}>
+                  <Text style={styles.text}>Duração do tratamento</Text>
+                  <DoubleLabelBox
+                    title={"Data de início"}
+                    text={
+                      dateRange.startDate
+                        ? formatDate(dateRange.startDate)
+                        : "Selecionar"
+                    }
+                  />
+                  <DoubleLabelBox
+                    title={"Data de término"}
+                    text={
+                      dateRange.endDate
+                        ? formatDate(dateRange.endDate)
+                        : "Selecionar"
+                    }
+                  />
+                </Pressable>
+              )}
             </View>
           }
           ListFooterComponent={
             <View style={styles.buttonContainer}>
               <IconButton
                 icon={"PlusCircle"}
-                title={"Novo alerta"}
+                title={"Adicionar Horário"}
                 color={GlobalStyles.colors.accent}
                 textColor="white"
                 onPress={handleAddAlert}
@@ -209,21 +188,20 @@ function CreateAlerts({ onNext, medicationData }) {
           title={"Seguir"}
           color={GlobalStyles.colors.primary}
           icon={"ArrowCircleRight"}
-          onPress={handleNext}
+          onPress={validateAndProceed}
         />
       </View>
       <RangeCalendar
         isVisible={isCalendarVisible}
-        onClose={handleCalendarToggle}
-        onDayPress={handleDayPress} // Passa a função de seleção de data
-        markedDates={markedDates}
+        onClose={() => toggleState(setIsCalendarVisible)}
+        onDateRangeSelected={handleDateRangeSelected}
       />
 
       <Modal visible={isFormVisible} animationType="slide">
         <AlertForm
-          onCancel={() => setIsFormVisible(false)} // Fecha o formulário
-          onSubmit={handleSubmitAlert} // Salva o alerta
-          defaultValues={editingAlert} // Dados pré-carregados para edição
+          onCancel={() => setIsFormVisible(false)}
+          onSubmit={handleSubmitAlert}
+          defaultValues={editingAlert}
         />
       </Modal>
     </KeyboardAvoidingView>
@@ -249,15 +227,10 @@ const styles = StyleSheet.create({
   buttonContainer: {
     paddingVertical: 10,
   },
-  weekDaysButtonContainer: {
-    marginVertical: 15,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
   nextButtonContainer: {
-    position: "absolute", // Posiciona o botão de forma fixa
-    bottom: 80, // Distância da parte inferior da tela
-    right: 20, // Distância da lateral direita
+    position: "absolute",
+    bottom: 80,
+    right: 20,
   },
   titleText: {
     fontSize: 16,
@@ -268,18 +241,5 @@ const styles = StyleSheet.create({
   },
   componentsContainer: {
     gap: 10,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fundo semi-transparente
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    width: "90%",
-    backgroundColor: GlobalStyles.colors.card, // Fundo do conteúdo da modal
-    borderRadius: 10,
-    padding: 20,
-    elevation: 5,
   },
 });

@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 
-function AlertItem({ time, dose, preMeal, id, onPress }) {
+function AlertItem({ time, dose, days, observations, id, onPress }) {
   return (
     <Pressable
       onPress={onPress}
@@ -22,9 +22,15 @@ function AlertItem({ time, dose, preMeal, id, onPress }) {
           </Pressable>
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Quando tomar:</Text>
+          <Text style={styles.label}>Dias da semana:</Text>
           <Pressable>
-            <Text style={styles.buttonText}>{preMeal}</Text>
+            <Text style={styles.buttonText}>{days.join(", ")}</Text>
+          </Pressable>
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Observações:</Text>
+          <Pressable>
+            <Text style={styles.buttonText}>{observations}</Text>
           </Pressable>
         </View>
       </View>

@@ -1,6 +1,7 @@
 import { createContext } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { refreshIdToken } from "../util/auth";
 
 export const AuthContext = createContext({
   token: "",
@@ -12,32 +13,49 @@ export const AuthContext = createContext({
 
 function AuthContextProvider({ children }) {
   const [authToken, setAuthToken] = useState();
-  const [didTryAutoLogin, setDidTryAutoLogin] = useState(false);
 
-  function authenticate(token) {
+  async function authenticate(token) {
     setAuthToken(token);
-    AsyncStorage.setItem("authToken", token).catch((err) => {
-      console.error("Error storing token:", err);
-    });
+    await AsyncStorage.setItem("authToken", token);
   }
+
+  async function autoRefreshToken() {
+    try {
+      const newToken = await refreshIdToken();
+      setAuthToken(newToken);
+    } catch (error) {
+      console.error("Erro ao renovar o token:", error);
+      logout(); // Faz logout se o refresh falhar
+    }
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      autoRefreshToken(); // Renova o token automaticamente
+    }, 55 * 60 * 1000); // Renova 5 minutos antes de expirar (55 minutos)
+
+    return () => clearInterval(interval); // Limpa o intervalo ao desmontar
+  }, []);
 
   function logout() {
     setAuthToken(null);
-    AsyncStorage.removeItem("authToken").catch((err) => {
-      console.error("Error removing token:", err);
-    });
+    AsyncStorage.removeItem("authToken");
+    AsyncStorage.removeItem("refreshToken");
   }
 
-  function tryAutoLogin() {
-    setDidTryAutoLogin(true);
-  }
+  useEffect(() => {
+    const interval = setInterval(() => {
+      autoRefreshToken(); // Renova o token automaticamente
+    }, 55 * 60 * 1000); // Renova 5 minutos antes de expirar (55 minutos)
+
+    return () => clearInterval(interval); // Limpa o intervalo ao desmontar
+  }, []);
 
   const value = {
     token: authToken,
     isAuthenticated: !!authToken,
     authenticate,
     logout,
-    tryAutoLogin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
