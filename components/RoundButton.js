@@ -30,7 +30,7 @@ function RoundButton({
       >
         {IconComponent && (
           <IconComponent
-            size={size * 0.75} // Ajusta o tamanho do ícone
+            size={size * 0.7} // Ajusta o tamanho do ícone
             color={color} // Cor do ícone
           />
         )}

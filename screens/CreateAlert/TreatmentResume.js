@@ -144,7 +144,7 @@ function TreatmentResume({ onFinish, treatment, alerts }) {
 
   return (
     <FlatList
-      data={treatment.alerts}
+      data={alerts}
       keyExtractor={(item) => item.id}
       renderItem={renderAlertItem}
       ListHeaderComponent={headerComponent}

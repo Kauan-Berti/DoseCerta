@@ -1,14 +1,12 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { GlobalStyles } from "../constants/colors";
+import RoundButton from "./RoundButton";
 
 function AlertItem({ time, dose, days, observations, id, onPress }) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.card,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
       <View style={styles.container}>
         <View style={styles.row}>

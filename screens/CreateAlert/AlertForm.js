@@ -6,7 +6,13 @@ import IconButton from "../../components/IconButton";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DayOfWeek from "../../components/DayOfWeek";
 
-function AlertForm({ onCancel, onSubmit, defaultValues, treatmentId }) {
+function AlertForm({
+  onCancel,
+  onSubmit,
+  defaultValues,
+  treatmentId,
+  onRemove,
+}) {
   const [inputs, setInputs] = useState({
     time: { value: defaultValues?.time || "", isValid: true },
     dose: { value: defaultValues?.dose || "", isValid: true },
@@ -72,6 +78,12 @@ function AlertForm({ onCancel, onSubmit, defaultValues, treatmentId }) {
     };
 
     onSubmit(alertData);
+  }
+
+  function handleRemove() {
+    if (defaultValues?.id) {
+      onRemove(defaultValues.id);
+    }
   }
 
   const formIsInvalid =
@@ -156,19 +168,29 @@ function AlertForm({ onCancel, onSubmit, defaultValues, treatmentId }) {
       )}
 
       {/* Botões */}
-      <View style={styles.buttonsContainer}>
-        <IconButton
-          onPress={onCancel}
-          title="Cancelar"
-          color={GlobalStyles.colors.error}
-          icon="XCircle"
-        />
-        <IconButton
-          onPress={submitHandler}
-          title="Salvar"
-          color={GlobalStyles.colors.accent}
-          icon="CheckCircle"
-        />
+      <View style={styles.buttonContainer}>
+        <View style={styles.buttonRow}>
+          <IconButton
+            onPress={onCancel}
+            title="Cancelar"
+            color={GlobalStyles.colors.primary}
+            icon="XCircle"
+          />
+          <IconButton
+            onPress={submitHandler}
+            title="Salvar"
+            color={GlobalStyles.colors.accent}
+            icon="CheckCircle"
+          />
+        </View>
+        {defaultValues?.id && (
+          <IconButton
+            onPress={handleRemove}
+            title="Remover"
+            color={GlobalStyles.colors.error}
+            icon="Trash"
+          />
+        )}
       </View>
     </View>
   );
@@ -213,11 +235,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  buttonsContainer: {
+  buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 24,
+    marginTop: 32,
+    gap: 16,
+  },
+  buttonContainer: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
   },
   errorText: {
     textAlign: "center",

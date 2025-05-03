@@ -11,7 +11,6 @@ import LoadingOverlay from "../components/ui/LoadingOverlay";
 
 function TreatmentScreen() {
   const appContext = useContext(AppContext);
-
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [todayAlerts, setTodayAlerts] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
@@ -100,7 +99,6 @@ function TreatmentScreen() {
     );
     //console.log("Medication ID:", treatment?.medicationId);
 
-    console.log("Treatment:", treatment);
 
     const medication = appContext.medications.find(
       (m) => m.id === treatment?.medicationId

@@ -101,6 +101,18 @@ function CreateAlerts({ onNext, treatment, alerts: initialAlerts }) {
     setIsFormVisible(false);
   }
 
+  function handleDeleteAlert(alertId) {
+    console.log("ID do alerta a ser removido:", alertId);
+    setAlerts((currentAlerts) => {
+      const updatedAlerts = currentAlerts.filter(
+        (alert) => alert.id !== alertId
+      );
+      console.log("Alertas atualizados:", updatedAlerts);
+      return updatedAlerts;
+    });
+    setIsFormVisible(false);
+  }
+
   function validateAndProceed() {
     if (!isContinuous && (!dateRange.startDate || !dateRange.endDate)) {
       ReactAlert.alert(
@@ -211,6 +223,7 @@ function CreateAlerts({ onNext, treatment, alerts: initialAlerts }) {
           onCancel={() => setIsFormVisible(false)}
           onSubmit={handleSubmitAlert}
           defaultValues={editingAlert}
+          onRemove={handleDeleteAlert}
         />
       </Modal>
     </KeyboardAvoidingView>
