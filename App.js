@@ -3,7 +3,6 @@ import TreatmentScreen from "./screens/TreatmentScreen";
 import LoginScreen from "./screens/LoginScreen";
 import Config from "./screens/Config";
 import Journal from "./screens/Journal";
-import Stock from "./screens/Stock";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
