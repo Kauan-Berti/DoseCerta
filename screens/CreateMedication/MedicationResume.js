@@ -1,14 +1,12 @@
 import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
 import { GlobalStyles } from "../../constants/colors";
 import DoubleLabelBox from "../../components/DoubleLabelBox";
-import Input from "../../components/Input";
 import IconButton from "../../components/IconButton";
 import { useContext } from "react";
 import { AppContext } from "../../store/app-context";
 import Medication from "../../models/medication";
 import { useState } from "react";
 import { storeMedication, updateMedication } from "../../util/http";
-import { Alert } from "react-native";
 
 function MedicationResume({ onFinish, medicationData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,20 +20,18 @@ function MedicationResume({ onFinish, medicationData }) {
 
     try {
       // Cria o objeto do medicamento com um ID provisório
-      const newMedication = new Medication(
-        medicationData.id || 0,
-        medicationData.name,
-        medicationData.amount,
-        medicationData.minAmount,
-        medicationData.form,
-        medicationData.unit
-      );
+
+      if (medicationData.id === 0) {
+        console.log("Novo medicamento:", medicationData);
+      } else {
+        console.log("Medicamento existente:", medicationData);
+      }
 
       if (medicationData.id !== 0) {
-        await updateMedication(medicationData.id, newMedication);
-        appContext.updateMedication(medicationData.id, newMedication); // Atualiza no contexto
+        await updateMedication(medicationData.id, medicationData);
+        appContext.updateMedication(medicationData.id, medicationData); // Atualiza no contexto
       } else {
-        const savedMedication = await storeMedication(newMedication);
+        const savedMedication = await storeMedication(medicationData);
         appContext.addMedication(savedMedication); // Adiciona ao contexto
       }
       onFinish(); // Finaliza o fluxo

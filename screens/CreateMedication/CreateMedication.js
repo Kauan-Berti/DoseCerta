@@ -15,7 +15,7 @@ function CreateMedication({ route }) {
 
   const [medicationData, setMedicationData] = useState(
     existingMedication || {
-      id: "",
+      id: 0,
       name: "",
       amount: "",
       minAmount: "",
@@ -36,6 +36,14 @@ function CreateMedication({ route }) {
   }
 
   function handleFinish() {
+    setMedicationData({
+      id: 0,
+      name: "",
+      amount: "",
+      minAmount: "",
+      form: "",
+      unit: "",
+    }); // Reseta os dados do medicamento
     setStep(1); // Reseta o passo para 1
     setIsSuccess(true); // Define o estado de sucesso como verdadeiro
   }
@@ -43,7 +51,11 @@ function CreateMedication({ route }) {
   if (isSuccess) {
     setTimeout(() => {
       setIsSuccess(false);
-      navigator.popToTop(); // Reseta o estado de sucesso após 2 segundos
+      if (existingMedication) {
+        navigator.popToTop();
+      } else {
+        navigator.navigate("Treatment");
+      }
     }, 2000);
 
     return <SuccesScreen text={"Medicamento salvo com sucesso!"} />; // Renderiza a tela de sucesso
@@ -53,6 +65,7 @@ function CreateMedication({ route }) {
       case 1:
         return (
           <MedicationForm
+            key={medicationData.id || "new"}
             onNext={handleNextStep}
             initialValues={medicationData} // Passa os valores iniciais para edição
           />

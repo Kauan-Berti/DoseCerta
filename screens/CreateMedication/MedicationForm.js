@@ -15,7 +15,15 @@ import { Platform } from "react-native";
 
 function MedicationForm({ onNext, initialValues }) {
   const [formData, setFormData] = useState(
-    initialValues || new Medication() // Usa os valores iniciais ou cria um novo medicamento
+    initialValues ||
+      new Medication(
+        0,
+        "", // Nome do medicamento
+        "", // Forma farmacêutica
+        "", // Unidade de medida
+        0, // Quantidade em estoque
+        0 // Quantidade mínima
+      ) // Usa os valores iniciais ou cria um novo medicamento
   );
 
   function handleInputChange(inputIdentifier, enteredValue) {
