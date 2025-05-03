@@ -11,24 +11,34 @@ import {
 import { GlobalStyles } from "../../constants/colors";
 import AlertItem from "../../components/AlertItem";
 import IconButton from "../../components/IconButton";
-import Alert from "../../models/alert";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Alert as ReactAlert } from "react-native";
 import RangeCalendar from "../../components/RangeCalendar";
 import DoubleLabelBox from "../../components/DoubleLabelBox";
 import AlertForm from "./AlertForm";
 import Toggle from "../../components/Toggle";
+import { useEffect } from "react";
 
-function CreateAlerts({ onNext, treatmentData }) {
-  const [alerts, setAlerts] = useState([]);
+function CreateAlerts({ onNext, treatment, alerts: initialAlerts }) {
+  const [alerts, setAlerts] = useState(initialAlerts || []); // Gerencia os alertas localmente
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [editingAlert, setEditingAlert] = useState(null);
-  const [isContinuous, setIsContinuous] = useState(false);
+  const [isContinuous, setIsContinuous] = useState(treatment.isContinuous);
+
   const [dateRange, setDateRange] = useState({
-    startDate: null,
-    endDate: null,
+    startDate: treatment.startDate || null,
+    endDate: treatment.endDate || null,
   });
+
+  useEffect(() => {
+    //console.log("Tratamento:", treatment);
+    //console.log("Alertas:", alerts);
+  }, [treatment, alerts]);
+
+  useEffect(() => {
+    treatment.isContinuous = isContinuous;
+  }, [isContinuous]);
 
   function toggleState(setState) {
     setState((prev) => !prev);
@@ -49,9 +59,15 @@ function CreateAlerts({ onNext, treatmentData }) {
   }
 
   function formatDate(dateString) {
-    const [year, month, day] = dateString.split("-").map(Number);
-    const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString("pt-BR");
+    if (!dateString) return "Não especificado";
+    try {
+      const [year, month, day] = dateString.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString("pt-BR");
+    } catch (error) {
+      console.error("Erro ao formatar a data:", error);
+      return "Data inválida";
+    }
   }
 
   function handleSubmitAlert(alertData) {
@@ -63,35 +79,35 @@ function CreateAlerts({ onNext, treatmentData }) {
       return;
     }
 
-    if (editingAlert) {
-      setAlerts((currentAlerts) =>
-        currentAlerts.map((alert) =>
-          alert.id === editingAlert.id ? { ...alert, ...alertData } : alert
-        )
+    setAlerts((currentAlerts) => {
+      const alertExists = currentAlerts.some(
+        (alert) => alert.id === alertData.id
       );
-    } else {
-      const newAlert = new Alert(
-        `${alerts.length + 1}`,
-        alertData.time,
-        alertData.dose,
-        alertData.observations,
-        alertData.days
-      );
-      setAlerts((currentAlerts) => [...currentAlerts, newAlert]);
-    }
+
+      if (alertExists) {
+        // Atualiza o alerta existente
+        return currentAlerts.map((alert) =>
+          alert.id === alertData.id ? { ...alert, ...alertData } : alert
+        );
+      } else {
+        // Adiciona um novo alerta com o ID do tratamento associado
+        return [
+          ...currentAlerts,
+          { ...alertData, id: `temp-${Date.now()}`, treatmentId: treatment.id },
+        ];
+      }
+    });
+
     setIsFormVisible(false);
   }
- 
 
   function validateAndProceed() {
-    if (!isContinuous) {
-      if (!dateRange.startDate || !dateRange.endDate) {
-        ReactAlert.alert(
-          "Erro",
-          "Por favor, selecione as datas de início e término do tratamento."
-        );
-        return;
-      }
+    if (!isContinuous && (!dateRange.startDate || !dateRange.endDate)) {
+      ReactAlert.alert(
+        "Erro",
+        "Por favor, selecione as datas de início e término do tratamento."
+      );
+      return;
     }
 
     if (alerts.length === 0) {
@@ -99,17 +115,16 @@ function CreateAlerts({ onNext, treatmentData }) {
       return;
     }
 
-    const updatedTreatmentData = {
-      ...treatmentData,
-      alerts,
-      treatmentPeriod: {
-        startDate: isContinuous ? null : dateRange.startDate,
-        endDate: isContinuous ? null : dateRange.endDate,
-        isContinuous,
-      },
+    const updatedTreatment = {
+      ...treatment,
+      startDate: isContinuous ? null : dateRange.startDate,
+      endDate: isContinuous ? null : dateRange.endDate,
+      isContinuous: isContinuous,
     };
 
-    onNext(updatedTreatmentData);
+    //console.log("Tratamento:", updatedTreatment);
+    //console.log("Alertas:", alerts);
+    onNext({ treatment: updatedTreatment, alerts: alerts });
   }
 
   function renderAlertItem({ item }) {
@@ -143,8 +158,9 @@ function CreateAlerts({ onNext, treatmentData }) {
               </Text>
               <Toggle
                 onToggle={() => toggleState(setIsContinuous)}
-                isEnabledText={"Uso Continuo"}
-                isDisabledText={"Uso Continuo"}
+                isEnabledText={"Uso Contínuo"}
+                isDisabledText={"Uso Contínuo"}
+                initalState={isContinuous}
               />
 
               {!isContinuous && (
@@ -152,19 +168,11 @@ function CreateAlerts({ onNext, treatmentData }) {
                   <Text style={styles.text}>Duração do tratamento</Text>
                   <DoubleLabelBox
                     title={"Data de início"}
-                    text={
-                      dateRange.startDate
-                        ? formatDate(dateRange.startDate)
-                        : "Selecionar"
-                    }
+                    text={formatDate(dateRange.startDate)}
                   />
                   <DoubleLabelBox
                     title={"Data de término"}
-                    text={
-                      dateRange.endDate
-                        ? formatDate(dateRange.endDate)
-                        : "Selecionar"
-                    }
+                    text={formatDate(dateRange.endDate)}
                   />
                 </Pressable>
               )}
@@ -195,6 +203,7 @@ function CreateAlerts({ onNext, treatmentData }) {
         isVisible={isCalendarVisible}
         onClose={() => toggleState(setIsCalendarVisible)}
         onDateRangeSelected={handleDateRangeSelected}
+        initalValues={dateRange}
       />
 
       <Modal visible={isFormVisible} animationType="slide">

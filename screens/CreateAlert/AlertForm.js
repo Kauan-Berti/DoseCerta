@@ -1,17 +1,17 @@
 import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
 import Input from "../../components/Input";
 import { GlobalStyles } from "../../constants/colors";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import IconButton from "../../components/IconButton";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DayOfWeek from "../../components/DayOfWeek";
 
-function AlertForm({ onCancel, onSubmit, defaultValues, isEditing }) {
+function AlertForm({ onCancel, onSubmit, defaultValues, treatmentId }) {
   const [inputs, setInputs] = useState({
     time: { value: defaultValues?.time || "", isValid: true },
     dose: { value: defaultValues?.dose || "", isValid: true },
     observations: { value: defaultValues?.observations || "", isValid: true },
-    days: { value: defaultValues?.days || [], isValid: true }, // Adiciona os dias da semana
+    days: { value: defaultValues?.days || [], isValid: true },
   });
 
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -24,38 +24,22 @@ function AlertForm({ onCancel, onSubmit, defaultValues, isEditing }) {
   }
 
   function handleTimeChange(event, selectedTime) {
-    setShowTimePicker(false); // Fecha o seletor após a seleção
+    setShowTimePicker(false);
     if (selectedTime) {
       const hours = selectedTime.getHours();
       const minutes = selectedTime.getMinutes();
       const formattedTime = `${String(hours).padStart(2, "0")}:${String(
         minutes
       ).padStart(2, "0")}`;
-      inputChangedHandler("time", formattedTime); // Atualiza o estado com o horário selecionado
+      inputChangedHandler("time", formattedTime);
     }
   }
+
   function handleDaysChange(selectedDays) {
     setInputs((currentInputs) => ({
       ...currentInputs,
       days: { value: selectedDays, isValid: selectedDays.length > 0 },
     }));
-  }
-
-  // Adiciona um console.log para verificar os inputs
-
-  function submitHandler() {
-    if (!validateForm()) {
-      return;
-    }
-
-    const alertData = {
-      time: inputs.time.value,
-      dose: inputs.dose.value,
-      observations: inputs.observations.value,
-      days: inputs.days.value, // Inclui os dias selecionados
-    };
-
-    onSubmit(alertData); // Envia os dados do alerta para o próximo passo
   }
 
   function validateForm() {
@@ -73,12 +57,30 @@ function AlertForm({ onCancel, onSubmit, defaultValues, isEditing }) {
     return timeIsValid && doseIsValid && daysIsValid;
   }
 
-  const formIsInvalid = !inputs.time.isValid || !inputs.dose.isValid;
+  function submitHandler() {
+    if (!validateForm()) {
+      return;
+    }
+
+    const alertData = {
+      id: defaultValues?.id || `temp-${Date.now()}`, // Gera um ID temporário se não existir
+      time: inputs.time.value,
+      dose: inputs.dose.value,
+      observations: inputs.observations.value,
+      days: inputs.days.value,
+      treatmentId, // Inclui o ID do tratamento associado
+    };
+
+    onSubmit(alertData);
+  }
+
+  const formIsInvalid =
+    !inputs.time.isValid || !inputs.dose.isValid || !inputs.days.isValid;
 
   return (
     <View style={styles.form}>
       <Text style={styles.title}>
-        {isEditing ? "Editar Alerta" : "Novo Alerta"}
+        {defaultValues?.id ? "Editar Alerta" : "Novo Alerta"}
       </Text>
 
       {/* Horário */}
@@ -222,11 +224,8 @@ const styles = StyleSheet.create({
     color: GlobalStyles.colors.error,
     marginVertical: 8,
   },
-  inputGroup: {
-    marginBottom: 16,
-  },
   dayOfWeek: {
-    height: 50, // Define uma altura mínima para o componente
-    marginVertical: 8, // Adiciona espaçamento vertical
+    height: 50,
+    marginVertical: 8,
   },
 });

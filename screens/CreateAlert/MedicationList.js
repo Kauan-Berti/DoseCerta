@@ -1,62 +1,74 @@
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet, Alert } from "react-native";
 import { useContext, useState, useEffect } from "react";
-import { MedicationsContext } from "../../store/medication-context";
-import { fetchMedication } from "../../util/http";
+import { AppContext } from "../../store/app-context";
+import { fetchMedications } from "../../util/http";
 import SelectMedicationCard from "./SelectMedicationCard";
 import { GlobalStyles } from "../../constants/colors";
 import IconButton from "../../components/IconButton";
-import { Alert } from "react-native";
 
-function MedicationList({ onNext }) {
-  const medicationsContext = useContext(MedicationsContext);
-  const [isFetching, setIsFetching] = useState(true);
-  const [selectedMedicationId, setSelectedMedicationId] = useState(null);
-
-  function handleSelectMedication(id) {
-    setSelectedMedicationId(id); // Atualiza o ID do medicamento selecionado
-  }
-
-  function renderMedicationItem(itemData) {
-    const isSelected = itemData.item.id === selectedMedicationId; // Verifica se o item está selecionado
-
-    return (
-      <SelectMedicationCard
-        isSelected={isSelected}
-        onPress={() => handleSelectMedication(itemData.item.id)}
-      >
-        <Text>{itemData.item.name}</Text>
-      </SelectMedicationCard>
-    );
-  }
+function MedicationList({ onNext, selectedMedication }) {
+  const appContext = useContext(AppContext);
+  const [isFetching, setIsFetching] = useState(false);
+  const [selectedMedicationId, setSelectedMedicationId] = useState(
+    selectedMedication?.id || null
+  );
 
   useEffect(() => {
-    async function getMedications() {
+    if (appContext.medications.length > 0) {
+      return;
+    }
+
+    async function fetchMedicationsFromAPI() {
       setIsFetching(true);
       try {
-        const medications = await fetchMedication();
-        medicationsContext.setMedications(medications);
+        const medications = await fetchMedications();
+        medications.forEach((medication) => {
+          appContext.addMedication(medication);
+        });
       } catch (err) {
-        console.log(err);
+        console.error(err);
         Alert.alert("Erro", "Não foi possível carregar os medicamentos.");
       } finally {
         setIsFetching(false);
       }
     }
-    getMedications();
-  }, []);
+
+    fetchMedicationsFromAPI();
+  }, [appContext]);
+
+  function handleSelectMedication(id) {
+    setSelectedMedicationId(id);
+  }
 
   function handleNext() {
-    if (selectedMedicationId == null) {
+    if (!selectedMedicationId) {
       Alert.alert("Erro", "Por favor, selecione um medicamento.");
       return;
     }
 
-    const selectedMedication = medicationsContext.medications.find(
+    const selectedMedication = appContext.medications.find(
       (medication) => medication.id === selectedMedicationId
     );
 
-    // Envia os dados do medicamento selecionado para a próxima etapa
+    if (!selectedMedication) {
+      Alert.alert("Erro", "O medicamento selecionado não foi encontrado.");
+      return;
+    }
+
     onNext(selectedMedication);
+  }
+
+  function renderMedicationItem({ item }) {
+    const isSelected = item.id === selectedMedicationId;
+
+    return (
+      <SelectMedicationCard
+        isSelected={isSelected}
+        onPress={() => handleSelectMedication(item.id)}
+      >
+        <Text>{item.name}</Text>
+      </SelectMedicationCard>
+    );
   }
 
   return (
@@ -66,15 +78,15 @@ function MedicationList({ onNext }) {
           <Text style={styles.text}>Carregando medicamentos...</Text>
         </View>
       )}
-      {!isFetching && medicationsContext.medications.length === 0 && (
+      {!isFetching && appContext.medications.length === 0 && (
         <View style={styles.centerContainer}>
           <Text style={styles.text}>Nenhum medicamento encontrado.</Text>
         </View>
       )}
-      {!isFetching && medicationsContext.medications.length > 0 && (
+      {!isFetching && appContext.medications.length > 0 && (
         <>
           <FlatList
-            data={medicationsContext.medications}
+            data={appContext.medications}
             keyExtractor={(item) => item.id}
             renderItem={renderMedicationItem}
           />
@@ -110,8 +122,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   nextButtonContainer: {
-    position: "absolute", // Posiciona o botão de forma fixa
-    bottom: 80, // Distância da parte inferior da tela
-    right: 20, // Distância da lateral direita
+    position: "absolute",
+    bottom: 80,
+    right: 20,
   },
 });

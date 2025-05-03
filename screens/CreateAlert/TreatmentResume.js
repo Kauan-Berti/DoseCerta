@@ -1,41 +1,71 @@
-import { View, Text, StyleSheet, Image, FlatList } from "react-native";
+import { View, Text, StyleSheet, Image, FlatList, Alert } from "react-native";
 import { GlobalStyles } from "../../constants/colors";
 import DoubleLabelBox from "../../components/DoubleLabelBox";
 import IconButton from "../../components/IconButton";
-import { useContext } from "react";
-import { MedicationsContext } from "../../store/medication-context";
-import Medication from "../../models/medication";
-import { useState } from "react";
-import { storeMedication } from "../../util/http";
+import { useEffect, useContext, useState } from "react";
+import { AppContext } from "../../store/app-context";
+import { storeTreatment, storeAlert } from "../../util/http";
 
-function TreatmentResume({ onFinish, treatmentData }) {
+function TreatmentResume({ onFinish, treatment, alerts }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState();
 
-  const medicationContext = useContext(MedicationsContext);
+  const appContext = useContext(AppContext);
+
+  function formatDate(dateString) {
+    if (!dateString) return "Selecionar";
+    const [year, month, day] = dateString.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString("pt-BR");
+  }
 
   async function handleSave() {
-    const newMedication = new Medication(
-      treatmentData.medication.id || Date.now().toString(),
-      treatmentData.medication.name,
-      treatmentData.medication.amount,
-      treatmentData.medication.minAmount,
-      treatmentData.medication.form,
-      treatmentData.medication.unit,
-      treatmentData.alerts.length > 0 ? treatmentData.alerts : [] // Se não houver alertas, envia um array vazio
-    );
-
     setIsSubmitting(true);
+    setError(null);
+
     try {
-      const id = await storeMedication(newMedication);
-      medicationContext.addMedication({ ...newMedication, id: id });
-    } catch (error) {
-      setError("Não foi possível salvar o tratamento.");
+      // Validação do tratamento
+      if (!treatment.medication?.id) {
+        throw new Error("O medicamento não foi selecionado.");
+      }
+
+      //console.log("Tratamento:", treatment);
+
+      const savedTreatment = await storeTreatment({
+        medicationId: treatment.medication.id,
+        startDate: treatment.startDate,
+        endDate: treatment.endDate,
+        isContinuous: treatment.isContinuous,
+      });
+
+      appContext.addTreatment({
+        id: savedTreatment.id,
+        medicationId: treatment.medication.id,
+        startDate: treatment.startDate,
+        endDate: treatment.endDate,
+        isContinuous: treatment.isContinuous,
+      });
+
+      // Validação e salvamento dos alertas
+      for (const alert of alerts) {
+        if (!alert.time || !alert.dose || !alert.days?.length) {
+          throw new Error("Os dados do alerta estão incompletos.");
+        }
+
+        if (alert.id.startsWith("temp-")) {
+          const { id, ...alertWithoutId } = alert;
+          alertWithoutId.treatmentId = savedTreatment.id;
+
+          await storeAlert(alertWithoutId);
+        }
+      }
+      onFinish(); // Finaliza o fluxo
+    } catch (err) {
+      console.error("Erro ao salvar o tratamento:", err);
+      setError(err.message || "Não foi possível salvar o tratamento.");
     } finally {
       setIsSubmitting(false);
     }
-
-    onFinish();
   }
 
   function renderAlertItem({ item }) {
@@ -63,8 +93,8 @@ function TreatmentResume({ onFinish, treatmentData }) {
         />
       </View>
 
-      <Text style={styles.title}>{treatmentData.medication.name}</Text>
-      {treatmentData.treatmentPeriod.isContinuous ? (
+      <Text style={styles.title}>{treatment.medication?.name}</Text>
+      {treatment.isContinuous ? (
         <View style={styles.continuousContainer}>
           <Text style={styles.continuousText}>
             Este é um tratamento contínuo.
@@ -74,21 +104,21 @@ function TreatmentResume({ onFinish, treatmentData }) {
         <>
           <DoubleLabelBox
             title={"Data de Início"}
-            text={treatmentData.treatmentPeriod.startDate || "Não especificado"}
+            text={formatDate(treatment.startDate) || "Não especificado"}
           />
           <DoubleLabelBox
             title={"Data de Término"}
-            text={treatmentData.treatmentPeriod.endDate || "Não especificado"}
+            text={formatDate(treatment.endDate) || "Não especificado"}
           />
         </>
       )}
       <DoubleLabelBox
         title={"Quantidade em estoque"}
-        text={`${treatmentData.medication.amount} ${treatmentData.medication.form}(s)`}
+        text={`${treatment.medication?.amount} ${treatment.medication?.form}(s)`}
       />
       <DoubleLabelBox
         title={"Quantidade mínima"}
-        text={`${treatmentData.medication.minAmount} ${treatmentData.medication.form}(s)`}
+        text={`${treatment.medication?.minAmount} ${treatment.medication?.form}(s)`}
       />
 
       <Text style={styles.subtitle}>Alertas Criados:</Text>
@@ -114,7 +144,7 @@ function TreatmentResume({ onFinish, treatmentData }) {
 
   return (
     <FlatList
-      data={treatmentData.alerts}
+      data={treatment.alerts}
       keyExtractor={(item) => item.id}
       renderItem={renderAlertItem}
       ListHeaderComponent={headerComponent}

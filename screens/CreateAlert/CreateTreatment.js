@@ -7,72 +7,114 @@ import SuccesScreen from "../SuccesScreen";
 import CreateAlerts from "./CreateAlerts";
 import TreatmentResume from "./TreatmentResume";
 import MedicationList from "./MedicationList";
+import Treatment from "../../models/treatment";
+import { useContext } from "react";
+import { AppContext } from "../../store/app-context";
 
 function CreateTreatment() {
+  const appContext = useContext(AppContext);
   const [step, setStep] = useState(1); // 1: Medication Form, 2: Alert Form
   const [isSuccess, setIsSuccess] = useState(false); // Para controlar o estado de sucesso
-  const [treatmentData, setTreatmentData] = useState({
-    medication: {
-      id: "",
-      name: "",
-      amount: "",
-      minAmount: "",
-      form: "",
-      unit: "",
-    },
-    alerts: [],
-    treatmentPeriod: {
-      startDate: null,
-      endDate: null,
-      isContinuous: false,
-    },
-  });
+  const [treatment, setTreatment] = useState(
+    new Treatment(
+      Date.now().toString(), // ID único para o tratamento
+      null, // ID do Medicamento selecionado
+      null, // Data de início
+      null, // Data de término
+      false // Não contínuo por padrão
+    )
+  );
+  const [alerts, setAlerts] = useState([]); // Gerencia os alertas separadamente
 
   const navigator = useNavigation(); // Hook para navegação
 
-  function handleNextStep(data) {
-    setTreatmentData((currentData) => ({ ...currentData, ...data })); // Atualiza os dados do medicamento ou alertas
-    setStep((prevStep) => prevStep + 1); // Avança para o próximo passo
+  function handleNextStep(updatedData) {
+    switch (step) {
+      case 1:
+        setTreatment((prev) => ({
+          ...prev,
+          medication: updatedData.medication,
+          medicationId: updatedData.medicationId,
+        }));
+        break;
+      case 2:
+        setAlerts(updatedData.alerts);
+        setTreatment((prev) => ({
+          ...prev,
+          startDate: updatedData.treatment.startDate || prev.startDate,
+          endDate: updatedData.treatment.endDate || prev.endDate,
+          isContinuous: updatedData.treatment.isContinuous || prev.isContinuous,
+        }));
+
+        break;
+      default:
+        break;
+    }
+
+    setStep((prevStep) => prevStep + 1); // Avança para a próxima etapa
   }
 
   function handleBack() {
     setStep((prevStep) => Math.max(prevStep - 1, 1)); // Volta até o primeiro passo
   }
 
-  function handleFinish() {
-    setIsSuccess(true); // Define o estado de sucesso como verdadeiro
-    setTimeout(() => {
-      setIsSuccess(false);
-      navigator.navigate("Treatment"); // Reseta o estado de sucesso após 2 segundos
-    }, 2000);
+  async function handleFinish() {
+    try {
+      // Salva o tratamento no contexto
+      appContext.addTreatment(treatment);
+
+      // Salva os alertas no contexto com o treatmentId associado
+      alerts.forEach((alert) => {
+        appContext.addAlert({ ...alert, treatmentId: treatment.id });
+      });
+
+      setIsSuccess(true); // Define o estado de sucesso como verdadeiro
+      setTimeout(() => {
+        setIsSuccess(false);
+        navigator.navigate("Treatment"); // Reseta o estado de sucesso após 2 segundos
+      }, 2000);
+    } catch (error) {
+      console.error("Erro ao salvar tratamento ou alertas:", error);
+    }
   }
 
   function renderStep() {
     if (isSuccess) {
-      return <SuccesScreen text={"Alertas adicionados com sucesso!"} />;
+      return <SuccesScreen text={"Tratamento criado com sucesso!"} />;
     }
 
     switch (step) {
       case 1:
         return (
           <MedicationList
+            selectedMedication={treatment.medication}
             onNext={(selectedMedication) =>
-              handleNextStep({ medication: selectedMedication })
+              handleNextStep({
+                medication: selectedMedication,
+                medicationId: selectedMedication.id,
+              })
             }
           />
         );
       case 2:
         return (
           <CreateAlerts
-            onNext={(updatedData) => handleNextStep(updatedData)}
-            treatmentData={treatmentData}
+            onNext={(updatedData) =>
+              handleNextStep({
+                alerts: updatedData.alerts,
+                treatment: updatedData.treatment,
+              })
+            }
+            treatment={treatment}
+            alerts={alerts}
           />
         );
       case 3:
         return (
           <TreatmentResume
             onFinish={handleFinish}
-            treatmentData={treatmentData}
+            treatment={treatment}
+            alerts={alerts}
           />
         );
       default:

@@ -2,8 +2,8 @@ import { View, Text, Switch, StyleSheet } from "react-native";
 import { useState } from "react";
 import { GlobalStyles } from "../constants/colors";
 
-function Toggle({ onToggle, isEnabledText, isDisabledText }) {
-  const [isEnabled, setIsEnabled] = useState(false);
+function Toggle({ onToggle, isEnabledText, isDisabledText, initalState }) {
+  const [isEnabled, setIsEnabled] = useState(initalState || false); // Estado inicial do switch
 
   const toggleSwitch = () => {
     setIsEnabled((previousState) => !previousState);

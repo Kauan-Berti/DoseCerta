@@ -8,9 +8,14 @@ import {
 import { GlobalStyles } from "../constants/colors";
 import { Calendar } from "react-native-calendars";
 import { useState } from "react";
-function RangeCalendar({ isVisible, onClose, onDateRangeSelected }) {
-  const [startDate, setStartDate] = useState(null); // Data de início
-  const [endDate, setEndDate] = useState(null); // Data de término
+function RangeCalendar({
+  isVisible,
+  onClose,
+  onDateRangeSelected,
+  initalValues,
+}) {
+  const [startDate, setStartDate] = useState(initalValues?.startDate || null); // Data de início
+  const [endDate, setEndDate] = useState(initalValues?.endDate || null); // Data de término
   const [selectingEndDate, setSelectingEndDate] = useState(false); // Estado para controlar a seleção da data de término
 
   function handleDayPress(day) {

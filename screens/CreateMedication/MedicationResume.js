@@ -1,42 +1,48 @@
 import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
 import { GlobalStyles } from "../../constants/colors";
 import DoubleLabelBox from "../../components/DoubleLabelBox";
-import SquareIconButton from "../../components/SquareIconButton";
 import Input from "../../components/Input";
 import IconButton from "../../components/IconButton";
 import { useContext } from "react";
-import { MedicationsContext } from "../../store/medication-context";
+import { AppContext } from "../../store/app-context";
 import Medication from "../../models/medication";
 import { useState } from "react";
 import { storeMedication } from "../../util/http";
+import { Alert } from "react-native";
 
 function MedicationResume({ onFinish, medicationData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState();
 
-  const medicationContext = useContext(MedicationsContext);
+  const appContext = useContext(AppContext);
 
   async function handleSave() {
-    const newMedication = new Medication(
-      medicationData.id || Date.now().toString(),
-      medicationData.name,
-      medicationData.amount,
-      medicationData.minAmount,
-      medicationData.form,
-      medicationData.unit
-    );
-
     setIsSubmitting(true);
+    setError(null);
+
     try {
-      const id = await storeMedication(newMedication);
-      medicationContext.addMedication({ ...newMedication, id: id });
+      // Cria o objeto do medicamento com um ID provisório
+      const newMedication = new Medication(
+        medicationData.id || Date.now().toString(),
+        medicationData.name,
+        medicationData.amount,
+        medicationData.minAmount,
+        medicationData.form,
+        medicationData.unit
+      );
+
+      // Salva o medicamento no Firebase e obtém o ID gerado
+      const savedMedication = await storeMedication(newMedication);
+
+      // Atualiza o ID do medicamento no contexto
+      appContext.addMedication(savedMedication); // Adiciona o medicamento com o ID atualizado ao contexto
+      onFinish(); // Finaliza o fluxo
     } catch (error) {
+      console.error("Erro ao salvar o medicamento:", error);
       setError("Não foi possível salvar o medicamento.");
     } finally {
       setIsSubmitting(false);
     }
-
-    onFinish();
   }
 
   return (

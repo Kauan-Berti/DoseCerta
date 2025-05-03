@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import Treatment from "./screens/Treatment";
+import TreatmentScreen from "./screens/TreatmentScreen";
 import LoginScreen from "./screens/LoginScreen";
 import Config from "./screens/Config";
 import Journal from "./screens/Journal";
@@ -20,7 +20,7 @@ import {
   Pill,
 } from "phosphor-react-native";
 import CustomTabBarButton from "./components/CustomTabBarButton";
-import MedicationsContextProvider from "./store/medication-context";
+import AppContextProvider from "./store/app-context";
 import SignupScreen from "./screens/SignupScreen";
 import { DefaultTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -52,7 +52,7 @@ function AuthenticatedStack() {
     >
       <BottomTabs.Screen
         name="Treatment"
-        component={Treatment}
+        component={TreatmentScreen}
         options={{
           title: "Alertas",
           tabBarIcon: ({ color, size }) => {
@@ -200,9 +200,9 @@ export default function App() {
         style={{ flex: 1, backgroundColor: GlobalStyles.colors.background }}
       >
         <AuthContextProvider>
-          <MedicationsContextProvider>
+          <AppContextProvider>
             <Root />
-          </MedicationsContextProvider>
+          </AppContextProvider>
         </AuthContextProvider>
       </GestureHandlerRootView>
     </>
