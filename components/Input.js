@@ -14,9 +14,12 @@ function Input({ label, style, textInputConfig, invalid, keyboardType }) {
 
   return (
     <View style={[styles.inputContainer, style]}>
-      <Text style={[styles.label, invalid && styles.invalidLabel]}>
-        {label}
-      </Text>
+      {label && (
+        <Text style={[styles.label, invalid && styles.invalidLabel]}>
+          {label}
+        </Text>
+      )}
+
       <TextInput
         style={StyleSheet.flatten(inputStyles)} // Garante que os estilos sejam mesclados corretamente
         {...textInputConfig}

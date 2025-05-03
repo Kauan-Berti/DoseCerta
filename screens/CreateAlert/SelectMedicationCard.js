@@ -18,7 +18,7 @@ export default SelectMedicationCard;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: GlobalStyles.colors.background,
+    backgroundColor: GlobalStyles.colors.card,
     padding: 16,
     borderRadius: 8,
     marginVertical: 8,

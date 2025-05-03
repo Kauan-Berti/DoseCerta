@@ -1,8 +1,8 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import SquareIconButton from "./SquareIconButton";
 import { GlobalStyles } from "../constants/colors";
-import { Bell } from "phosphor-react-native";
 import RoundButton from "./RoundButton";
+import TreeDotsButton from "./TreeDotsButton";
 
 function AlertCard({ name, time, dose, preMeal }) {
   return (
@@ -10,19 +10,17 @@ function AlertCard({ name, time, dose, preMeal }) {
       <View style={styles.titlesContainer}>
         <RoundButton
           icon="Bell"
-          size={40}
+          size={50}
           shadowOffset
-          color={GlobalStyles.colors.primary}
-          borderColor={GlobalStyles.colors.primary}
+          color={GlobalStyles.colors.lightYellow}
+          borderColor={GlobalStyles.colors.lightYellow}
         />
 
-        <Text style={styles.text}>{name}</Text>
-        <SquareIconButton
-          icon="ArrowCircleRight"
-          size={30}
-          color={GlobalStyles.colors.buttonSecondary}
-        />
+        <Text style={styles.title}>{name}</Text>
+        <TreeDotsButton onPress={() => {}} />
       </View>
+      <View style={styles.lineSeparator} />
+
       <View style={styles.buttonsContainer}>
         <SquareIconButton title={time} icon="SunHorizon" />
         <SquareIconButton title={dose} icon="Pill" />
@@ -37,7 +35,6 @@ export default AlertCard;
 const styles = StyleSheet.create({
   card: {
     marginVertical: 6,
-    marginHorizontal: 10,
     backgroundColor: GlobalStyles.colors.card,
     padding: 10,
     borderRadius: 8,
@@ -51,14 +48,14 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   titlesContainer: {
-    marginHorizontal: 6,
+    marginHorizontal: 10,
+    marginVertical: 10,
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
     justifyContent: "space-between",
   },
   buttonsContainer: {
-    marginTop: 10,
     marginHorizontal: 10,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -69,8 +66,15 @@ const styles = StyleSheet.create({
     height: 40,
     marginRight: 10,
   },
-  text: {
-    fontSize: 16,
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
     color: GlobalStyles.colors.text,
+  },
+  lineSeparator: {
+    height: 1,
+    width: "100%",
+    backgroundColor: GlobalStyles.colors.disabled,
+    marginVertical: 10,
   },
 });

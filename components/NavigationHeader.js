@@ -35,8 +35,11 @@ const styles = {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 10,
     marginBottom: 10,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: GlobalStyles.colors.card,
   },
   headerText: {
     fontSize: 20,

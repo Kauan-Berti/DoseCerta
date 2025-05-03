@@ -1,107 +1,137 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text, FlatList } from "react-native";
 import { GlobalStyles } from "../constants/colors";
-import NavigationHeader from "../components/NavigationHeader";
-import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import MedicationForm from "./CreateMedication/MedicationForm";
-import MedicationResume from "./CreateMedication/MedicationResume";
-import SuccesScreen from "./SuccesScreen";
+import { useState, useContext } from "react";
+import { AppContext } from "../store/app-context";
+import { fetchMedications } from "../util/http";
+import { useEffect } from "react";
+import { Alert } from "react-native";
+import MedicationCard from "../components/MedicationCart";
+import { SafeAreaView } from "react-native-safe-area-context";
+import SearchBar from "../components/SearchBar";
 
 function MedicationScreen() {
-  const [step, setStep] = useState(1); // 1: Medication Form, 2: Alert Form
-  const [isSuccess, setIsSuccess] = useState(false); // Para controlar o estado de sucesso
+  const appContext = useContext(AppContext);
+  const [isFetching, setIsFetching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [medicationData, setMedicationData] = useState({
-    id: "",
-    name: "",
-    amount: "",
-    minAmount: "",
-    form: "",
-    unit: "",
-    alerts: [],
-  });
-
-  const navigator = useNavigation(); // Hook para navegação
-
-  function handleNextStep(data) {
-    if (step === 1) {
-      setMedicationData(data); // Salva os dados do medicamento
-    } else if (step === 2) {
-      setMedicationData((currentData) => ({ ...currentData, ...data })); // Adiciona os alertas
+  useEffect(() => {
+    if (appContext.medications.length > 0) {
+      return;
     }
-    setStep((prevStep) => prevStep + 1); // Avança para o próximo passo
+
+    async function fetchMedicationsFromAPI() {
+      setIsFetching(true);
+      try {
+        const medications = await fetchMedications();
+        medications.forEach((medication) => {
+          appContext.addMedication(medication);
+        });
+      } catch (err) {
+        console.error(err);
+        Alert.alert("Erro", "Não foi possível carregar os medicamentos.");
+      } finally {
+        setIsFetching(false);
+      }
+    }
+
+    fetchMedicationsFromAPI();
+  }, [appContext]);
+
+  function renderMedicationItem({ item }) {
+    return <MedicationCard onPress={() => {}} item={item} />;
   }
 
-  const handleNext = (data) => {
-    setStep((prevStep) => (prevStep < 3 ? prevStep + 1 : prevStep)); // Avança até o último step
-  };
-  const handleBack = () => {
-    setStep((prevStep) => (prevStep > 1 ? prevStep - 1 : prevStep)); // Volta até o primeiro step
-  };
-
-  function handleFinish() {
-    setIsSuccess(true); // Define o estado de sucesso como verdadeiro
+  function handleSearch() {
+    console.log("Buscando por:", searchQuery);
+    // Adicione a lógica de busca aqui
   }
-
-  if (isSuccess) {
-    setTimeout(() => {
-      setIsSuccess(false);
-      navigator.navigate("Treatment"); // Reseta o estado de sucesso após 2 segundos
-    }, 2000);
-
-    return <SuccesScreen text={"Medicamento adicionado com sucesso!"} />; // Renderiza a tela de sucesso
-  }
-
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return <MedicationForm onNext={handleNextStep} />;
-      case 2:
-        return (
-          <MedicationResume
-            onFinish={handleFinish}
-            medicationData={medicationData}
-          />
-        );
-      default:
-        return;
-    }
-  };
-
-  const getTitle = () => {
-    switch (step) {
-      case 1:
-        return "Dados do medicamento";
-      case 2:
-        return "Resumo";
-      default:
-        return "";
-    }
-  };
 
   return (
     <View style={styles.container}>
-      <NavigationHeader
-        title={getTitle()}
-        onNext={handleNext}
-        onBack={handleBack}
-      />
-      {renderStep()}
+      {isFetching && (
+        <View style={styles.centerContainer}>
+          <Text style={styles.text}>Carregando medicamentos...</Text>
+        </View>
+      )}
+      {!isFetching && appContext.medications.length === 0 && (
+        <View style={styles.centerContainer}>
+          <Text style={styles.text}>Nenhum medicamento encontrado.</Text>
+        </View>
+      )}
+      {!isFetching && appContext.medications.length > 0 && (
+        <>
+          <SafeAreaView>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>Medicamentos</Text>
+            </View>
+            <SearchBar
+              placeholder="Pesquisar medicamento"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onSearch={handleSearch}
+            />
+            <FlatList
+              data={appContext.medications}
+              keyExtractor={(item) => item.id}
+              renderItem={renderMedicationItem}
+              contentContainerStyle={styles.contentContainer}
+              showsVerticalScrollIndicator={false}
+            />
+          </SafeAreaView>
+        </>
+      )}
     </View>
   );
 }
 
 export default MedicationScreen;
-
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: GlobalStyles.colors.background,
-    paddingTop: 50,
-    paddingHorizontal: 16,
     flex: 1,
+    backgroundColor: GlobalStyles.colors.background,
+    paddingHorizontal: 16,
   },
   text: {
-    fontSize: 20,
+    fontSize: 18,
     color: GlobalStyles.colors.text,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  nextButtonContainer: {
+    position: "absolute",
+    bottom: 80,
+    right: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: GlobalStyles.colors.text,
+    marginBottom: 16,
+  },
+  titleContainer: {
+    padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: GlobalStyles.colors.card,
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 16,
+  },
+  searchInput: {
+    flex: 1, // Faz o input ocupar o máximo de espaço possível
+    marginRight: 8, // Adiciona espaçamento entre o input e o botão
+  },
+  searchButton: {
+    padding: 8, // Adiciona um pouco de padding ao botão
+  },
+  contentContainer: {
+    paddingBottom: 300,
   },
 });

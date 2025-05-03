@@ -1,4 +1,4 @@
-import { StyleSheet, FlatList, Text } from "react-native";
+import { StyleSheet, FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GlobalStyles } from "../constants/colors";
 import NavigationHeader from "../components/NavigationHeader";
@@ -99,7 +99,6 @@ function TreatmentScreen() {
     );
     //console.log("Medication ID:", treatment?.medicationId);
 
-
     const medication = appContext.medications.find(
       (m) => m.id === treatment?.medicationId
     );
@@ -125,6 +124,9 @@ function TreatmentScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>Alertas</Text>
+      </View>
       <NavigationHeader
         title={selectedDate.toLocaleDateString("pt-BR")}
         onBack={() => changeSelectedDate(-1)}
@@ -149,7 +151,7 @@ export default TreatmentScreen;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: GlobalStyles.colors.background,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     flex: 1,
   },
   text: {
@@ -160,5 +162,16 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingBottom: 100,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: GlobalStyles.colors.text,
+    marginBottom: 16,
+  },
+  titleContainer: {
+    padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

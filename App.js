@@ -28,6 +28,7 @@ import CreateMedication from "./screens/CreateMedication/CreateMedication";
 import CreateTreatment from "./screens/CreateAlert/CreateTreatment";
 import CreateJournal from "./screens/CreateJournal/CreateJournal";
 import { refreshIdToken } from "./util/auth";
+import MedicationScreen from "./screens/MedicationScreen";
 
 SplashScreen.preventAutoHideAsync(); //Aplicar quando o login estiver pronto
 
@@ -83,7 +84,7 @@ function AuthenticatedStack() {
       />
       <BottomTabs.Screen
         name="Medications"
-        component={Stock}
+        component={MedicationScreen}
         options={{
           title: "Medicamentos",
           tabBarIcon: ({ color, size }) => {
