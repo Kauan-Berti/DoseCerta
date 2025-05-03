@@ -7,7 +7,7 @@ import { useContext } from "react";
 import { AppContext } from "../../store/app-context";
 import Medication from "../../models/medication";
 import { useState } from "react";
-import { storeMedication } from "../../util/http";
+import { storeMedication, updateMedication } from "../../util/http";
 import { Alert } from "react-native";
 
 function MedicationResume({ onFinish, medicationData }) {
@@ -23,7 +23,7 @@ function MedicationResume({ onFinish, medicationData }) {
     try {
       // Cria o objeto do medicamento com um ID provisório
       const newMedication = new Medication(
-        medicationData.id || Date.now().toString(),
+        medicationData.id || 0,
         medicationData.name,
         medicationData.amount,
         medicationData.minAmount,
@@ -31,11 +31,13 @@ function MedicationResume({ onFinish, medicationData }) {
         medicationData.unit
       );
 
-      // Salva o medicamento no Firebase e obtém o ID gerado
-      const savedMedication = await storeMedication(newMedication);
-
-      // Atualiza o ID do medicamento no contexto
-      appContext.addMedication(savedMedication); // Adiciona o medicamento com o ID atualizado ao contexto
+      if (medicationData.id !== 0) {
+        await updateMedication(medicationData.id, newMedication);
+        appContext.updateMedication(medicationData.id, newMedication); // Atualiza no contexto
+      } else {
+        const savedMedication = await storeMedication(newMedication);
+        appContext.addMedication(savedMedication); // Adiciona ao contexto
+      }
       onFinish(); // Finaliza o fluxo
     } catch (error) {
       console.error("Erro ao salvar o medicamento:", error);
@@ -53,8 +55,6 @@ function MedicationResume({ onFinish, medicationData }) {
           source={require("../../assets/custom/image 1.png")}
         />
       </View>
-
-      <Text style={styles.title}>Paracetamol 500mg</Text>
       <View style={styles.contentContainer}>
         <Text style={styles.title}>{medicationData.name}</Text>
         <DoubleLabelBox title={"Forma"} text={medicationData.form} />
@@ -67,8 +67,6 @@ function MedicationResume({ onFinish, medicationData }) {
           title={"Quantidade mínima"}
           text={medicationData.minAmount}
         />
-
-        <Input label={"Observações"} textInputConfig={{ multiline: true }} />
         <View style={styles.saveButtonContainer}>
           <IconButton
             color={GlobalStyles.colors.accent}
@@ -108,9 +106,11 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     color: GlobalStyles.colors.text,
     textAlign: "center",
+    marginBottom: 10,
+    fontWeight: "bold",
   },
   squareButtonsContainer: {
     flexDirection: "row",

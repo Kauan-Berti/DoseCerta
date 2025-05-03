@@ -7,64 +7,65 @@ import MedicationForm from "./MedicationForm";
 import MedicationResume from "./MedicationResume";
 import SuccesScreen from "../SuccesScreen";
 
-function CreateMedication() {
+function CreateMedication({ route }) {
   const [step, setStep] = useState(1); // 1: Medication Form, 2: Alert Form
   const [isSuccess, setIsSuccess] = useState(false); // Para controlar o estado de sucesso
 
-  const [medicationData, setMedicationData] = useState({
-    id: "",
-    name: "",
-    amount: "",
-    minAmount: "",
-    form: "",
-    unit: "",
-    alerts: [],
-  });
+  const existingMedication = route?.params?.medication || null; // Dados do medicamento existente
+
+  const [medicationData, setMedicationData] = useState(
+    existingMedication || {
+      id: "",
+      name: "",
+      amount: "",
+      minAmount: "",
+      form: "",
+      unit: "",
+    }
+  );
 
   const navigator = useNavigation(); // Hook para navegação
 
   function handleNextStep(data) {
-    if (step === 1) {
-      setMedicationData(data); // Salva os dados do medicamento
-    } else if (step === 2) {
-      setMedicationData((currentData) => ({ ...currentData, ...data })); // Adiciona os alertas
-    }
+    setMedicationData((currentData) => ({ ...currentData, ...data })); // Atualiza os dados do medicamento
     setStep((prevStep) => prevStep + 1); // Avança para o próximo passo
   }
 
-  const handleNext = (data) => {
-    setStep((prevStep) => (prevStep < 3 ? prevStep + 1 : prevStep)); // Avança até o último step
-  };
-  const handleBack = () => {
-    setStep((prevStep) => (prevStep > 1 ? prevStep - 1 : prevStep)); // Volta até o primeiro step
-  };
+  function handleBack() {
+    setStep((prevStep) => (prevStep > 1 ? prevStep - 1 : prevStep)); // Volta para o passo anterior
+  }
 
   function handleFinish() {
+    setStep(1); // Reseta o passo para 1
     setIsSuccess(true); // Define o estado de sucesso como verdadeiro
   }
 
   if (isSuccess) {
     setTimeout(() => {
       setIsSuccess(false);
-      navigator.navigate("Treatment"); // Reseta o estado de sucesso após 2 segundos
+      navigator.popToTop(); // Reseta o estado de sucesso após 2 segundos
     }, 2000);
 
-    return <SuccesScreen text={"Medicamento adicionado com sucesso!"} />; // Renderiza a tela de sucesso
+    return <SuccesScreen text={"Medicamento salvo com sucesso!"} />; // Renderiza a tela de sucesso
   }
-
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <MedicationForm onNext={handleNextStep} />;
+        return (
+          <MedicationForm
+            onNext={handleNextStep}
+            initialValues={medicationData} // Passa os valores iniciais para edição
+          />
+        );
       case 2:
         return (
           <MedicationResume
             onFinish={handleFinish}
-            medicationData={medicationData}
+            medicationData={medicationData} // Passa os dados para o resumo
           />
         );
       default:
-        return;
+        return null;
     }
   };
 
@@ -83,8 +84,7 @@ function CreateMedication() {
     <View style={styles.container}>
       <NavigationHeader
         title={getTitle()}
-        onNext={handleNext}
-        onBack={handleBack}
+        onBack={step > 1 ? handleBack : null} // Habilita o botão de voltar apenas no segundo passo
       />
       {renderStep()}
     </View>

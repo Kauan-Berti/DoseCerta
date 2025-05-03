@@ -8,9 +8,11 @@ import { Alert } from "react-native";
 import MedicationCard from "../components/MedicationCart";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchBar from "../components/SearchBar";
+import { useNavigation } from "@react-navigation/native";
 
 function MedicationScreen() {
   const appContext = useContext(AppContext);
+  const navigation = useNavigation();
   const [isFetching, setIsFetching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -37,8 +39,12 @@ function MedicationScreen() {
     fetchMedicationsFromAPI();
   }, [appContext]);
 
+  function handleEdit(medication) {
+    navigation.navigate("CreateMedication", { medication });
+  }
+
   function renderMedicationItem({ item }) {
-    return <MedicationCard onPress={() => {}} item={item} />;
+    return <MedicationCard onPress={handleEdit} item={item} />;
   }
 
   function handleSearch() {

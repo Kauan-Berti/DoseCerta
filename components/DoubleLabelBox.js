@@ -23,12 +23,12 @@ const styles = StyleSheet.create({
     borderColor: GlobalStyles.colors.border,
   },
   labeTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: GlobalStyles.colors.text,
   },
   labelText: {
-    fontSize: 14,
+    fontSize: 18,
     color: GlobalStyles.colors.textSecondary,
   },
 });

@@ -36,6 +36,20 @@ export async function storeMedication(medicationData) {
   return { id: firebaseId, ...medicationWithoutId };
 }
 
+export async function updateMedication(medicationId, medicationData) {
+  const token = await getToken();
+
+  try {
+    await axios.put(
+      `${BACKEND_URL}/medications/${medicationId}.json?auth=${token}`,
+      medicationData
+    );
+  } catch (error) {
+    console.error("Erro ao atualizar medicamento:", error);
+    throw new Error("Não foi possível atualizar o medicamento.");
+  }
+}
+
 export async function fetchMedications() {
   try {
     const token = await getToken();
@@ -91,17 +105,19 @@ export async function storeTreatment(treatmentData) {
 export async function fetchTreatments() {
   try {
     const token = await getToken();
-    const { data } = await axios.get(`${BACKEND_URL}/treatments.json?auth=${token}`);
+    const { data } = await axios.get(
+      `${BACKEND_URL}/treatments.json?auth=${token}`
+    );
 
     return Object.entries(data || {}).map(([id, treatment]) => ({
       id,
-      medicationId: treatment.medicationId?.id || treatment.medicationId || null,
-      startDate: treatment.startDate || new Date().toISOString().split('T')[0],
+      medicationId:
+        treatment.medicationId?.id || treatment.medicationId || null,
+      startDate: treatment.startDate || new Date().toISOString().split("T")[0],
       endDate: treatment.endDate || null,
       isContinuous: Boolean(treatment.isContinuous),
       // Inclua aqui outros campos necessários
     }));
-    
   } catch (error) {
     console.error("Erro ao buscar tratamentos:", error);
     throw new Error("Não foi possível buscar os tratamentos.");

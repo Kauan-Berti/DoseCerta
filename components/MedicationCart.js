@@ -2,8 +2,13 @@ import { Text, View, StyleSheet, Image } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import TreeDotsButton from "./TreeDotsButton";
 import ProgressBar from "./ProgressBar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 function MedicationCard({ item, onPress }) {
+  function handlePress() {
+    onPress(item);
+  }
+
   const progress = Math.min(
     100,
     Math.max(0, ((item.amount - item.minAmount) / (2 * item.minAmount)) * 100)
@@ -16,7 +21,7 @@ function MedicationCard({ item, onPress }) {
           style={styles.image}
         />
         <Text style={styles.title}>{item.name}</Text>
-        <TreeDotsButton />
+        <TreeDotsButton onPress={handlePress} />
       </View>
       <View style={styles.lineSeparator} />
       <View style={styles.lowerContainer}>

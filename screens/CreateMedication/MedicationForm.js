@@ -13,8 +13,10 @@ import IconButton from "../../components/IconButton";
 import Medication from "../../models/medication";
 import { Platform } from "react-native";
 
-function MedicationForm({ onNext }) {
-  const [formData, setFormData] = useState(new Medication());
+function MedicationForm({ onNext, initialValues }) {
+  const [formData, setFormData] = useState(
+    initialValues || new Medication() // Usa os valores iniciais ou cria um novo medicamento
+  );
 
   function handleInputChange(inputIdentifier, enteredValue) {
     setFormData((currentData) => ({
@@ -43,7 +45,9 @@ function MedicationForm({ onNext }) {
       <ScrollView style={styles.screen}>
         <View style={styles.container}>
           <Text style={styles.text}>
-            Vamos adicionar as informações da sua medicação
+            {initialValues.id != 0
+              ? "Editar Medicamento"
+              : "Adicionar Medicamento"}
           </Text>
           <Input
             label="Nome do Medicamento"
@@ -52,6 +56,7 @@ function MedicationForm({ onNext }) {
               autoCapitalize: "sentences",
               autoCorrect: false,
               maxLength: 50,
+              value: formData.name,
               onChangeText: (text) => handleInputChange("name", text),
             }}
           />
@@ -62,6 +67,7 @@ function MedicationForm({ onNext }) {
               autoCapitalize: "sentences",
               autoCorrect: false,
               maxLength: 30,
+              value: formData.form,
               onChangeText: (text) => handleInputChange("form", text),
             }}
           />
@@ -72,6 +78,7 @@ function MedicationForm({ onNext }) {
               autoCapitalize: "sentences",
               autoCorrect: false,
               maxLength: 10,
+              value: formData.unit,
               onChangeText: (text) => handleInputChange("unit", text),
             }}
           />
@@ -81,6 +88,7 @@ function MedicationForm({ onNext }) {
               autoCapitalize: "sentences",
               autoCorrect: false,
               maxLength: 10,
+              value: formData.amount,
               onChangeText: (text) => handleInputChange("amount", text),
             }}
           />
@@ -90,6 +98,7 @@ function MedicationForm({ onNext }) {
               autoCapitalize: "sentences",
               autoCorrect: false,
               maxLength: 10,
+              value: formData.minAmount,
               onChangeText: (text) => handleInputChange("minAmount", text),
             }}
           />
@@ -97,7 +106,7 @@ function MedicationForm({ onNext }) {
       </ScrollView>
       <View style={styles.nextButtonContainer}>
         <IconButton
-          title={"Seguir"}
+          title={"Próximo"}
           color={GlobalStyles.colors.primary}
           icon={"ArrowCircleRight"}
           onPress={handleNext}
