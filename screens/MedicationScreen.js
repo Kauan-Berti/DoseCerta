@@ -2,7 +2,7 @@ import { View, StyleSheet, Text, FlatList } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import { useState, useContext } from "react";
 import { AppContext } from "../store/app-context";
-import { fetchMedications } from "../util/http";
+import { fetchMedications } from "../util/supabase";
 import { useEffect } from "react";
 import { Alert } from "react-native";
 import MedicationCard from "../components/MedicationCart";
@@ -18,6 +18,7 @@ function MedicationScreen() {
 
   useEffect(() => {
     if (appContext.medications.length > 0) {
+
       return;
     }
 

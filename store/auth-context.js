@@ -1,54 +1,49 @@
-import { createContext } from "react";
-import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { refreshIdToken } from "../util/auth";
+import { createContext, useState, useEffect } from "react";
+import { supabase } from "../util/supabase";
 
 export const AuthContext = createContext({
   token: "",
   isAuthenticated: false,
   authenticate: (token) => {},
   logout: () => {},
-  tryAutoLogin: () => {},
 });
 
 function AuthContextProvider({ children }) {
-  const [authToken, setAuthToken] = useState();
+  const [authToken, setAuthToken] = useState(null);
 
   async function authenticate(token) {
     setAuthToken(token);
-    await AsyncStorage.setItem("authToken", token);
   }
 
-  async function autoRefreshToken() {
-    try {
-      const newToken = await refreshIdToken();
-      setAuthToken(newToken);
-    } catch (error) {
-      console.error("Erro ao renovar o token:", error);
-      logout(); // Faz logout se o refresh falhar
-    }
+  async function logout() {
+    setAuthToken(null);
+    await supabase.auth.signOut();
   }
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      autoRefreshToken(); // Renova o token automaticamente
-    }, 55 * 60 * 1000); // Renova 5 minutos antes de expirar (55 minutos)
+    const initSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (data?.session) {
+        setAuthToken(data.session.access_token);
+      }
+    };
 
-    return () => clearInterval(interval); // Limpa o intervalo ao desmontar
+    initSession();
   }, []);
 
-  function logout() {
-    setAuthToken(null);
-    AsyncStorage.removeItem("authToken");
-    AsyncStorage.removeItem("refreshToken");
-  }
-
+  // OPCIONAL: auto refresh se você quiser controle manual
   useEffect(() => {
-    const interval = setInterval(() => {
-      autoRefreshToken(); // Renova o token automaticamente
-    }, 55 * 60 * 1000); // Renova 5 minutos antes de expirar (55 minutos)
+    const interval = setInterval(async () => {
+      const { data, error } = await supabase.auth.refreshSession();
+      if (data?.session) {
+        setAuthToken(data.session.access_token);
+      } else if (error) {
+        console.error("Erro ao renovar token:", error);
+        logout();
+      }
+    }, 55 * 60 * 1000);
 
-    return () => clearInterval(interval); // Limpa o intervalo ao desmontar
+    return () => clearInterval(interval);
   }, []);
 
   const value = {
@@ -60,4 +55,5 @@ function AuthContextProvider({ children }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+
 export default AuthContextProvider;

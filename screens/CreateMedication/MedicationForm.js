@@ -7,7 +7,7 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import Input from "../../components/Input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GlobalStyles } from "../../constants/colors";
 import IconButton from "../../components/IconButton";
 import Medication from "../../models/medication";
@@ -25,6 +25,7 @@ function MedicationForm({ onNext, initialValues }) {
         0 // Quantidade mínima
       ) // Usa os valores iniciais ou cria um novo medicamento
   );
+
 
   function handleInputChange(inputIdentifier, enteredValue) {
     setFormData((currentData) => ({
@@ -96,7 +97,7 @@ function MedicationForm({ onNext, initialValues }) {
               autoCapitalize: "sentences",
               autoCorrect: false,
               maxLength: 10,
-              value: formData.amount,
+              value: formData.amount?.toString() ?? "",
               onChangeText: (text) => handleInputChange("amount", text),
             }}
           />
@@ -106,7 +107,7 @@ function MedicationForm({ onNext, initialValues }) {
               autoCapitalize: "sentences",
               autoCorrect: false,
               maxLength: 10,
-              value: formData.minAmount,
+              value: formData.minAmount?.toString() ?? "",
               onChangeText: (text) => handleInputChange("minAmount", text),
             }}
           />

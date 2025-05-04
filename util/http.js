@@ -63,24 +63,6 @@ export async function fetchMedications() {
     throw new Error("Não foi possível buscar os medicamentos.");
   }
 }
-export async function fetchMedicationById(medicationId) {
-  const token = await getToken();
-
-  try {
-    const response = await axios.get(
-      `${BACKEND_URL}/medications/${medicationId}.json?auth=${token}`
-    );
-
-    if (!response.data) {
-      throw new Error(`Medicamento com ID ${medicationId} não encontrado.`);
-    }
-
-    return { id: medicationId, ...response.data };
-  } catch (error) {
-    console.error(`Erro ao buscar medicamento com ID ${medicationId}:`, error);
-    throw new Error("Não foi possível buscar o medicamento.");
-  }
-}
 
 // -------------------- Tratamentos --------------------
 

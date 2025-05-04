@@ -1,10 +1,10 @@
 class Treatment {
   constructor(
     id,
-    medicationId = null, // Objeto do medicamento
-    startDate = null,
-    endDate = null,
-    isContinuous = false
+    medicationId, // Objeto do medicamento
+    startDate,
+    endDate,
+    isContinuous
   ) {
     this.id = id; // ID do tratamento
     this.medicationId = medicationId; // Objeto do medicamento

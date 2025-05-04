@@ -4,7 +4,7 @@ import DoubleLabelBox from "../../components/DoubleLabelBox";
 import IconButton from "../../components/IconButton";
 import { useEffect, useContext, useState } from "react";
 import { AppContext } from "../../store/app-context";
-import { storeTreatment, storeAlert } from "../../util/http";
+import { storeTreatment, storeAlert } from "../../util/supabase";
 
 function TreatmentResume({ onFinish, treatment, alerts }) {
   const [isSubmitting, setIsSubmitting] = useState(false);

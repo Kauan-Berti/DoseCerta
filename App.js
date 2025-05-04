@@ -26,8 +26,9 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CreateMedication from "./screens/CreateMedication/CreateMedication";
 import CreateTreatment from "./screens/CreateAlert/CreateTreatment";
 import CreateJournal from "./screens/CreateJournal/CreateJournal";
-import { refreshIdToken } from "./util/auth";
+import { refreshIdToken } from "./util/supabase";
 import MedicationScreen from "./screens/MedicationScreen";
+import { cleanOldData } from "./util/cleandata";
 
 SplashScreen.preventAutoHideAsync(); //Aplicar quando o login estiver pronto
 
@@ -155,7 +156,6 @@ function Navigation() {
   const authContext = useContext(AuthContext);
   return (
     <NavigationContainer
-      screenOptions={{ detachPreviousScreen: false }}
       theme={{
         ...DefaultTheme,
         colors: {
@@ -181,6 +181,9 @@ function Root() {
         if (storedToken) {
           const newToken = await refreshIdToken(); // Renova o token ao iniciar
           authContext.authenticate(newToken);
+        } else {
+          // Se não houver token, você pode garantir que a autenticação seja tratada
+          console.log("Nenhum token armazenado.");
         }
       } catch (error) {
         console.error("Erro ao buscar ou renovar o token:", error);
@@ -192,12 +195,9 @@ function Root() {
   }, []);
 
   useEffect(() => {
-    async function hideSplash() {
-      if (!isTryingLogin) {
-        await SplashScreen.hideAsync();
-      }
+    if (!isTryingLogin) {
+      SplashScreen.hideAsync().catch(console.warn);
     }
-    hideSplash();
   }, [isTryingLogin]);
 
   if (isTryingLogin) {

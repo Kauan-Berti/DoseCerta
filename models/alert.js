@@ -1,12 +1,5 @@
 class Alert {
-  constructor(
-    id,
-    time,
-    dose,
-    observations = "",
-    days = [],
-    treatmentId = null
-  ) {
+  constructor(id, time, dose, observations, days, treatmentId) {
     this.id = id; // ID do alerta
     this.time = time; // Horário do alerta
     this.dose = dose; // Dose do medicamento

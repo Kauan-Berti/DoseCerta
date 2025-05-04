@@ -2,7 +2,6 @@ import { Text, View, StyleSheet, Image } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import TreeDotsButton from "./TreeDotsButton";
 import ProgressBar from "./ProgressBar";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 function MedicationCard({ item, onPress }) {
   function handlePress() {

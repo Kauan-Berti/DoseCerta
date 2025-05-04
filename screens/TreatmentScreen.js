@@ -5,7 +5,11 @@ import NavigationHeader from "../components/NavigationHeader";
 import AlertCard from "../components/AlertCard";
 import { useEffect, useState, useContext } from "react";
 import { AppContext } from "../store/app-context";
-import { fetchTreatments, fetchMedications, fetchAlerts } from "../util/http";
+import {
+  fetchTreatments,
+  fetchMedications,
+  fetchAlerts,
+} from "../util/supabase";
 import ErrorOverlay from "../components/ui/ErrorOverlay";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 

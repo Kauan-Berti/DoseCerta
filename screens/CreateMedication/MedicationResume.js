@@ -6,7 +6,7 @@ import { useContext } from "react";
 import { AppContext } from "../../store/app-context";
 import Medication from "../../models/medication";
 import { useState } from "react";
-import { storeMedication, updateMedication } from "../../util/http";
+import { storeMedication, updateMedication } from "../../util/supabase";
 
 function MedicationResume({ onFinish, medicationData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,12 +20,6 @@ function MedicationResume({ onFinish, medicationData }) {
 
     try {
       // Cria o objeto do medicamento com um ID provisório
-
-      if (medicationData.id === 0) {
-        console.log("Novo medicamento:", medicationData);
-      } else {
-        console.log("Medicamento existente:", medicationData);
-      }
 
       if (medicationData.id !== 0) {
         await updateMedication(medicationData.id, medicationData);
