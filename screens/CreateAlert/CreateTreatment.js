@@ -2,7 +2,7 @@ import { View, StyleSheet } from "react-native";
 import { GlobalStyles } from "../../constants/colors";
 import NavigationHeader from "../../components/NavigationHeader";
 import { useState, useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import SuccesScreen from "../SuccesScreen";
 import CreateAlerts from "./CreateAlerts";
 import TreatmentResume from "./TreatmentResume";
@@ -13,38 +13,40 @@ import { AppContext } from "../../store/app-context";
 
 function CreateTreatment() {
   const appContext = useContext(AppContext);
+  const route = useRoute();
+  const navigator = useNavigation();
+
+  const existingTreatment = route.params?.treatment || null;
+
   const [step, setStep] = useState(1); // 1: Medication Form, 2: Alert Form
   const [isSuccess, setIsSuccess] = useState(false); // Para controlar o estado de sucesso
   const [treatment, setTreatment] = useState(
-    new Treatment(
-      Date.now().toString(), // ID único para o tratamento
-      null, // ID do Medicamento selecionado
-      null, // Data de início
-      null, // Data de término
-      false // Não contínuo por padrão
-    )
+    route.params?.treatment ||
+      new Treatment(
+        Date.now().toString(), // ID único para o tratamento
+        null, // ID do Medicamento selecionado
+        null, // Data de início
+        null, // Data de término
+        false // Não contínuo por padrão
+      )
   );
-  const [alerts, setAlerts] = useState([]); // Gerencia os alertas separadamente
+  const [alerts, setAlerts] = useState(route.params?.alerts || []); // Alertas associados
+  const [medication, setMedication] = useState(
+    route.params?.medication || null
+  );
 
-  const navigator = useNavigation(); // Hook para navegação
+  useState(() => {
+    console.log("Medicamento :", medication);
+  }, [medication]);
 
   function handleNextStep(updatedData) {
     switch (step) {
       case 1:
-        setTreatment((prev) => ({
-          ...prev,
-          medication: updatedData.medication,
-          medicationId: updatedData.medicationId,
-        }));
+        setMedication(updatedData.medication);
         break;
       case 2:
         setAlerts(updatedData.alerts);
-        setTreatment((prev) => ({
-          ...prev,
-          startDate: updatedData.treatment.startDate || prev.startDate,
-          endDate: updatedData.treatment.endDate || prev.endDate,
-          isContinuous: updatedData.treatment.isContinuous || prev.isContinuous,
-        }));
+        setTreatment(updatedData.treatment);
 
         break;
       default:
@@ -61,17 +63,36 @@ function CreateTreatment() {
   async function handleFinish() {
     try {
       // Salva o tratamento no contexto
-      appContext.addTreatment(treatment);
+      if (existingTreatment) {
+        // Atualiza o tratamento existente
+        appContext.updateTreatment(treatment.id, treatment);
 
-      // Salva os alertas no contexto com o treatmentId associado
-      alerts.forEach((alert) => {
-        appContext.addAlert({ ...alert, treatmentId: treatment.id });
-      });
+        // Atualiza os alertas no contexto
+        alerts.forEach((alert) => {
+          if (alert.id.startsWith("temp-")) {
+            appContext.addAlert({ ...alert, treatmentId: treatment.id });
+          } else {
+            appContext.updateAlert(alert.id, alert);
+          }
+        });
+      } else {
+        // Cria um novo tratamento
+        appContext.addTreatment(treatment);
+
+        // Salva os alertas no contexto com o treatmentId associado
+        alerts.forEach((alert) => {
+          appContext.addAlert({ ...alert, treatmentId: treatment.id });
+        });
+      }
 
       setIsSuccess(true); // Define o estado de sucesso como verdadeiro
       setTimeout(() => {
         setIsSuccess(false);
-        navigator.navigate("Treatment"); // Reseta o estado de sucesso após 2 segundos
+        if (existingTreatment) {
+          navigator.navigate("TreatmentList", { refresh: true }); // Reseta o estado de sucesso após 2 segundos
+        } else {
+          navigator.navigate("Treatment", { refresh: true }); // Reseta o estado de sucesso após 2 segundos
+        }
       }, 2000);
     } catch (error) {
       console.error("Erro ao salvar tratamento ou alertas:", error);
@@ -80,18 +101,17 @@ function CreateTreatment() {
 
   function renderStep() {
     if (isSuccess) {
-      return <SuccesScreen text={"Tratamento criado com sucesso!"} />;
+      return <SuccesScreen text={"Tratamento salvo com sucesso!"} />;
     }
 
     switch (step) {
       case 1:
         return (
           <MedicationList
-            selectedMedication={treatment.medication}
+            medicationId={treatment.medicationId}
             onNext={(selectedMedication) =>
               handleNextStep({
                 medication: selectedMedication,
-                medicationId: selectedMedication.id,
               })
             }
           />
@@ -115,6 +135,7 @@ function CreateTreatment() {
             onFinish={handleFinish}
             treatment={treatment}
             alerts={alerts}
+            medication={medication}
           />
         );
       default:

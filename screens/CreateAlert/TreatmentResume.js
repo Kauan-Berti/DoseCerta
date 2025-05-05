@@ -4,9 +4,15 @@ import DoubleLabelBox from "../../components/DoubleLabelBox";
 import IconButton from "../../components/IconButton";
 import { useEffect, useContext, useState } from "react";
 import { AppContext } from "../../store/app-context";
-import { storeTreatment, storeAlert } from "../../util/supabase";
+import {
+  storeTreatment,
+  storeAlert,
+  updateTreatment,
+  updateAlert,
+  deleteAlert,
+} from "../../util/supabase";
 
-function TreatmentResume({ onFinish, treatment, alerts }) {
+function TreatmentResume({ onFinish, treatment, alerts, medication }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState();
 
@@ -19,32 +25,72 @@ function TreatmentResume({ onFinish, treatment, alerts }) {
     return date.toLocaleDateString("pt-BR");
   }
 
+  useEffect(() => {
+    console.log("Tratamento:", treatment);
+    console.log("Alertas:", alerts);
+    console.log("Medicamento:", medication);
+  }, [treatment, alerts, medication]);
+
   async function handleSave() {
     setIsSubmitting(true);
     setError(null);
 
     try {
       // Validação do tratamento
-      if (!treatment.medication?.id) {
+      if (!medication) {
         throw new Error("O medicamento não foi selecionado.");
       }
 
-      //console.log("Tratamento:", treatment);
+      let savedTreatment;
 
-      const savedTreatment = await storeTreatment({
-        medicationId: treatment.medication.id,
-        startDate: treatment.startDate,
-        endDate: treatment.endDate,
-        isContinuous: treatment.isContinuous,
-      });
+      if (treatment.id.startsWith("temp-")) {
+        // Criação de um novo tratamento
+        savedTreatment = await storeTreatment({
+          medicationId: medication.id,
+          startDate: treatment.startDate,
+          endDate: treatment.endDate,
+          isContinuous: treatment.isContinuous,
+        });
 
-      appContext.addTreatment({
-        id: savedTreatment.id,
-        medicationId: treatment.medication.id,
-        startDate: treatment.startDate,
-        endDate: treatment.endDate,
-        isContinuous: treatment.isContinuous,
-      });
+        appContext.addTreatment({
+          id: savedTreatment.id,
+          medicationId: medication.id,
+          startDate: treatment.startDate,
+          endDate: treatment.endDate,
+          isContinuous: treatment.isContinuous,
+        });
+      } else {
+        // Atualização de um tratamento existente
+        savedTreatment = await updateTreatment(treatment.id, {
+          medicationId: medication.id,
+          startDate: treatment.startDate,
+          endDate: treatment.endDate,
+          isContinuous: treatment.isContinuous,
+        });
+
+        appContext.updateTreatment(treatment.id, {
+          id: savedTreatment.id,
+          medicationId: medication.id,
+          startDate: treatment.startDate,
+          endDate: treatment.endDate,
+          isContinuous: treatment.isContinuous,
+        });
+      }
+
+      // Identificar alertas removidos
+      const existingAlerts = appContext.alerts.filter(
+        (alert) => alert.treatmentId === treatment.id
+      );
+      const removedAlerts = existingAlerts.filter(
+        (existingAlert) =>
+          !alerts.some((alert) => alert.id === existingAlert.id)
+      );
+
+      // Excluir alertas removidos
+      for (const alert of removedAlerts) {
+        await deleteAlert(alert.id); // Remove do backend
+        appContext.deleteAlert(alert.id); // Remove do contexto
+      }
 
       // Validação e salvamento dos alertas
       for (const alert of alerts) {
@@ -53,10 +99,20 @@ function TreatmentResume({ onFinish, treatment, alerts }) {
         }
 
         if (alert.id.startsWith("temp-")) {
+          // Criação de um novo alerta
           const { id, ...alertWithoutId } = alert;
           alertWithoutId.treatmentId = savedTreatment.id;
 
           await storeAlert(alertWithoutId);
+        } else {
+          // Atualização de um alerta existente
+          await updateAlert(alert.id, {
+            time: alert.time,
+            dose: alert.dose,
+            days: alert.days,
+            observations: alert.observations,
+            treatmentId: savedTreatment.id,
+          });
         }
       }
       onFinish(); // Finaliza o fluxo
@@ -93,7 +149,7 @@ function TreatmentResume({ onFinish, treatment, alerts }) {
         />
       </View>
 
-      <Text style={styles.title}>{treatment.medication?.name}</Text>
+      <Text style={styles.title}>{medication.name}</Text>
       {treatment.isContinuous ? (
         <View style={styles.continuousContainer}>
           <Text style={styles.continuousText}>
@@ -114,11 +170,11 @@ function TreatmentResume({ onFinish, treatment, alerts }) {
       )}
       <DoubleLabelBox
         title={"Quantidade em estoque"}
-        text={`${treatment.medication?.amount} ${treatment.medication?.form}(s)`}
+        text={`${medication?.amount} ${medication?.form}(s)`}
       />
       <DoubleLabelBox
         title={"Quantidade mínima"}
-        text={`${treatment.medication?.minAmount} ${treatment.medication?.form}(s)`}
+        text={`${medication?.minAmount} ${medication?.form}(s)`}
       />
 
       <Text style={styles.subtitle}>Alertas Criados:</Text>

@@ -12,6 +12,7 @@ import {
 } from "../util/supabase";
 import ErrorOverlay from "../components/ui/ErrorOverlay";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
+import { useNavigation } from "@react-navigation/native";
 
 function TreatmentScreen() {
   const appContext = useContext(AppContext);
@@ -19,6 +20,8 @@ function TreatmentScreen() {
   const [todayAlerts, setTodayAlerts] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState();
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchData();
@@ -101,19 +104,27 @@ function TreatmentScreen() {
     const treatment = appContext.treatments.find(
       (t) => t.id === item.treatmentId
     );
-    //console.log("Medication ID:", treatment?.medicationId);
 
     const medication = appContext.medications.find(
       (m) => m.id === treatment?.medicationId
     );
-    //console.log("Medication:", medication);
+    function handleEditTreatment() {
+      navigation.navigate("CreateTreatment", {
+        treatment: treatment,
+        medication: medication,
+        alerts: appContext.alerts.filter(
+          (alert) => alert.treatmentId === treatment.id
+        ),
+      });
+    }
 
     return (
       <AlertCard
         name={medication?.name || "Medicamento desconhecido"}
         time={item.time}
         dose={item.dose}
-        preMeal={item.observations || "Sem observações"}
+        observations={item.observations || "Sem observações"}
+        onEdit={handleEditTreatment}
       />
     );
   }

@@ -53,7 +53,7 @@ function AuthenticatedStack() {
     >
       <BottomTabs.Screen
         name="Treatment"
-        component={TreatmentScreen}
+        component={TreatmentStack}
         options={{
           title: "Alertas",
           tabBarIcon: ({ color, size }) => {
@@ -112,7 +112,6 @@ function AuthStack() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: GlobalStyles.colors.background },
-        animation: "default",
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />
@@ -127,7 +126,6 @@ function AddStack() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: GlobalStyles.colors.background },
-        animation: "default",
       }}
     >
       <Stack.Screen name="CreateJournal" component={CreateJournal} />
@@ -143,11 +141,24 @@ function MedicationStack() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: GlobalStyles.colors.background },
-        animation: "default",
       }}
     >
       <Stack.Screen name="MedicationList" component={MedicationScreen} />
       <Stack.Screen name="CreateMedication" component={CreateMedication} />
+    </Stack.Navigator>
+  );
+}
+
+function TreatmentStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: GlobalStyles.colors.background },
+      }}
+    >
+      <Stack.Screen name="TreatmentList" component={TreatmentScreen} />
+      <Stack.Screen name="CreateTreatment" component={CreateTreatment} />
     </Stack.Navigator>
   );
 }

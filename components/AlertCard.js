@@ -3,10 +3,15 @@ import SquareIconButton from "./SquareIconButton";
 import { GlobalStyles } from "../constants/colors";
 import RoundButton from "./RoundButton";
 import TreeDotsButton from "./TreeDotsButton";
+import { useNavigation } from "@react-navigation/native";
 
 // This is the default configuration
 
-function AlertCard({ name, time, dose, preMeal }) {
+function AlertCard({ name, time, dose, observations, onEdit }) {
+  function handlePress() {
+    onEdit();
+  }
+
   return (
     <View style={styles.card}>
       <View style={styles.titlesContainer}>
@@ -19,14 +24,14 @@ function AlertCard({ name, time, dose, preMeal }) {
         />
 
         <Text style={styles.title}>{name}</Text>
-        <TreeDotsButton onPress={() => {}} />
+        <TreeDotsButton onPress={handlePress} />
       </View>
       <View style={styles.lineSeparator} />
 
       <View style={styles.buttonsContainer}>
         <SquareIconButton title={time} icon="SunHorizon" />
         <SquareIconButton title={dose} icon="Pill" />
-        <SquareIconButton title={preMeal} icon="ForkKnife" />
+        <SquareIconButton title={observations} icon="ForkKnife" />
       </View>
     </View>
   );
