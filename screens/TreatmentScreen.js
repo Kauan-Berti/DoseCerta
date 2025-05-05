@@ -13,6 +13,7 @@ import {
 import ErrorOverlay from "../components/ui/ErrorOverlay";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 import { useNavigation } from "@react-navigation/native";
+import PagerView from "react-native-pager-view";
 
 function TreatmentScreen() {
   const appContext = useContext(AppContext);
@@ -22,6 +23,21 @@ function TreatmentScreen() {
   const [error, setError] = useState();
 
   const navigation = useNavigation();
+
+  const numberOfPages = 7; // 3 dias antes, o dia atual e 3 depois
+  const middleIndex = Math.floor(numberOfPages / 2);
+
+  const dates = Array.from({ length: numberOfPages }, (_, i) => {
+    const date = new Date(selectedDate);
+    date.setDate(date.getDate() + (i - middleIndex));
+    return date;
+  });
+
+  function handlePageSelected(e) {
+    const newIndex = e.nativeEvent.position;
+    const newDate = dates[newIndex];
+    setSelectedDate(newDate);
+  }
 
   useEffect(() => {
     fetchData();
@@ -142,23 +158,58 @@ function TreatmentScreen() {
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Alertas</Text>
       </View>
-      <NavigationHeader
-        title={selectedDate.toLocaleDateString("pt-BR")}
-        onBack={() => changeSelectedDate(-1)}
-        onNext={() => changeSelectedDate(1)}
-      />
-      {todayAlerts.length === 0 ? (
-        <Text style={styles.text}>Nenhum alerta para hoje</Text>
-      ) : (
-        <FlatList
-          data={todayAlerts}
-          renderItem={renderAlertCard}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.contentContainer}
-        />
-      )}
+  
+      <PagerView
+        style={{ flex: 1 }}
+        initialPage={middleIndex}
+        onPageSelected={handlePageSelected}
+        key={selectedDate.toDateString()}
+      >
+        {dates.map((date, index) => {
+          const dayOfWeek = date
+            .toLocaleDateString("pt-BR", { weekday: "short" })
+            .toUpperCase()
+            .replace("Á", "A")
+            .replace(".", "");
+  
+          const filteredAlerts = appContext.alerts.filter((alert) => {
+            const dayMatch = alert.days?.map((d) => d.toUpperCase()).includes(dayOfWeek);
+            if (!dayMatch) return false;
+  
+            const treatment = appContext.treatments.find((t) => t.id === alert.treatmentId);
+            if (!treatment) return false;
+  
+            const currentDate = date.getTime();
+            const startDate = treatment.startDate ? new Date(treatment.startDate).getTime() : 0;
+            const endDate = treatment.endDate ? new Date(treatment.endDate).getTime() : Infinity;
+  
+            return currentDate >= startDate && currentDate <= endDate;
+          });
+  
+          return (
+            <View key={index} style={{ padding: 16 }}>
+              <NavigationHeader
+                title={date.toLocaleDateString("pt-BR")}
+                onBack={() => {}}
+                onNext={() => {}}
+              />
+              {filteredAlerts.length === 0 ? (
+                <Text style={styles.text}>Nenhum alerta para este dia</Text>
+              ) : (
+                <FlatList
+                  data={filteredAlerts}
+                  renderItem={renderAlertCard}
+                  keyExtractor={(item) => item.id}
+                  contentContainerStyle={styles.contentContainer}
+                />
+              )}
+            </View>
+          );
+        })}
+      </PagerView>
     </SafeAreaView>
   );
+  
 }
 
 export default TreatmentScreen;
