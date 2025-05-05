@@ -12,6 +12,7 @@ import { GlobalStyles } from "../../constants/colors";
 import IconButton from "../../components/IconButton";
 import Medication from "../../models/medication";
 import { Platform } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 
 function MedicationForm({ onNext, initialValues }) {
   const [formData, setFormData] = useState(
@@ -25,7 +26,6 @@ function MedicationForm({ onNext, initialValues }) {
         0 // Quantidade mínima
       ) // Usa os valores iniciais ou cria um novo medicamento
   );
-
 
   function handleInputChange(inputIdentifier, enteredValue) {
     setFormData((currentData) => ({
@@ -69,17 +69,21 @@ function MedicationForm({ onNext, initialValues }) {
               onChangeText: (text) => handleInputChange("name", text),
             }}
           />
-          <Input
-            label="Forma farmacêutica"
-            textInputConfig={{
-              placeholder: "(Comprimido, pomada, etc..)",
-              autoCapitalize: "sentences",
-              autoCorrect: false,
-              maxLength: 30,
-              value: formData.form,
-              onChangeText: (text) => handleInputChange("form", text),
-            }}
-          />
+
+          <Text style={styles.label}>Forma farmacêutica</Text>
+          <Picker
+            selectedValue={formData.form}
+            onValueChange={(itemValue) => handleInputChange("form", itemValue)}
+            style={[styles.picker, styles.input]} // Aplica estilos consistentes
+            dropdownIconColor={GlobalStyles.colors.text} // Cor do ícone de dropdown
+            mode="dropdown"
+          >
+            <Picker.Item label="Selecione uma forma" value="" />
+            <Picker.Item label="Comprimido" value="Comprimido" />
+            <Picker.Item label="Pomada" value="Pomada" />
+            <Picker.Item label="Xarope" value="Xarope" />
+            <Picker.Item label="Injeção" value="Injeção" />
+          </Picker>
           <Input
             label="Un. de medida"
             textInputConfig={{
@@ -144,18 +148,35 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: GlobalStyles.colors.text,
   },
-  inputsContainer: {
-    flex: 1,
-    flexDirection: "row",
+  label: {
+    fontSize: 16,
+    color: GlobalStyles.colors.text,
+    marginBottom: 8,
+    fontWeight: "bold",
+  },
+  picker: {
+    backgroundColor: GlobalStyles.colors.card, // Fundo consistente com o app
+    borderRadius: 8, // Bordas arredondadas
+    marginBottom: 16, // Espaçamento inferior
+    borderWidth: 1, // Borda fina
+    borderColor: GlobalStyles.colors.border, // Cor da borda
+    color: GlobalStyles.colors.text, // Cor do texto
+    paddingHorizontal: 10, // Espaçamento interno
+    height: 50, // Altura consistente com os inputs
   },
   input: {
-    flex: 1,
-    marginHorizontal: 5,
-    maxWidth: "100%",
+    fontSize: 16, // Tamanho do texto consistente
+    color: GlobalStyles.colors.text, // Cor do texto
   },
   nextButtonContainer: {
-    position: "absolute", // Posiciona o botão de forma fixa
-    bottom: 80, // Distância da parte inferior da tela
-    right: 20, // Distância da lateral direita
+    position: "absolute",
+    bottom: 80,
+    right: 20,
+  },
+  label: {
+    fontSize: 12,
+    color: GlobalStyles.colors.textSecondary,
+    marginBottom: 4,
+    fontWeight: "bold",
   },
 });

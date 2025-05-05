@@ -158,7 +158,7 @@ function TreatmentScreen() {
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Alertas</Text>
       </View>
-  
+
       <PagerView
         style={{ flex: 1 }}
         initialPage={middleIndex}
@@ -171,21 +171,29 @@ function TreatmentScreen() {
             .toUpperCase()
             .replace("Á", "A")
             .replace(".", "");
-  
+
           const filteredAlerts = appContext.alerts.filter((alert) => {
-            const dayMatch = alert.days?.map((d) => d.toUpperCase()).includes(dayOfWeek);
+            const dayMatch = alert.days
+              ?.map((d) => d.toUpperCase())
+              .includes(dayOfWeek);
             if (!dayMatch) return false;
-  
-            const treatment = appContext.treatments.find((t) => t.id === alert.treatmentId);
+
+            const treatment = appContext.treatments.find(
+              (t) => t.id === alert.treatmentId
+            );
             if (!treatment) return false;
-  
+
             const currentDate = date.getTime();
-            const startDate = treatment.startDate ? new Date(treatment.startDate).getTime() : 0;
-            const endDate = treatment.endDate ? new Date(treatment.endDate).getTime() : Infinity;
-  
+            const startDate = treatment.startDate
+              ? new Date(treatment.startDate).getTime()
+              : 0;
+            const endDate = treatment.endDate
+              ? new Date(treatment.endDate).getTime()
+              : Infinity;
+
             return currentDate >= startDate && currentDate <= endDate;
           });
-  
+
           return (
             <View key={index} style={{ padding: 16 }}>
               <NavigationHeader
@@ -209,7 +217,6 @@ function TreatmentScreen() {
       </PagerView>
     </SafeAreaView>
   );
-  
 }
 
 export default TreatmentScreen;
@@ -217,14 +224,12 @@ export default TreatmentScreen;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: GlobalStyles.colors.background,
-    paddingHorizontal: 16,
     flex: 1,
   },
   text: {
     fontSize: 20,
     color: GlobalStyles.colors.text,
     textAlign: "center",
-    marginTop: 20,
   },
   contentContainer: {
     paddingBottom: 100,
@@ -236,7 +241,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   titleContainer: {
-    padding: 16,
+    paddingTop: 16,
     justifyContent: "center",
     alignItems: "center",
   },

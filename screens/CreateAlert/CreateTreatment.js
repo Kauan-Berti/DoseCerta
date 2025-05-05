@@ -23,7 +23,7 @@ function CreateTreatment() {
   const [treatment, setTreatment] = useState(
     route.params?.treatment ||
       new Treatment(
-        Date.now().toString(), // ID único para o tratamento
+        "temp-", // ID único para o tratamento
         null, // ID do Medicamento selecionado
         null, // Data de início
         null, // Data de término

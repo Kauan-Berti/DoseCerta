@@ -47,8 +47,8 @@ function TreatmentResume({ onFinish, treatment, alerts, medication }) {
         // Criação de um novo tratamento
         savedTreatment = await storeTreatment({
           medicationId: medication.id,
-          startDate: treatment.startDate,
-          endDate: treatment.endDate,
+          startDate: treatment.startDate || null,
+          endDate: treatment.endDate || null,
           isContinuous: treatment.isContinuous,
         });
 
