@@ -4,6 +4,7 @@ import { GlobalStyles } from "../constants/colors";
 import RoundButton from "./RoundButton";
 import TreeDotsButton from "./TreeDotsButton";
 import { useNavigation } from "@react-navigation/native";
+import { G } from "react-native-svg";
 
 // This is the default configuration
 
@@ -15,16 +16,14 @@ function AlertCard({ name, time, dose, observations, onEdit }) {
   return (
     <View style={styles.card}>
       <View style={styles.titlesContainer}>
-        <RoundButton
-          icon="Bell"
-          size={50}
-          shadowOffset
-          color={GlobalStyles.colors.lightYellow}
-          borderColor={GlobalStyles.colors.lightYellow}
-        />
-
         <Text style={styles.title}>{name}</Text>
-        <TreeDotsButton onPress={handlePress} />
+        <RoundButton
+          icon="ArrowSquareOut"
+          size={32}
+          color={GlobalStyles.colors.primary}
+          borderColor={GlobalStyles.colors.card}
+          backgroundColor={GlobalStyles.colors.card}
+        />
       </View>
       <View style={styles.lineSeparator} />
 

@@ -9,18 +9,22 @@ function NavigationHeader({ title, onBack, onNext }) {
         <RoundButton
           icon="ArrowLeft"
           onPress={onBack}
-          color={GlobalStyles.colors.lightYellow}
+          color={GlobalStyles.colors.background}
+          backgroundColor={GlobalStyles.colors.primary}
           size={30}
         />
       )}
       {!onBack && <View style={{ width: 30 }} />}
+
       <Text style={styles.headerText}>{title}</Text>
+
       {!onNext && <View style={{ width: 30 }} />}
       {onNext && (
         <RoundButton
           icon="ArrowRight"
           onPress={onNext}
-          color={GlobalStyles.colors.lightYellow}
+          color={GlobalStyles.colors.background}
+          backgroundColor={GlobalStyles.colors.primary}
           size={30}
         />
       )}

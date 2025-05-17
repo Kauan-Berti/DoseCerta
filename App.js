@@ -1,8 +1,7 @@
 import { StatusBar } from "expo-status-bar";
-import TreatmentScreen from "./screens/TreatmentScreen";
+import AlertScreen from "./screens/AlertScreen";
 import LoginScreen from "./screens/LoginScreen";
-import Config from "./screens/Config";
-import Journal from "./screens/Journal";
+import ProfileScreen from "./screens/ProfileScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -12,8 +11,8 @@ import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GlobalStyles } from "./constants/colors";
 import {
+  UserGear,
   CalendarDots,
-  DotsThreeCircle,
   Hospital,
   Plus,
   Pill,
@@ -22,13 +21,15 @@ import {
 import CustomTabBarButton from "./components/CustomTabBarButton";
 import AppContextProvider from "./store/app-context";
 import SignupScreen from "./screens/SignupScreen";
-import { DefaultTheme } from "@react-navigation/native";
+import { DefaultTheme, useNavigation } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CreateMedication from "./screens/CreateMedication/CreateMedication";
 import CreateTreatment from "./screens/CreateAlert/CreateTreatment";
-import CreateJournal from "./screens/CreateJournal/CreateJournal";
 import { refreshIdToken } from "./util/supabase";
 import MedicationScreen from "./screens/MedicationScreen";
+import TreatmentScreen from "./screens/TreatmentScreen";
+import { TouchableOpacity } from "react-native";
+import JournalScreen from "./screens/JournalScreen";
 
 SplashScreen.preventAutoHideAsync(); //Aplicar quando o login estiver pronto
 
@@ -40,9 +41,10 @@ function AuthenticatedStack() {
     <BottomTabs.Navigator
       screenOptions={{
         headerShown: true,
+        headerTitleAlign: "center",
         headerStyle: {
           backgroundColor: GlobalStyles.colors.primary,
-          borderBottomWidth: 0,
+          height: 88,
         },
         tabBarStyle: {
           backgroundColor: GlobalStyles.colors.primary,
@@ -55,11 +57,12 @@ function AuthenticatedStack() {
         tabBarActiveTintColor: GlobalStyles.colors.card,
         tabBarInactiveTintColor: GlobalStyles.colors.background,
         tabBarShowLabel: false,
+        headerRight: () => <ProfileHeaderButton />,
       }}
     >
       <BottomTabs.Screen
-        name="Treatment"
-        component={TreatmentStack}
+        name="Alerts"
+        component={AlertScreen}
         options={{
           title: "Alertas",
           tabBarLabel: () => null,
@@ -71,11 +74,11 @@ function AuthenticatedStack() {
         }}
       />
       <BottomTabs.Screen
-        name="Journal"
-        component={Journal}
+        name="Treatment"
+        component={TreatmentScreen}
         options={{
-          title: "Histórico",
-          headerTitle: "Histórico",
+          title: "Tratamentos",
+          headerTitle: "Tratamentos",
           tabBarIcon: ({ color, size }) => {
             return (
               <Hospital
@@ -110,13 +113,13 @@ function AuthenticatedStack() {
         }}
       />
       <BottomTabs.Screen
-        name="Config"
-        component={Config}
+        name="Journal"
+        component={JournalScreen}
         options={{
-          title: "Mais",
+          title: "Histórico",
           tabBarIcon: ({ color, size }) => {
             return (
-              <DotsThreeCircle
+              <CalendarDots
                 color={color}
                 size={size * 1.5}
                 style={{ marginTop: 16 }}
@@ -126,6 +129,33 @@ function AuthenticatedStack() {
         }}
       />
     </BottomTabs.Navigator>
+  );
+}
+
+function MainStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: GlobalStyles.colors.background },
+      }}
+    >
+      <Stack.Screen name="Tabs" component={AuthenticatedStack} />
+      <Stack.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{
+          headerShown: true,
+          title: "Perfil",
+          headerStyle: {
+            backgroundColor: GlobalStyles.colors.primary,
+            height: 80,
+            borderBottomWidth: 0,
+          },
+          headerTitleAlign: "center",
+        }}
+      />
+    </Stack.Navigator>
   );
 }
 
@@ -143,6 +173,18 @@ function AuthStack() {
   );
 }
 
+function ProfileHeaderButton() {
+  const navigation = useNavigation();
+  return (
+    <TouchableOpacity
+      style={{ marginRight: 16 }}
+      onPress={() => navigation.navigate("ProfileScreen")}
+    >
+      <UserGear color={GlobalStyles.colors.card} size={28} />
+    </TouchableOpacity>
+  );
+}
+
 function AddStack() {
   return (
     <Stack.Navigator
@@ -151,7 +193,6 @@ function AddStack() {
         contentStyle: { backgroundColor: GlobalStyles.colors.background },
       }}
     >
-      <Stack.Screen name="CreateJournal" component={CreateJournal} />
       <Stack.Screen name="CreateMedication" component={CreateMedication} />
       <Stack.Screen name="CreateTreatment" component={CreateTreatment} />
     </Stack.Navigator>
@@ -199,7 +240,7 @@ function Navigation() {
       }}
     >
       {!authContext.isAuthenticated && <AuthStack />}
-      {authContext.isAuthenticated && <AuthenticatedStack />}
+      {authContext.isAuthenticated && <MainStack />}
     </NavigationContainer>
   );
 }

@@ -4,7 +4,7 @@ import IconButton from "../components/IconButton";
 import { AuthContext } from "../store/auth-context";
 import { useContext } from "react";
 
-function Config() {
+function ProfileScreen() {
 
   const authContext = useContext(AuthContext);
   function logoutHandler() {
@@ -23,7 +23,7 @@ function Config() {
   );
 }
 
-export default Config;
+export default ProfileScreen;
 
 const styles = StyleSheet.create({
   container: {

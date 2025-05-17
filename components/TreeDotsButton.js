@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet } from "react-native";
 import { DotsThreeVertical } from "phosphor-react-native";
 import { GlobalStyles } from "../constants/colors";
+import RoundButton from "./RoundButton";
 
 function TreeDotsButton({ onPress }) {
   return (
@@ -8,7 +9,13 @@ function TreeDotsButton({ onPress }) {
       onPress={onPress}
       style={({ pressed }) => [styles.container, pressed && styles.pressed]}
     >
-      <DotsThreeVertical color={GlobalStyles.colors.primary} size={24} />
+      <RoundButton
+        icon="ArrowRight"
+        onPress={() => {}}
+        color={GlobalStyles.colors.background}
+        backgroundColor={GlobalStyles.colors.lightYellow}
+        size={30}
+      />
     </Pressable>
   );
 }

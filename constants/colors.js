@@ -1,7 +1,7 @@
 export const GlobalStyles = {
   colors: {
     background: "#1E1E1E", // fundo principal
-    card: "#24211D", // fundo dos cards
+    card: "#262626", // fundo dos cards
     button: "#24211D", // fundo dos botões
     primary: "#FFD400", // botões, tabs, ícones principais
     accent: "#00CC4D", // destaque positivo (ex: sucesso, botão verde)

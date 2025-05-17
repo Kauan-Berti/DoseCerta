@@ -6,8 +6,6 @@ import { fetchMedications } from "../util/supabase";
 import { useEffect } from "react";
 import { Alert } from "react-native";
 import MedicationCard from "../components/MedicationCart";
-import { SafeAreaView } from "react-native-safe-area-context";
-import SearchBar from "../components/SearchBar";
 import { useNavigation } from "@react-navigation/native";
 
 function MedicationScreen() {
@@ -18,7 +16,6 @@ function MedicationScreen() {
 
   useEffect(() => {
     if (appContext.medications.length > 0) {
-
       return;
     }
 
@@ -67,16 +64,7 @@ function MedicationScreen() {
       )}
       {!isFetching && appContext.medications.length > 0 && (
         <>
-          <SafeAreaView>
-            <View style={styles.titleContainer}>
-              <Text style={styles.title}>Medicamentos</Text>
-            </View>
-            <SearchBar
-              placeholder="Pesquisar medicamento"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onSearch={handleSearch}
-            />
+          <View style={styles.container}>
             <FlatList
               data={appContext.medications}
               keyExtractor={(item) => item.id}
@@ -84,7 +72,7 @@ function MedicationScreen() {
               contentContainerStyle={styles.contentContainer}
               showsVerticalScrollIndicator={false}
             />
-          </SafeAreaView>
+          </View>
         </>
       )}
     </View>
@@ -94,9 +82,11 @@ function MedicationScreen() {
 export default MedicationScreen;
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 8,
+    paddingBottom: 40,
     flex: 1,
     backgroundColor: GlobalStyles.colors.background,
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
   },
   text: {
     fontSize: 18,
@@ -139,6 +129,6 @@ const styles = StyleSheet.create({
     padding: 8, // Adiciona um pouco de padding ao botão
   },
   contentContainer: {
-    paddingBottom: 300,
+    paddingBottom: 50,
   },
 });
