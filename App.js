@@ -75,7 +75,7 @@ function AuthenticatedStack() {
       />
       <BottomTabs.Screen
         name="Treatment"
-        component={TreatmentScreen}
+        component={TreatmentStack}
         options={{
           title: "Tratamentos",
           headerTitle: "Tratamentos",
@@ -199,20 +199,6 @@ function AddStack() {
   );
 }
 
-function MedicationStack() {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: GlobalStyles.colors.background },
-      }}
-    >
-      <Stack.Screen name="MedicationList" component={MedicationScreen} />
-      <Stack.Screen name="CreateMedication" component={CreateMedication} />
-    </Stack.Navigator>
-  );
-}
-
 function TreatmentStack() {
   return (
     <Stack.Navigator
@@ -221,11 +207,26 @@ function TreatmentStack() {
         contentStyle: { backgroundColor: GlobalStyles.colors.background },
       }}
     >
-      <Stack.Screen name="TreatmentList" component={TreatmentScreen} />
+      <Stack.Screen name="TreatmentScreen" component={TreatmentScreen} />
       <Stack.Screen name="CreateTreatment" component={CreateTreatment} />
     </Stack.Navigator>
   );
 }
+function MedicationStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: GlobalStyles.colors.background },
+      }}
+    >
+      <Stack.Screen name="MedicationScreen" component={MedicationScreen} />
+      <Stack.Screen name="CreateMedication" component={CreateMedication} />
+    </Stack.Navigator>
+  );
+}
+
+
 
 function Navigation() {
   const authContext = useContext(AuthContext);

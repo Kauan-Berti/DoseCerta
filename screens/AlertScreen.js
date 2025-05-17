@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   contentContainer: {
-    paddingBottom: 100,
+    paddingBottom: 110,
   },
   title: {
     fontSize: 24,
