@@ -17,13 +17,21 @@ function TreatmentScreen() {
   }, [appContext.treatments]);
 
   function RenderTreatmentCard({ item }) {
-    function onPressEdit(treatmentId) {
-      console.log("treatmentId", treatmentId);
+    function onPressEdit() {
+      console.log("treatmentId", item);
       const treatment = appContext.treatments.find(
-        (treatment) => treatment.id === treatmentId
+        (treatment) => treatment.id === item
+      );
+      const medication = appContext.medications.find(
+        (medication) => medication.id === treatment.medicationId
+      );
+      const alerts = appContext.alerts.filter(
+        (alert) => alert.treatmentId === item
       );
       navigation.navigate("CreateTreatment", {
         treatment: treatment,
+        medication: medication,
+        alerts: alerts,
       });
     }
     return <TreatmentCard treatmentId={item} onEdit={onPressEdit} />;

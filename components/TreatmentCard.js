@@ -48,16 +48,16 @@ function TreatmentCard({ treatmentId, onEdit }) {
     }
   }, [treatment]);
 
-  useEffect(() => {
-    console.log("treatment", treatment);
-  }, [treatment]);
+  // useEffect(() => {
+  //   console.log("treatment", treatment);
+  // }, [treatment]);
 
-  useEffect(() => {
-    console.log("medication", medication);
-  }, [medication]);
-  useEffect(() => {
-    console.log("alerts", alerts);
-  }, [alerts]);
+  // useEffect(() => {
+  //   console.log("medication", medication);
+  // }, [medication]);
+  // useEffect(() => {
+  //   console.log("alerts", alerts);
+  // }, [alerts]);
 
   function handlePress() {
     onEdit();

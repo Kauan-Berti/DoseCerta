@@ -20,16 +20,7 @@ function CreateTreatment() {
 
   const [step, setStep] = useState(1); // 1: Medication Form, 2: Alert Form
   const [isSuccess, setIsSuccess] = useState(false); // Para controlar o estado de sucesso
-  const [treatment, setTreatment] = useState(
-    route.params?.treatment ||
-      new Treatment(
-        "temp-", // ID único para o tratamento
-        null, // ID do Medicamento selecionado
-        null, // Data de início
-        null, // Data de término
-        false // Não contínuo por padrão
-      )
-  );
+  const [treatment, setTreatment] = useState(route.params?.treatment || null);
   const [alerts, setAlerts] = useState(route.params?.alerts || []); // Alertas associados
   const [medication, setMedication] = useState(
     route.params?.medication || null
@@ -88,11 +79,7 @@ function CreateTreatment() {
       setIsSuccess(true); // Define o estado de sucesso como verdadeiro
       setTimeout(() => {
         setIsSuccess(false);
-        if (existingTreatment) {
-          navigator.navigate("TreatmentList", { refresh: true }); // Reseta o estado de sucesso após 2 segundos
-        } else {
-          navigator.navigate("Treatment", { refresh: true }); // Reseta o estado de sucesso após 2 segundos
-        }
+        navigator.navigate("TreatmentScreen"); // Reseta o estado de sucesso após 2 segundos
       }, 2000);
     } catch (error) {
       console.error("Erro ao salvar tratamento ou alertas:", error);
@@ -149,15 +136,7 @@ function CreateTreatment() {
     3: "Resumo",
   };
 
-  return (
-    <View style={styles.container}>
-      <NavigationHeader
-        title={titleMap[step] || ""}
-        onBack={step > 1 ? handleBack : null} // Desabilita o botão de voltar no primeiro passo
-      />
-      {renderStep()}
-    </View>
-  );
+  return <View style={styles.container}>{renderStep()}</View>;
 }
 
 export default CreateTreatment;
