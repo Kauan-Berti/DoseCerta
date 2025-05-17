@@ -39,14 +39,18 @@ function AuthenticatedStack() {
   return (
     <BottomTabs.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: GlobalStyles.colors.primary,
+          borderBottomWidth: 0,
+        },
         tabBarStyle: {
           backgroundColor: GlobalStyles.colors.primary,
           borderTopWidth: 0,
           position: "absolute",
           height: 60,
         },
-        tabBarShowLabel: true,
+        tabBarShowLabel: false,
         tabBarActiveTintColor: GlobalStyles.colors.card,
         tabBarInactiveTintColor: GlobalStyles.colors.background,
       }}
@@ -221,7 +225,7 @@ function Root() {
 export default function App() {
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <GestureHandlerRootView
         style={{ flex: 1, backgroundColor: GlobalStyles.colors.background }}
       >

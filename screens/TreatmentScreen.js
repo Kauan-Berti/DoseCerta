@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GlobalStyles } from "../constants/colors";
 import NavigationHeader from "../components/NavigationHeader";
 import AlertCard from "../components/AlertCard";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { AppContext } from "../store/app-context";
 import {
   fetchTreatments,
@@ -21,11 +21,13 @@ function TreatmentScreen() {
   const [todayAlerts, setTodayAlerts] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState();
+  const pagerRef = useRef(null);
 
   const navigation = useNavigation();
 
   const numberOfPages = 7; // 3 dias antes, o dia atual e 3 depois
   const middleIndex = Math.floor(numberOfPages / 2);
+  const currentPageIndex = middleIndex;
 
   const dates = Array.from({ length: numberOfPages }, (_, i) => {
     const date = new Date(selectedDate);
@@ -112,6 +114,11 @@ function TreatmentScreen() {
     setSelectedDate((prevDate) => {
       const newDate = new Date(prevDate);
       newDate.setDate(newDate.getDate() + days);
+
+      if (pagerRef.current) {
+        pagerRef.current.setPage(middleIndex + days);
+      }
+
       return newDate;
     });
   }
@@ -154,12 +161,9 @@ function TreatmentScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Alertas</Text>
-      </View>
-
+    <View style={styles.container}>
       <PagerView
+        ref={pagerRef}
         style={{ flex: 1 }}
         initialPage={middleIndex}
         onPageSelected={handlePageSelected}
@@ -198,8 +202,8 @@ function TreatmentScreen() {
             <View key={index} style={{ padding: 16 }}>
               <NavigationHeader
                 title={date.toLocaleDateString("pt-BR")}
-                onBack={() => {}}
-                onNext={() => {}}
+                onBack={() => changeSelectedDate(-1)}
+                onNext={() => changeSelectedDate(1)}
               />
               {filteredAlerts.length === 0 ? (
                 <Text style={styles.text}>Nenhum alerta para este dia</Text>
@@ -215,7 +219,7 @@ function TreatmentScreen() {
           );
         })}
       </PagerView>
-    </SafeAreaView>
+    </View>
   );
 }
 
