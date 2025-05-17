@@ -17,6 +17,7 @@ import {
   Hospital,
   Plus,
   Pill,
+  Bell,
 } from "phosphor-react-native";
 import CustomTabBarButton from "./components/CustomTabBarButton";
 import AppContextProvider from "./store/app-context";
@@ -28,7 +29,6 @@ import CreateTreatment from "./screens/CreateAlert/CreateTreatment";
 import CreateJournal from "./screens/CreateJournal/CreateJournal";
 import { refreshIdToken } from "./util/supabase";
 import MedicationScreen from "./screens/MedicationScreen";
-import { cleanOldData } from "./util/cleandata";
 
 SplashScreen.preventAutoHideAsync(); //Aplicar quando o login estiver pronto
 
@@ -49,10 +49,12 @@ function AuthenticatedStack() {
           borderTopWidth: 0,
           position: "absolute",
           height: 60,
+          alignItems: "center",
+          justifyContent: "center",
         },
-        tabBarShowLabel: false,
         tabBarActiveTintColor: GlobalStyles.colors.card,
         tabBarInactiveTintColor: GlobalStyles.colors.background,
+        tabBarShowLabel: false,
       }}
     >
       <BottomTabs.Screen
@@ -60,8 +62,11 @@ function AuthenticatedStack() {
         component={TreatmentStack}
         options={{
           title: "Alertas",
+          tabBarLabel: () => null,
           tabBarIcon: ({ color, size }) => {
-            return <Pill color={color} size={size} />;
+            return (
+              <Bell color={color} size={size * 1.5} style={{ marginTop: 16 }} />
+            );
           },
         }}
       />
@@ -70,8 +75,15 @@ function AuthenticatedStack() {
         component={Journal}
         options={{
           title: "Histórico",
+          headerTitle: "Histórico",
           tabBarIcon: ({ color, size }) => {
-            return <CalendarDots color={color} size={size} />;
+            return (
+              <Hospital
+                color={color}
+                size={size * 1.5}
+                style={{ marginTop: 16 }}
+              />
+            );
           },
         }}
       />
@@ -80,10 +92,9 @@ function AuthenticatedStack() {
         component={AddStack}
         options={{
           tabBarIcon: ({ color, size }) => {
-            return <Plus color={color} size={size * 1.5} />;
+            return <Plus color={color} size={size * 2} />;
           },
           tabBarButton: (props) => <CustomTabBarButton {...props} />,
-          tabBarLabel: () => null,
         }}
       />
       <BottomTabs.Screen
@@ -92,7 +103,9 @@ function AuthenticatedStack() {
         options={{
           title: "Medicamentos",
           tabBarIcon: ({ color, size }) => {
-            return <Hospital color={color} size={size} />;
+            return (
+              <Pill color={color} size={size * 1.5} style={{ marginTop: 16 }} />
+            );
           },
         }}
       />
@@ -102,7 +115,13 @@ function AuthenticatedStack() {
         options={{
           title: "Mais",
           tabBarIcon: ({ color, size }) => {
-            return <DotsThreeCircle color={color} size={size} />;
+            return (
+              <DotsThreeCircle
+                color={color}
+                size={size * 1.5}
+                style={{ marginTop: 16 }}
+              />
+            );
           },
         }}
       />
