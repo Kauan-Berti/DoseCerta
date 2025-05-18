@@ -103,10 +103,22 @@ function TreatmentResume({ onFinish, treatment, alerts, medication }) {
           const { id, ...alertWithoutId } = alert;
           alertWithoutId.treatmentId = savedTreatment.id;
 
-          await storeAlert(alertWithoutId);
+          const savedAlert = await storeAlert(alertWithoutId);
+          // Atualize o contexto com o alerta salvo (incluindo o id real do backend)
+          appContext.addAlert({
+            ...alertWithoutId,
+            id: savedAlert.id,
+          });
         } else {
           // Atualização de um alerta existente
           await updateAlert(alert.id, {
+            time: alert.time,
+            dose: alert.dose,
+            days: alert.days,
+            observations: alert.observations,
+            treatmentId: savedTreatment.id,
+          });
+          appContext.updateAlert(alert.id, {
             time: alert.time,
             dose: alert.dose,
             days: alert.days,
