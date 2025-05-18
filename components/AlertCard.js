@@ -1,28 +1,36 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import SquareIconButton from "./SquareIconButton";
 import { GlobalStyles } from "../constants/colors";
-import RoundButton from "./RoundButton";
-import TreeDotsButton from "./TreeDotsButton";
-import { useNavigation } from "@react-navigation/native";
-import { G } from "react-native-svg";
+import RoundToggle from "./RoundToggle";
 
 // This is the default configuration
 
-function AlertCard({ name, time, dose, observations, onEdit }) {
+function AlertCard({
+  name,
+  time,
+  dose,
+  observations,
+  onConfirm,
+  isSelected = false,
+}) {
   function handlePress() {
-    onEdit();
+    if (onConfirm) {
+      onConfirm();
+    }
   }
 
   return (
     <View style={styles.card}>
       <View style={styles.titlesContainer}>
         <Text style={styles.title}>{name}</Text>
-        <RoundButton
-          icon="ArrowSquareOut"
+        <RoundToggle
+          icon="Check"
           size={32}
           color={GlobalStyles.colors.primary}
-          borderColor={GlobalStyles.colors.card}
+          borderColor={GlobalStyles.colors.primary}
           backgroundColor={GlobalStyles.colors.card}
+          onPress={handlePress}
+          isSelected={isSelected}
         />
       </View>
       <View style={styles.lineSeparator} />

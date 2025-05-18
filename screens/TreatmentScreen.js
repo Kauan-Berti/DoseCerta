@@ -35,6 +35,7 @@ function TreatmentScreen() {
         treatment: treatment,
         medication: medication,
         alerts: alerts,
+        origin: "edit",
       });
     }
     return <TreatmentCard treatmentId={item} onEdit={onPressEdit} />;

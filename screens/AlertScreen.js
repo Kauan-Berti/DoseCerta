@@ -1,5 +1,4 @@
 import { StyleSheet, FlatList, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { GlobalStyles } from "../constants/colors";
 import NavigationHeader from "../components/NavigationHeader";
 import AlertCard from "../components/AlertCard";
@@ -9,6 +8,8 @@ import {
   fetchTreatments,
   fetchMedications,
   fetchAlerts,
+  storeMedicationLog,
+  fetchMedicationLogsForDate,
 } from "../util/supabase";
 import ErrorOverlay from "../components/ui/ErrorOverlay";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
@@ -22,6 +23,7 @@ function AlertScreen() {
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState();
   const pagerRef = useRef(null);
+  const [confirmedAlerts, setConfirmedAlerts] = useState({});
 
   const navigation = useNavigation();
 
@@ -48,6 +50,39 @@ function AlertScreen() {
   useEffect(() => {
     filterAlertsForDate(selectedDate);
   }, [selectedDate, appContext.alerts]);
+
+  useEffect(() => {
+    async function fetchLogsAndSetConfirmed() {
+      try {
+        const dateStr = selectedDate.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+        // Pegue todos os treatments do contexto
+        let allLogs = [];
+        for (const treatment of appContext.treatments) {
+          const logs = await fetchMedicationLogsForDate(treatment.id, dateStr);
+
+          allLogs = allLogs.concat(logs);
+        }
+        // Crie um objeto { [treatmentId + "_" + alertTime]: true }
+        const confirmed = {};
+        allLogs.forEach((log) => {
+          if (log.alert_time && log.treatment_id) {
+            // Se alert_time for '2024-05-19T10:00:00', pega só '10:00'
+            const timeKey =
+              log.alert_time.length > 5
+                ? log.alert_time.slice(11, 16)
+                : log.alert_time;
+            confirmed[`${log.treatment_id}_${timeKey}`] = true;
+          }
+        });
+        console.log("Confirmed alerts:", confirmed);
+        setConfirmedAlerts(confirmed);
+      } catch (err) {
+        console.error("Erro ao buscar logs de confirmação:", err);
+      }
+    }
+
+    fetchLogsAndSetConfirmed();
+  }, [selectedDate, appContext.treatments]);
 
   async function fetchData() {
     setIsFetching(true);
@@ -131,13 +166,22 @@ function AlertScreen() {
     const medication = appContext.medications.find(
       (m) => m.id === treatment?.medicationId
     );
-    function handleEditTreatment() {
-      navigation.navigate("CreateTreatment", {
-        treatment: treatment,
-        medication: medication,
-        alerts: appContext.alerts.filter(
-          (alert) => alert.treatmentId === treatment.id
-        ),
+    function handlerConfirm() {
+      const timeKey =
+        typeof item.time === "string" ? item.time.slice(0, 5) : "";
+      setConfirmedAlerts((prev) => ({
+        ...prev,
+        [`${item.treatmentId}_${timeKey}`]:
+          !prev[`${item.treatmentId}_${timeKey}`],
+      }));
+
+      storeMedicationLog({
+        treatmentId: item.treatmentId,
+        timeTaken: new Date().toISOString(),
+        alertTime: item.time,
+        notes: "", // ou algum campo de observação se desejar
+      }).catch((err) => {
+        console.error("Erro ao registrar log:", err);
       });
     }
 
@@ -154,7 +198,14 @@ function AlertScreen() {
         }
         dose={item.dose}
         observations={item.observations || "Sem observações"}
-        onEdit={handleEditTreatment}
+        onConfirm={() => handlerConfirm(item)}
+        isSelected={
+          !!confirmedAlerts[
+            `${item.treatmentId}_${
+              typeof item.time === "string" ? item.time.slice(0, 5) : ""
+            }`
+          ]
+        }
       />
     );
   }

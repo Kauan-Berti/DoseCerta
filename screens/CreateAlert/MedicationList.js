@@ -1,7 +1,7 @@
 import { View, Text, FlatList, StyleSheet, Alert } from "react-native";
 import { useContext, useState, useEffect } from "react";
 import { AppContext } from "../../store/app-context";
-import { fetchMedications } from "../../util/http";
+import { fetchMedications } from "../../util/supabase";
 import SelectMedicationCard from "./SelectMedicationCard";
 import { GlobalStyles } from "../../constants/colors";
 import IconButton from "../../components/IconButton";

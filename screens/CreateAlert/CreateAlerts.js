@@ -19,16 +19,18 @@ import AlertForm from "./AlertForm";
 import Toggle from "../../components/Toggle";
 import { useEffect } from "react";
 
-function CreateAlerts({ onNext, treatment, alerts: initialAlerts }) {
+function CreateAlerts({ onNext, treatment = {}, alerts: initialAlerts }) {
   const [alerts, setAlerts] = useState(initialAlerts || []); // Gerencia os alertas localmente
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [editingAlert, setEditingAlert] = useState(null);
-  const [isContinuous, setIsContinuous] = useState(treatment.isContinuous);
+  const [isContinuous, setIsContinuous] = useState(
+    treatment?.isContinuous || false
+  );
 
   const [dateRange, setDateRange] = useState({
-    startDate: treatment.startDate || null,
-    endDate: treatment.endDate || null,
+    startDate: treatment?.startDate || null,
+    endDate: treatment?.endDate || null,
   });
 
   useEffect(() => {
@@ -37,8 +39,14 @@ function CreateAlerts({ onNext, treatment, alerts: initialAlerts }) {
   }, [treatment, alerts]);
 
   useEffect(() => {
-    treatment.isContinuous = isContinuous;
-  }, [isContinuous]);
+    if (
+      treatment &&
+      typeof treatment === "object" &&
+      "isContinuous" in treatment
+    ) {
+      treatment.isContinuous = isContinuous;
+    }
+  }, [isContinuous, treatment]);
 
   function toggleState(setState) {
     setState((prev) => !prev);
@@ -54,7 +62,14 @@ function CreateAlerts({ onNext, treatment, alerts: initialAlerts }) {
   }
 
   function handleEditAlert(alert) {
-    setEditingAlert(alert);
+    const normalizedAlert = {
+      ...alert,
+      time:
+        typeof alert.time === "string" && alert.time.length >= 5
+          ? alert.time.slice(0, 5)
+          : alert.time,
+    };
+    setEditingAlert(normalizedAlert);
     setIsFormVisible(true);
   }
 
@@ -72,6 +87,13 @@ function CreateAlerts({ onNext, treatment, alerts: initialAlerts }) {
 
   function handleSubmitAlert(alertData) {
     if (!alertData.time || !alertData.dose) {
+      const normalizedAlertData = {
+        ...alertData,
+        time:
+          typeof alertData.time === "string" && alertData.time.length >= 5
+            ? alertData.time.slice(0, 5)
+            : alertData.time,
+      };
       ReactAlert.alert(
         "Erro",
         "Por favor, preencha todos os campos do alerta."

@@ -12,12 +12,10 @@ import {
   deleteAlert,
 } from "../../util/supabase";
 
-function TreatmentResume({ onFinish, treatment, alerts, medication }) {
+function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState();
-
   const appContext = useContext(AppContext);
-
   function formatDate(dateString) {
     if (!dateString) return "Selecionar";
     const [year, month, day] = dateString.split("-").map(Number);
@@ -42,8 +40,9 @@ function TreatmentResume({ onFinish, treatment, alerts, medication }) {
       }
 
       let savedTreatment;
+      let isNew = !treatment.id || treatment.id.startsWith("temp-");
 
-      if (treatment.id && treatment.id.startsWith("temp-")) {
+      if (isNew) {
         // Criação de um novo tratamento
         savedTreatment = await storeTreatment({
           medicationId: medication.id,
@@ -61,6 +60,8 @@ function TreatmentResume({ onFinish, treatment, alerts, medication }) {
         });
       } else {
         // Atualização de um tratamento existente
+        if (!treatment.id) throw new Error("ID do tratamento não encontrado.");
+
         savedTreatment = await updateTreatment(treatment.id, {
           medicationId: medication.id,
           startDate: treatment.startDate,
@@ -78,6 +79,8 @@ function TreatmentResume({ onFinish, treatment, alerts, medication }) {
       }
 
       // Identificar alertas removidos
+      const treatmentIdForAlerts = isNew ? savedTreatment.id : treatment.id;
+
       const existingAlerts = appContext.alerts.filter(
         (alert) => alert.treatmentId === treatment.id
       );
@@ -98,7 +101,7 @@ function TreatmentResume({ onFinish, treatment, alerts, medication }) {
           throw new Error("Os dados do alerta estão incompletos.");
         }
 
-        if (alert.id.startsWith("temp-")) {
+        if (!alert.id || alert.id.startsWith("temp-")) {
           // Criação de um novo alerta
           const { id, ...alertWithoutId } = alert;
           alertWithoutId.treatmentId = savedTreatment.id;
@@ -127,7 +130,7 @@ function TreatmentResume({ onFinish, treatment, alerts, medication }) {
           });
         }
       }
-      onFinish(); // Finaliza o fluxo
+      onFinish(origin); // Finaliza o fluxo
     } catch (err) {
       console.error("Erro ao salvar o tratamento:", err);
       setError(err.message || "Não foi possível salvar o tratamento.");

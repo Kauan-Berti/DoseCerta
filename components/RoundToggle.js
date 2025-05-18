@@ -2,9 +2,19 @@ import RoundButton from "./RoundButton";
 import { Text, StyleSheet } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 
-function RoundToggle({ text, onPress, isSelected, size = 40 }) {
+function RoundToggle({
+  text,
+  onPress,
+  isSelected,
+  size = 40,
+  icon = null,
+  color = null,
+  borderColor = null,
+}) {
   function handlePress() {
-    onPress();
+    if (onPress) {
+      onPress();
+    }
   }
 
   return (
@@ -14,8 +24,15 @@ function RoundToggle({ text, onPress, isSelected, size = 40 }) {
         isSelected ? GlobalStyles.colors.primary : GlobalStyles.colors.button
       }
       onPress={handlePress}
+      icon={icon}
+      color={isSelected ? GlobalStyles.colors.background : color}
+      borderColor={isSelected ? GlobalStyles.colors.primary : borderColor}
     >
-      <Text style={isSelected ? styles.selectedText : styles.text}>{text}</Text>
+      {text && (
+        <Text style={isSelected ? styles.selectedText : styles.text}>
+          {text}
+        </Text>
+      )}
     </RoundButton>
   );
 }

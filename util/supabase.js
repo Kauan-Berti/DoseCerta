@@ -58,7 +58,13 @@ export async function refreshIdToken() {
 // -------------------- Medicamentos --------------------
 
 export async function fetchMedications() {
-  const { data, error } = await supabase.from("medications").select("*");
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
+  console.log("userId", userId);
+  const { data, error } = await supabase
+    .from("medications")
+    .select("*")
+    .eq("user_id", userId);
 
   if (error) {
     console.error("Erro ao buscar medicamentos:", error);
@@ -77,10 +83,13 @@ export async function fetchMedications() {
 }
 
 export async function storeMedication(medication) {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
   const { data, error } = await supabase
     .from("medications")
     .insert([
       {
+        user_id: userId,
         name: medication.name,
         amount: medication.amount,
         min_amount: medication.minAmount,
@@ -107,9 +116,12 @@ export async function storeMedication(medication) {
 }
 
 export async function updateMedication(id, updates) {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
   const { data, error } = await supabase
     .from("medications")
     .update({
+      user_id: userId,
       name: updates.name,
       amount: updates.amount,
       min_amount: updates.minAmount,
@@ -147,9 +159,12 @@ export async function deleteMedication(id) {
 //--------------------- Tratamentos --------------------
 
 export async function fetchTreatments() {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
   const { data, error } = await supabase
     .from("treatments")
     .select("*")
+    .eq("user_id", userId)
     .order("start_date", { ascending: true });
 
   if (error) {
@@ -167,10 +182,13 @@ export async function fetchTreatments() {
 }
 
 export async function storeTreatment(treatment) {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
   const { data, error } = await supabase
     .from("treatments")
     .insert([
       {
+        user_id: userId,
         start_date: treatment.startDate,
         end_date: treatment.endDate,
         medication_id: treatment.medicationId,
@@ -195,9 +213,12 @@ export async function storeTreatment(treatment) {
 }
 
 export async function updateTreatment(id, updates) {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
   const { data, error } = await supabase
     .from("treatments")
     .update({
+      user_id: userId,
       start_date: updates.startDate,
       end_date: updates.endDate,
       medication_id: updates.medicationId,
@@ -233,9 +254,12 @@ export async function deleteTreatment(id) {
 //--------------------- Alertas --------------------
 
 export async function fetchAlerts() {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
   const { data, error } = await supabase
     .from("alerts")
     .select("*")
+    .eq("user_id", userId)
     .order("time", { ascending: true });
 
   if (error) {
@@ -254,10 +278,13 @@ export async function fetchAlerts() {
 }
 
 export async function storeAlert(alert) {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
   const { data, error } = await supabase
     .from("alerts")
     .insert([
       {
+        user_id: userId,
         time: alert.time,
         dose: alert.dose,
         observations: alert.observations,
@@ -284,9 +311,12 @@ export async function storeAlert(alert) {
 }
 
 export async function updateAlert(id, updates) {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
   const { data, error } = await supabase
     .from("alerts")
     .update({
+      user_id: userId,
       time: updates.time,
       dose: updates.dose,
       observations: updates.observations,
@@ -319,4 +349,55 @@ export async function deleteAlert(id) {
     console.error(`Erro ao excluir alerta com ID ${id}:`, error);
     throw new Error("Não foi possível excluir o alerta.");
   }
+}
+
+export async function storeMedicationLog(log) {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
+
+  const dateStr = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+  const alertTime = typeof log.alertTime === "string" ? log.alertTime : "00:00";
+  const alertTimeStamp = `${dateStr}T${
+    alertTime.length === 5 ? alertTime + ":00" : alertTime
+  }`;
+
+  const { data, error } = await supabase
+    .from("medication_logs")
+    .insert([
+      {
+        user_id: userId,
+        treatment_id: log.treatmentId,
+        time_taken: new Date().toISOString(), // Data/hora em que o usuário confirmou
+        alert_time: alertTimeStamp, // Horário do alerta programado
+        notes: log.notes || "",
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Erro ao criar log de medicação:", error);
+    throw new Error("Não foi possível criar o log de medicação.");
+  }
+  return data;
+}
+
+export async function fetchMedicationLogsForDate(treatmentId, dateStr) {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
+  // dateStr: 'YYYY-MM-DD'
+  const { data, error } = await supabase
+    .from("medication_logs")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("treatment_id", treatmentId)
+    .gte("time_taken", `${dateStr}T00:00:00`)
+    .lte("time_taken", `${dateStr}T23:59:59`);
+
+  if (error) {
+    console.error("Erro ao buscar logs:", error);
+    throw error;
+  }
+
+  return data;
 }
