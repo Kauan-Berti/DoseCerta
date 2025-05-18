@@ -3,7 +3,13 @@ import { GlobalStyles } from "../constants/colors";
 import { useState, useEffect, Text } from "react";
 import RoundToggle from "./RoundToggle";
 
-function DayOfWeek({ onDaysChange, style, defaultValues }) {
+function DayOfWeek({
+  onDaysChange,
+  style,
+  defaultValues,
+  isButton = true,
+  size = 40,
+}) {
   const days = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
   const [selectedDays, setSelectedDays] = useState(
     Array.isArray(defaultValues) && defaultValues.length > 0
@@ -11,7 +17,8 @@ function DayOfWeek({ onDaysChange, style, defaultValues }) {
       : days
   );
   useEffect(() => {
-    onDaysChange(selectedDays);
+    if (onDaysChange && typeof onDaysChange === "function")
+      onDaysChange(selectedDays);
   }, []);
 
   function toggleDay(day) {
@@ -21,7 +28,8 @@ function DayOfWeek({ onDaysChange, style, defaultValues }) {
         ? currentDays.filter((d) => d !== day)
         : [...currentDays, day];
 
-      onDaysChange(updatedDays); // Notifica o componente pai sobre os dias selecionados
+      if (onDaysChange && typeof onDaysChange === "function")
+        onDaysChange(updatedDays); // Notifica o componente pai sobre os dias selecionados
       return updatedDays;
     });
   }
@@ -34,7 +42,8 @@ function DayOfWeek({ onDaysChange, style, defaultValues }) {
             key={index}
             text={day.charAt(0)}
             isSelected={selectedDays.includes(day)}
-            onPress={() => toggleDay(day)}
+            onPress={isButton ? () => toggleDay(day) : () => {}}
+            size={size}
           />
         ))}
       </View>

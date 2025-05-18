@@ -2,14 +2,14 @@ import RoundButton from "./RoundButton";
 import { Text, StyleSheet } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 
-function RoundToggle({ text, onPress, isSelected }) {
+function RoundToggle({ text, onPress, isSelected, size = 40 }) {
   function handlePress() {
     onPress();
   }
 
   return (
     <RoundButton
-      size={40}
+      size={size}
       backgroundColor={
         isSelected ? GlobalStyles.colors.primary : GlobalStyles.colors.button
       }

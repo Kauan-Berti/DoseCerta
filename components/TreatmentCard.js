@@ -7,6 +7,7 @@ import { useState, useEffect, useContext, use } from "react";
 import formatDate from "../util/formatDate";
 import { FlatList } from "react-native-gesture-handler";
 import formatTime from "../util/formatTime";
+import DayOfWeek from "../components/DayOfWeek";
 
 // This is the default configuration
 
@@ -74,17 +75,10 @@ function TreatmentCard({ treatmentId, onEdit }) {
     return (
       <View style={styles.alert}>
         <Text style={styles.text}> {formatTime(item.time)}</Text>
-        <FlatList
-          data={sortedDays}
-          renderItem={({ item }) => (
-            <View style={styles.day}>
-              <Text style={styles.dayText}>{item}</Text>
-            </View>
-          )}
-          keyExtractor={(item) => item}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        />
+
+        <View style={styles.daysContainer}>
+          <DayOfWeek defaultValues={sortedDays} isButton={false} size={30} />
+        </View>
       </View>
     );
   }
@@ -227,12 +221,12 @@ const styles = StyleSheet.create({
     backgroundColor: GlobalStyles.colors.accent,
   },
   alert: {
-    gap: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 2,
-    paddingHorizontal: 10,
+    gap: 10,
+    marginLeft: 10,
   },
   day: {
     backgroundColor: GlobalStyles.colors.card,
@@ -249,5 +243,8 @@ const styles = StyleSheet.create({
     color: GlobalStyles.colors.text,
     fontSize: 12,
     textAlign: "center",
+  },
+  daysContainer: {
+    flexGrow: 1,
   },
 });
