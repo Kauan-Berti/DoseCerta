@@ -226,8 +226,6 @@ function MedicationStack() {
   );
 }
 
-
-
 function Navigation() {
   const authContext = useContext(AuthContext);
   return (

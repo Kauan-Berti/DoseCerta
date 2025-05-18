@@ -1,24 +1,27 @@
 import { Text, View, StyleSheet } from "react-native";
 import TreatmentCard from "../components/TreatmentCard";
 import { FlatList } from "react-native-gesture-handler";
-import { useContext, useEffect, useState, useLayoutEffect } from "react";
+import React, { useContext, useState } from "react";
 import { AppContext } from "../store/app-context";
 import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 
 function TreatmentScreen() {
   const appContext = useContext(AppContext);
-
   const [treatmentList, setTreatmentList] = useState([]);
   const navigation = useNavigation();
 
-  useLayoutEffect(() => {
-    const treatmentIds = appContext.treatments.map((treatment) => treatment.id);
-    setTreatmentList(treatmentIds);
-  }, [appContext.treatments]);
+  useFocusEffect(
+    React.useCallback(() => {
+      const treatmentIds = appContext.treatments.map(
+        (treatment) => treatment.id
+      );
+      setTreatmentList(treatmentIds);
+    }, [appContext.treatments])
+  );
 
   function RenderTreatmentCard({ item }) {
     function onPressEdit() {
-      console.log("treatmentId", item);
       const treatment = appContext.treatments.find(
         (treatment) => treatment.id === item
       );

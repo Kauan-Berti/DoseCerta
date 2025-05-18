@@ -6,15 +6,16 @@ import SelectMedicationCard from "./SelectMedicationCard";
 import { GlobalStyles } from "../../constants/colors";
 import IconButton from "../../components/IconButton";
 
-function MedicationList({ onNext, medicationId }) {
+function MedicationList({ medication, onNext }) {
   const appContext = useContext(AppContext);
   const [isFetching, setIsFetching] = useState(false);
   const [selectedMedicationId, setSelectedMedicationId] = useState(
-    medicationId || null
+    medication ? medication.id : null
   );
+
   useEffect(() => {
     //console.log("Medicamento selecionado:", medicationId);
-  }, [medicationId]);
+  }, [medication]);
 
   useEffect(() => {
     if (appContext.medications.length > 0) {

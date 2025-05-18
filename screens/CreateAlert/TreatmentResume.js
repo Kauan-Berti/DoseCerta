@@ -43,7 +43,7 @@ function TreatmentResume({ onFinish, treatment, alerts, medication }) {
 
       let savedTreatment;
 
-      if (treatment.id.startsWith("temp-")) {
+      if (treatment.id && treatment.id.startsWith("temp-")) {
         // Criação de um novo tratamento
         savedTreatment = await storeTreatment({
           medicationId: medication.id,
