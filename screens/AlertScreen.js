@@ -15,6 +15,8 @@ import ErrorOverlay from "../components/ui/ErrorOverlay";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 import { useNavigation } from "@react-navigation/native";
 import PagerView from "react-native-pager-view";
+import { Alert as RNAlert } from "react-native";
+import formatTime from "../util/formatTime";
 
 function AlertScreen() {
   const appContext = useContext(AppContext);
@@ -54,19 +56,29 @@ function AlertScreen() {
   useEffect(() => {
     async function fetchLogsAndSetConfirmed() {
       try {
-        const dateStr = selectedDate.toISOString().slice(0, 10); // 'YYYY-MM-DD'
-        // Pegue todos os treatments do contexto
         let allLogs = [];
         for (const treatment of appContext.treatments) {
-          const logs = await fetchMedicationLogsForDate(treatment.id, dateStr);
-
+          const logs = await fetchMedicationLogsForDate(
+            treatment.id,
+            selectedDate
+          );
           allLogs = allLogs.concat(logs);
         }
-        // Crie um objeto { [treatmentId + "_" + alertTime]: true }
+
+        const selectedDateStr = [
+          selectedDate.getFullYear(),
+          String(selectedDate.getMonth() + 1).padStart(2, "0"),
+          String(selectedDate.getDate()).padStart(2, "0"),
+        ].join("-");
+
         const confirmed = {};
+
         allLogs.forEach((log) => {
-          if (log.alert_time && log.treatment_id) {
-            // Se alert_time for '2024-05-19T10:00:00', pega só '10:00'
+          if (
+            log.alert_time &&
+            log.treatment_id &&
+            log.alert_time.slice(0, 10) === selectedDateStr // <-- só confirma se for do dia certo!
+          ) {
             const timeKey =
               log.alert_time.length > 5
                 ? log.alert_time.slice(11, 16)
@@ -166,46 +178,72 @@ function AlertScreen() {
     const medication = appContext.medications.find(
       (m) => m.id === treatment?.medicationId
     );
-    function handlerConfirm() {
-      const timeKey =
-        typeof item.time === "string" ? item.time.slice(0, 5) : "";
-      setConfirmedAlerts((prev) => ({
-        ...prev,
-        [`${item.treatmentId}_${timeKey}`]:
-          !prev[`${item.treatmentId}_${timeKey}`],
-      }));
 
-      storeMedicationLog({
-        treatmentId: item.treatmentId,
-        timeTaken: new Date().toISOString(),
-        alertTime: item.time,
-        notes: "", // ou algum campo de observação se desejar
-      }).catch((err) => {
-        console.error("Erro ao registrar log:", err);
-      });
+    const isConfirmed =
+      !!confirmedAlerts[
+        `${item.treatmentId}_${
+          typeof item.time === "string" ? item.time.slice(0, 5) : ""
+        }`
+      ];
+
+    function handlerConfirm() {
+      if (isConfirmed === true) return;
+
+      RNAlert.alert(
+        "Confirmar dose",
+        "Você deseja confirmar que tomou este medicamento?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Confirmar",
+            style: "default",
+            onPress: () => {
+              console.log("item.time:", item.time);
+
+              const timeKey =
+                typeof item.time === "string" ? item.time.slice(0, 5) : "";
+              setConfirmedAlerts((prev) => ({
+                ...prev,
+                [`${item.treatmentId}_${timeKey}`]: true,
+              }));
+
+              const year = selectedDate.getFullYear();
+              const month = String(selectedDate.getMonth() + 1).padStart(
+                2,
+                "0"
+              );
+              const day = String(selectedDate.getDate()).padStart(2, "0");
+              const dateStr = `${year}-${month}-${day}`;
+
+              const alertTime =
+                typeof item.time === "string" ? item.time : "00:00";
+              const alertTimeStamp = `${dateStr}T${
+                alertTime.length === 5 ? alertTime + ":00" : alertTime
+              }`;
+              console.log("alertTimeStamp:", alertTimeStamp);
+
+              storeMedicationLog({
+                treatmentId: item.treatmentId,
+                timeTaken: new Date().toISOString(),
+                alertTime: alertTimeStamp,
+                notes: "",
+              }).catch((err) => {
+                console.error("Erro ao registrar log:", err);
+              });
+            },
+          },
+        ]
+      );
     }
 
     return (
       <AlertCard
         name={medication?.name || "Medicamento desconhecido"}
-        time={
-          typeof item.time === "string"
-            ? item.time.slice(0, 5) // Se for "HH:mm:ss", pega só "HH:mm"
-            : new Date(item.time).toLocaleTimeString("pt-BR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-        }
+        time={formatTime(item.time)}
         dose={item.dose}
         observations={item.observations || "Sem observações"}
-        onConfirm={() => handlerConfirm(item)}
-        isSelected={
-          !!confirmedAlerts[
-            `${item.treatmentId}_${
-              typeof item.time === "string" ? item.time.slice(0, 5) : ""
-            }`
-          ]
-        }
+        onConfirm={handlerConfirm}
+        isSelected={isConfirmed}
       />
     );
   }

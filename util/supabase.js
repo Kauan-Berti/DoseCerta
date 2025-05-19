@@ -355,11 +355,8 @@ export async function storeMedicationLog(log) {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user.id;
 
-  const dateStr = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
-  const alertTime = typeof log.alertTime === "string" ? log.alertTime : "00:00";
-  const alertTimeStamp = `${dateStr}T${
-    alertTime.length === 5 ? alertTime + ":00" : alertTime
-  }`;
+  const alertTimeStamp =
+    log.alertTime.length === 5 ? `${log.alertTime}:00` : log.alertTime; // já deve ser 'YYYY-MM-DDTHH:mm:ss'
 
   const { data, error } = await supabase
     .from("medication_logs")
@@ -382,22 +379,30 @@ export async function storeMedicationLog(log) {
   return data;
 }
 
-export async function fetchMedicationLogsForDate(treatmentId, dateStr) {
+export async function fetchMedicationLogsForDate(treatmentId, selectedDate) {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user.id;
+
+  // No frontend, para o dia selecionado:
+  const year = selectedDate.getFullYear();
+  const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+  const day = String(selectedDate.getDate()).padStart(2, "0");
+  const startUTC = `${year}-${month}-${day}T00:00:00`;
+  const endUTC = `${year}-${month}-${day}T23:59:59.999`;
+
   // dateStr: 'YYYY-MM-DD'
   const { data, error } = await supabase
     .from("medication_logs")
     .select("*")
     .eq("user_id", userId)
     .eq("treatment_id", treatmentId)
-    .gte("time_taken", `${dateStr}T00:00:00`)
-    .lte("time_taken", `${dateStr}T23:59:59`);
+    .gte("alert_time", startUTC)
+    .lte("alert_time", endUTC);
 
   if (error) {
     console.error("Erro ao buscar logs:", error);
     throw error;
   }
-
+  console.log("Logs:", data);
   return data;
 }

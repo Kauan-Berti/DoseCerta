@@ -86,20 +86,14 @@ function CreateAlerts({ onNext, treatment = {}, alerts: initialAlerts }) {
   }
 
   function handleSubmitAlert(alertData) {
-    if (!alertData.time || !alertData.dose) {
-      const normalizedAlertData = {
-        ...alertData,
-        time:
-          typeof alertData.time === "string" && alertData.time.length >= 5
-            ? alertData.time.slice(0, 5)
-            : alertData.time,
-      };
-      ReactAlert.alert(
-        "Erro",
-        "Por favor, preencha todos os campos do alerta."
-      );
-      return;
-    }
+    const normalizedAlertData = {
+      ...alertData,
+      time:
+        typeof alertData.time === "string" && alertData.time.length >= 5
+          ? alertData.time.slice(0, 5)
+          : alertData.time,
+    };
+    ReactAlert.alert("Erro", "Por favor, preencha todos os campos do alerta.");
 
     setAlerts((currentAlerts) => {
       const alertExists = currentAlerts.some(
