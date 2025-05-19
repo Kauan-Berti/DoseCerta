@@ -34,11 +34,6 @@ function CreateAlerts({ onNext, treatment = {}, alerts: initialAlerts }) {
   });
 
   useEffect(() => {
-    //console.log("Tratamento:", treatment);
-    //console.log("Alertas:", alerts);
-  }, [treatment, alerts]);
-
-  useEffect(() => {
     if (
       treatment &&
       typeof treatment === "object" &&

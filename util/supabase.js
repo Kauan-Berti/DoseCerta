@@ -406,3 +406,19 @@ export async function fetchMedicationLogsForDate(treatmentId, selectedDate) {
   console.log("Logs:", data);
   return data;
 }
+
+export async function fetchAllMedicationLogs() {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
+
+  const { data, error } = await supabase
+    .from("medication_logs")
+    .select("*")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Erro ao buscar todos os logs:", error);
+    throw error;
+  }
+  return data;
+}

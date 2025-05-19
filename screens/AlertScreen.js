@@ -9,7 +9,7 @@ import {
   fetchMedications,
   fetchAlerts,
   storeMedicationLog,
-  fetchMedicationLogsForDate,
+  fetchAllMedicationLogs,
 } from "../util/supabase";
 import ErrorOverlay from "../components/ui/ErrorOverlay";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
@@ -53,57 +53,16 @@ function AlertScreen() {
     filterAlertsForDate(selectedDate);
   }, [selectedDate, appContext.alerts]);
 
-  useEffect(() => {
-    async function fetchLogsAndSetConfirmed() {
-      try {
-        let allLogs = [];
-        for (const treatment of appContext.treatments) {
-          const logs = await fetchMedicationLogsForDate(
-            treatment.id,
-            selectedDate
-          );
-          allLogs = allLogs.concat(logs);
-        }
-
-        const selectedDateStr = [
-          selectedDate.getFullYear(),
-          String(selectedDate.getMonth() + 1).padStart(2, "0"),
-          String(selectedDate.getDate()).padStart(2, "0"),
-        ].join("-");
-
-        const confirmed = {};
-
-        allLogs.forEach((log) => {
-          if (
-            log.alert_time &&
-            log.treatment_id &&
-            log.alert_time.slice(0, 10) === selectedDateStr // <-- só confirma se for do dia certo!
-          ) {
-            const timeKey =
-              log.alert_time.length > 5
-                ? log.alert_time.slice(11, 16)
-                : log.alert_time;
-            confirmed[`${log.treatment_id}_${timeKey}`] = true;
-          }
-        });
-        console.log("Confirmed alerts:", confirmed);
-        setConfirmedAlerts(confirmed);
-      } catch (err) {
-        console.error("Erro ao buscar logs de confirmação:", err);
-      }
-    }
-
-    fetchLogsAndSetConfirmed();
-  }, [selectedDate, appContext.treatments]);
-
   async function fetchData() {
     setIsFetching(true);
     try {
-      const [medications, treatments, alerts] = await Promise.all([
-        fetchMedications(),
-        fetchTreatments(),
-        fetchAlerts(),
-      ]);
+      const [medications, treatments, alerts, medicationLogs] =
+        await Promise.all([
+          fetchMedications(),
+          fetchTreatments(),
+          fetchAlerts(),
+          fetchAllMedicationLogs(),
+        ]);
 
       // Limpa o contexto antes de adicionar novos itens
       appContext.medications.forEach((m) => appContext.deleteMedication(m.id));
@@ -114,6 +73,7 @@ function AlertScreen() {
       medications.forEach(appContext.addMedication);
       treatments.forEach(appContext.addTreatment);
       alerts.forEach(appContext.addAlert);
+      appContext.setMedicationLogs(medicationLogs); // <-- salva todos os logs no contexto
     } catch (err) {
       console.error("Erro ao buscar dados:", err);
       setError("Não foi possível carregar os dados.");
@@ -156,6 +116,34 @@ function AlertScreen() {
 
     setTodayAlerts(filteredAlerts);
   }
+  useEffect(() => {
+    function setConfirmedFromLogs() {
+      const selectedDateStr = [
+        selectedDate.getFullYear(),
+        String(selectedDate.getMonth() + 1).padStart(2, "0"),
+        String(selectedDate.getDate()).padStart(2, "0"),
+      ].join("-");
+
+      const confirmed = {};
+
+      appContext.medicationLogs.forEach((log) => {
+        if (
+          log.alert_time &&
+          log.treatment_id &&
+          log.alert_time.slice(0, 10) === selectedDateStr
+        ) {
+          const timeKey =
+            log.alert_time.length > 5
+              ? log.alert_time.slice(11, 16)
+              : log.alert_time;
+          confirmed[`${log.treatment_id}_${timeKey}`] = true;
+        }
+      });
+      setConfirmedAlerts(confirmed);
+    }
+
+    setConfirmedFromLogs();
+  }, [selectedDate, appContext.medicationLogs]);
 
   function changeSelectedDate(days) {
     setSelectedDate((prevDate) => {
@@ -170,7 +158,7 @@ function AlertScreen() {
     });
   }
 
-  function renderAlertCard({ item }) {
+  function renderAlertCard({ item, confirmedAlerts, date }) {
     const treatment = appContext.treatments.find(
       (t) => t.id === item.treatmentId
     );
@@ -197,7 +185,7 @@ function AlertScreen() {
           {
             text: "Confirmar",
             style: "default",
-            onPress: () => {
+            onPress: async () => {
               console.log("item.time:", item.time);
 
               const timeKey =
@@ -222,14 +210,19 @@ function AlertScreen() {
               }`;
               console.log("alertTimeStamp:", alertTimeStamp);
 
-              storeMedicationLog({
-                treatmentId: item.treatmentId,
-                timeTaken: new Date().toISOString(),
-                alertTime: alertTimeStamp,
-                notes: "",
-              }).catch((err) => {
+              try {
+                await storeMedicationLog({
+                  treatmentId: item.treatmentId,
+                  timeTaken: new Date().toISOString(),
+                  alertTime: alertTimeStamp,
+                  notes: "",
+                });
+                // Atualiza os logs no contexto para refletir imediatamente na UI
+                const updatedLogs = await fetchAllMedicationLogs();
+                appContext.setMedicationLogs(updatedLogs);
+              } catch (err) {
                 console.error("Erro ao registrar log:", err);
-              });
+              }
             },
           },
         ]
@@ -255,6 +248,28 @@ function AlertScreen() {
   if (isFetching) {
     return <LoadingOverlay />;
   }
+  const confirmedAlertsByDate = {};
+  dates.forEach((date) => {
+    const dateStr = [
+      date.getFullYear(),
+      String(date.getMonth() + 1).padStart(2, "0"),
+      String(date.getDate()).padStart(2, "0"),
+    ].join("-");
+    confirmedAlertsByDate[dateStr] = {};
+    appContext.medicationLogs.forEach((log) => {
+      if (
+        log.alert_time &&
+        log.treatment_id &&
+        log.alert_time.slice(0, 10) === dateStr
+      ) {
+        const timeKey =
+          log.alert_time.length > 5
+            ? log.alert_time.slice(11, 16)
+            : log.alert_time;
+        confirmedAlertsByDate[dateStr][`${log.treatment_id}_${timeKey}`] = true;
+      }
+    });
+  });
 
   return (
     <View style={styles.container}>
@@ -294,6 +309,13 @@ function AlertScreen() {
             return currentDate >= startDate && currentDate <= endDate;
           });
 
+          // Data string para buscar os confirmados deste dia
+          const dateStr = [
+            date.getFullYear(),
+            String(date.getMonth() + 1).padStart(2, "0"),
+            String(date.getDate()).padStart(2, "0"),
+          ].join("-");
+
           return (
             <View key={index} style={{ padding: 16 }}>
               <NavigationHeader
@@ -306,7 +328,13 @@ function AlertScreen() {
               ) : (
                 <FlatList
                   data={filteredAlerts}
-                  renderItem={renderAlertCard}
+                  renderItem={({ item }) =>
+                    renderAlertCard({
+                      item,
+                      confirmedAlerts: confirmedAlertsByDate[dateStr] || {},
+                      date,
+                    })
+                  }
                   keyExtractor={(item) => item.id}
                   contentContainerStyle={styles.contentContainer}
                 />

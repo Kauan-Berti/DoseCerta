@@ -35,6 +35,7 @@ export const AppContext = createContext({
   addMedicationLog: (medicationLogData) => {},
   updateMedicationLog: (id, medicationLogData) => {},
   deleteMedicationLog: (id) => {},
+  setMedicationLogs: (medicationLogs) => {},
 });
 
 // Reducer para gerenciar o estado
@@ -265,6 +266,11 @@ function appReducer(state, action) {
           (medicationLog) => medicationLog.id !== action.payload
         ),
       };
+    case "SET_MEDICATION_LOGS":
+      return {
+        ...state,
+        medicationLogs: action.payload,
+      };
 
     default:
       return state;
@@ -395,6 +401,10 @@ function AppContextProvider({ children }) {
     dispatch({ type: "DELETE_MEDICATION_LOG", payload: id });
   }
 
+  function setMedicationLogs(logs) {
+    dispatch({ type: "SET_MEDICATION_LOGS", payload: logs });
+  }
+
   const value = {
     medications: state.medications,
     treatments: state.treatments,
@@ -426,6 +436,7 @@ function AppContextProvider({ children }) {
     addMedicationLog,
     updateMedicationLog,
     deleteMedicationLog,
+    setMedicationLogs,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
