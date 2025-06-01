@@ -63,7 +63,6 @@ const styles = StyleSheet.create({
   },
   fullWidthButton: {
     justifyContent: "center", // Centraliza o conteúdo horizontalmente
-    width: "100%", // Faz o botão ocupar toda a largura disponível
   },
   text: {
     fontSize: 16,
