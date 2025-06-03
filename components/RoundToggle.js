@@ -10,6 +10,7 @@ function RoundToggle({
   icon = null,
   color = null,
   borderColor = null,
+  selectedBackgroundColor = null, // NOVA PROP
 }) {
   function handlePress() {
     if (onPress) {
@@ -21,12 +22,18 @@ function RoundToggle({
     <RoundButton
       size={size}
       backgroundColor={
-        isSelected ? GlobalStyles.colors.primary : GlobalStyles.colors.button
+        isSelected
+          ? selectedBackgroundColor || GlobalStyles.colors.primary
+          : GlobalStyles.colors.button
       }
       onPress={handlePress}
       icon={icon}
       color={isSelected ? GlobalStyles.colors.background : color}
-      borderColor={isSelected ? GlobalStyles.colors.primary : borderColor}
+      borderColor={
+        isSelected
+          ? selectedBackgroundColor || GlobalStyles.colors.primary
+          : GlobalStyles.colors.button
+      }
     >
       {text && (
         <Text style={isSelected ? styles.selectedText : styles.text}>
