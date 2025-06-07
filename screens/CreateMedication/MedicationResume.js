@@ -4,9 +4,8 @@ import DoubleLabelBox from "../../components/DoubleLabelBox";
 import IconButton from "../../components/IconButton";
 import { useContext } from "react";
 import { AppContext } from "../../store/app-context";
-import Medication from "../../models/medication";
 import { useState } from "react";
-import { storeMedication, updateMedication } from "../../util/supabase";
+import { storeMedication, updateMedication } from "../../services/medicationService";
 
 function MedicationResume({ onFinish, medicationData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);

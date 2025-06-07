@@ -2,7 +2,7 @@ import { View, StyleSheet, Text, FlatList } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import { useState, useContext } from "react";
 import { AppContext } from "../store/app-context";
-import { fetchMedications } from "../util/supabase";
+import { fetchMedications } from "../services/medicationService";
 import { useEffect } from "react";
 import { Alert } from "react-native";
 import MedicationCard from "../components/MedicationCart";

@@ -4,13 +4,15 @@ import NavigationHeader from "../components/NavigationHeader";
 import AlertCard from "../components/AlertCard";
 import { useEffect, useState, useContext, useRef } from "react";
 import { AppContext } from "../store/app-context";
+import { fetchMedications } from "../services/medicationService";
+
+import { fetchTreatments } from "../services/treatmentService";
+import { fetchAlerts } from "../services/alertService";
 import {
-  fetchTreatments,
-  fetchMedications,
-  fetchAlerts,
   storeMedicationLog,
   fetchAllMedicationLogs,
-} from "../util/supabase";
+} from "../services/medicationLogService";
+
 import ErrorOverlay from "../components/ui/ErrorOverlay";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 import { useNavigation } from "@react-navigation/native";

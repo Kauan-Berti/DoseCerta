@@ -3,7 +3,7 @@ import { Alert } from "react-native";
 import { AuthContext } from "../store/auth-context";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 import AuthContent from "../components/Auth/AuthContent";
-import { supabase } from "../util/supabase";
+import { signIn, signUp } from "../services/authService";
 
 function SignupScreen() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -14,7 +14,7 @@ function SignupScreen() {
 
     try {
       // 1. Criação de conta
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await signUp({ email, password });
       if (error) throw error;
 
       const user = data.user;
@@ -22,19 +22,16 @@ function SignupScreen() {
 
       // 2. Inserção do perfil se usuário foi criado
       if (user) {
-        const { error: profileError } = await supabase.from("profiles").insert([
-          {
-            id: user.id,
-            created_at: new Date().toISOString(),
-          },
-        ]);
+        const { error: profileError } = await insertProfile(user.id);
         if (profileError) throw profileError;
       }
 
       // 3. Se ainda não há sessão (verificação de e-mail), tentar login manual
       if (!session) {
-        const { data: signInData, error: signInError } =
-          await supabase.auth.signInWithPassword({ email, password });
+        const { data: signInData, error: signInError } = await signIn({
+          email,
+          password,
+        });
 
         if (signInError) throw signInError;
         session = signInData.session;

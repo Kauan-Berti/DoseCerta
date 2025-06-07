@@ -25,7 +25,7 @@ import { DefaultTheme, useNavigation } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CreateMedication from "./screens/CreateMedication/CreateMedication";
 import CreateTreatment from "./screens/CreateAlert/CreateTreatment";
-import { refreshIdToken } from "./util/supabase";
+import { refreshIdToken } from "./services/authService";
 import MedicationScreen from "./screens/MedicationScreen";
 import TreatmentScreen from "./screens/TreatmentScreen";
 import { TouchableOpacity } from "react-native";

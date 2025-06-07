@@ -10,7 +10,7 @@ import {
   updateTreatment,
   updateAlert,
   deleteAlert,
-} from "../../util/supabase";
+} from "../../services/treatmentService";
 
 function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
   const [isSubmitting, setIsSubmitting] = useState(false);

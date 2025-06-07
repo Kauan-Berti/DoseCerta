@@ -3,7 +3,7 @@ import { AuthContext } from "../store/auth-context";
 import { Alert } from "react-native";
 import AuthContent from "../components/Auth/AuthContent";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
-import { supabase } from "../util/supabase";
+import { signIn } from "../services/authService";
 
 function LoginScreen() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -12,7 +12,7 @@ function LoginScreen() {
   async function loginHandler({ email, password }) {
     setIsAuthenticating(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await signIn({
         email,
         password,
       });

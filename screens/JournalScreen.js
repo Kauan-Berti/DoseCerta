@@ -7,7 +7,8 @@ import { Alert } from "react-native";
 import ResumeCard from "../components/ResumeCard";
 import { useNavigation } from "@react-navigation/native";
 import { AppContext } from "../store/app-context";
-import { fetchMedicationLogsInRange, fetchTreatments } from "../util/supabase";
+import { fetchMedicationLogsInRange } from "../services/medicationLogService";
+import { fetchTreatments } from "../services/treatmentService";
 
 function JournalScreen() {
   //Puxar registros de doses
@@ -17,7 +18,6 @@ function JournalScreen() {
   const [selectedTab, setSelectedTab] = useState("medications");
 
   useEffect(() => {
-    
     async function fetchTreatmentsFromAPI() {
       try {
         const treatments = await fetchTreatments();

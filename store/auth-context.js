@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import { supabase } from "../util/supabase";
+import { signOut } from "../services/authService";
 
 export const AuthContext = createContext({
   token: "",
@@ -17,7 +17,7 @@ function AuthContextProvider({ children }) {
 
   async function logout() {
     setAuthToken(null);
-    await supabase.auth.signOut();
+    await signOut();
   }
 
   useEffect(() => {
