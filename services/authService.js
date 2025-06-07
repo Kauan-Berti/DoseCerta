@@ -7,7 +7,7 @@ export const signUp = async (email, password) => {
 };
 
 // Função de login
-export const signIn = async (email, password) => {
+export const signIn = async ({email, password}) => {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,

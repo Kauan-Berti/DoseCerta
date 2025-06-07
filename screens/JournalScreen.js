@@ -1,64 +1,17 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import IconButton from "../components/IconButton";
-import { useEffect, useState, useContext, useRef } from "react";
-import { Alert } from "react-native";
-
-import ResumeCard from "../components/ResumeCard";
-import { useNavigation } from "@react-navigation/native";
-import { AppContext } from "../store/app-context";
-import { fetchMedicationLogsInRange } from "../services/medicationLogService";
-import { fetchTreatments } from "../services/treatmentService";
+import { useState } from "react";
+import LogsScreen from "./Journals/LogsScreen";
 
 function JournalScreen() {
-  //Puxar registros de doses
-  const appContext = useContext(AppContext);
-
-  const [isFetching, setIsFetching] = useState(false);
-  const [selectedTab, setSelectedTab] = useState("medications");
-
-  useEffect(() => {
-    async function fetchTreatmentsFromAPI() {
-      try {
-        const treatments = await fetchTreatments();
-        treatments.forEach((treatment) => {
-          appContext.addTreatment(treatment);
-        });
-      } catch (err) {
-        console.error(err);
-        Alert.alert("Erro", "Não foi possível carregar os tratamentos.");
-      }
-    }
-
-    async function fetchMedicationLogsFromAPI() {
-      setIsFetching(true);
-      try {
-        const today = new Date();
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(today.getDate() - 6);
-
-        const logs = await fetchMedicationLogsInRange(
-          treatmentId,
-          sevenDaysAgo,
-          today
-        );
-      } catch (err) {
-        console.error(err);
-        Alert.alert("Erro", "Não foi possivel carregar registro de doses");
-      } finally {
-        setIsFetching(false);
-      }
-    }
-    fetchMedicationLogsFromAPI();
-  }, [appContext]);
+  const [selectedTab, setSelectedTab] = useState("treatments");
 
   function onPressGraphics() {
     setSelectedTab("sensations");
-    console.log("Sensações");
   }
-  function onPressResume() {
-    setSelectedTab("medications");
-    console.log("Medicamentos");
+  function onPressTreatments() {
+    setSelectedTab("treatments");
   }
 
   return (
@@ -75,11 +28,11 @@ function JournalScreen() {
         </View>
         <View style={styles.buttonContainer}>
           <IconButton
-            title="Medicamentos"
+            title="Tratamentos"
             color={GlobalStyles.colors.button}
             textColor={GlobalStyles.colors.text}
             fullWidth={true}
-            onPress={onPressResume}
+            onPress={onPressTreatments}
           ></IconButton>
         </View>
       </View>
@@ -87,7 +40,9 @@ function JournalScreen() {
         {selectedTab === "sensations" && (
           <Text style={styles.text}>Conteudo de Sensações</Text>
         )}
-        {selectedTab === "medications" && <ResumeCard></ResumeCard>}
+        {selectedTab === "treatments" && (
+          <LogsScreen selectedTab={selectedTab} />
+        )}
       </View>
     </>
   );
@@ -113,9 +68,9 @@ const styles = StyleSheet.create({
   },
   tabContent: {
     flex: 1,
-    marginTop: 24,
-    marginHorizontal: 12,
-    alignItems: "center",
+    alignItems: "stretch",
     justifyContent: "flex-start",
+    marginTop: 8,
+    marginHorizontal: 12,
   },
 });

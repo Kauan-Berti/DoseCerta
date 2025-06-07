@@ -6,11 +6,14 @@ import { useEffect, useContext, useState } from "react";
 import { AppContext } from "../../store/app-context";
 import {
   storeTreatment,
-  storeAlert,
   updateTreatment,
+} from "../../services/treatmentService";
+
+import {
   updateAlert,
   deleteAlert,
-} from "../../services/treatmentService";
+  storeAlert,
+} from "../../services/alertService";
 
 function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
   const [isSubmitting, setIsSubmitting] = useState(false);

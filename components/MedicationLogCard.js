@@ -3,36 +3,64 @@ import { GlobalStyles } from "../constants/colors";
 import { FlatList } from "react-native-gesture-handler";
 import RoundToggle from "./RoundToggle";
 
-const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-const daysStatus = [
-  { day: "Dom", status: "notNeed" },
-  { day: "Seg", status: "notOk" },
-  { day: "Ter", status: "ok" },
-  { day: "Qua", status: "notOk" },
-  { day: "Qui", status: "ok" },
-  { day: "Sex", status: "ok" },
-  { day: "Sáb", status: "notNeed" },
-];
+const weekDays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
 
-function getLast7DaysAbbr() {
+function getLast7DaysStatus(logs, alertDays, alerts) {
   const days = [];
   const today = new Date();
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    days.push(weekDays[d.getDay()]);
+    const abbr = weekDays[d.getDay()];
+
+    // Se o dia não está em alertDays, status é "notNeed"
+    if (!alertDays || !alertDays.includes(abbr)) {
+      days.push({ day: abbr, status: "notNeed" });
+      continue;
+    }
+
+    // Filtra todos os alertas para esse dia da semana
+    const alertsForDay = (alerts || []).filter((alert) =>
+      alert.days.includes(abbr)
+    );
+
+    // Para cada alerta do dia, deve haver um log dentro do intervalo tolerado
+    const allAlertsOk = alertsForDay.every((alert) => {
+      // Monta o horário do alerta para o dia atual
+      const [alertHour, alertMin, alertSec] = alert.time.split(":").map(Number);
+      const alertDate = new Date(d);
+      alertDate.setHours(alertHour, alertMin, alertSec, 0);
+
+      // Procura um log para o dia dentro do intervalo de 1h antes/depois do alerta
+      return logs.some((log) => {
+        const logDate = new Date(log.time_taken);
+        if (
+          logDate.getDate() === d.getDate() &&
+          logDate.getMonth() === d.getMonth() &&
+          logDate.getFullYear() === d.getFullYear()
+        ) {
+          const diffMs = Math.abs(logDate - alertDate);
+          const diffH = diffMs / (1000 * 60 * 60);
+          return diffH <= 1;
+        }
+        return false;
+      });
+    });
+
+    let status = allAlertsOk ? "ok" : "notOk";
+    days.push({ day: abbr, status });
   }
   return days;
 }
 
-function ResumeCard({ medicament = "Medicamento" }) {
-  //buscar histórico de uso do medicamento
-  // e renderizar os dias com o estado do uso
-
-  // Exemplo de renderização de um item do FlatList
-  // Cada item representa um dia da semana
-  // e se o medicamento foi tomado ou não nesse dia
-
+function MedicationLogCard({ treatment, medication, alerts, logs }) {
+  console.log(logs);
+  console.log(alerts);
+  const last7DaysStatus = getLast7DaysStatus(
+    logs,
+    alerts?.days,
+    Array.isArray(alerts) ? alerts : [alerts]
+  );
   function renderDayItem({ item }) {
     let bgColor = GlobalStyles.colors.primary;
     if (item.status === "notNeed") bgColor = "#444";
@@ -62,9 +90,9 @@ function ResumeCard({ medicament = "Medicamento" }) {
   return (
     <View style={styles.cardContainer}>
       <View style={styles.contentContainer}>
-        <Text style={styles.text}> {medicament}</Text>
+        <Text style={styles.text}> {medication}</Text>
         <FlatList
-          data={daysStatus}
+          data={last7DaysStatus}
           horizontal
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderDayItem}
@@ -81,17 +109,17 @@ function ResumeCard({ medicament = "Medicamento" }) {
   );
 }
 
-export default ResumeCard;
+export default MedicationLogCard;
 
 const styles = StyleSheet.create({
   cardContainer: {
     height: 150,
-    width: "100%",
     backgroundColor: GlobalStyles.colors.card,
     marginBottom: 12,
+    alignSelf: "stretch",
   },
   contentContainer: {
-    margin: 12,
+    padding: 12,
     flex: 1,
   },
   text: {
