@@ -1,18 +1,64 @@
 import { View, Text, StyleSheet } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import IconButton from "../components/IconButton";
-import { useState } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
+import { Alert } from "react-native";
+
 import ResumeCard from "../components/ResumeCard";
+import { useNavigation } from "@react-navigation/native";
+import { AppContext } from "../store/app-context";
+import { fetchMedicationLogsInRange, fetchTreatments } from "../util/supabase";
 
 function JournalScreen() {
-  const [selectedTab, setSelectedTab] = useState("resume");
+  //Puxar registros de doses
+  const appContext = useContext(AppContext);
+
+  const [isFetching, setIsFetching] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("medications");
+
+  useEffect(() => {
+    
+    async function fetchTreatmentsFromAPI() {
+      try {
+        const treatments = await fetchTreatments();
+        treatments.forEach((treatment) => {
+          appContext.addTreatment(treatment);
+        });
+      } catch (err) {
+        console.error(err);
+        Alert.alert("Erro", "Não foi possível carregar os tratamentos.");
+      }
+    }
+
+    async function fetchMedicationLogsFromAPI() {
+      setIsFetching(true);
+      try {
+        const today = new Date();
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(today.getDate() - 6);
+
+        const logs = await fetchMedicationLogsInRange(
+          treatmentId,
+          sevenDaysAgo,
+          today
+        );
+      } catch (err) {
+        console.error(err);
+        Alert.alert("Erro", "Não foi possivel carregar registro de doses");
+      } finally {
+        setIsFetching(false);
+      }
+    }
+    fetchMedicationLogsFromAPI();
+  }, [appContext]);
+
   function onPressGraphics() {
-    setSelectedTab("resume");
-    console.log("Resume");
+    setSelectedTab("sensations");
+    console.log("Sensações");
   }
   function onPressResume() {
-    setSelectedTab("details");
-    console.log("Details");
+    setSelectedTab("medications");
+    console.log("Medicamentos");
   }
 
   return (
@@ -20,7 +66,7 @@ function JournalScreen() {
       <View style={styles.topButtonsContainer}>
         <View style={styles.buttonContainer}>
           <IconButton
-            title="Resumo"
+            title="Sensações"
             color={GlobalStyles.colors.button}
             textColor={GlobalStyles.colors.text}
             fullWidth={true}
@@ -29,7 +75,7 @@ function JournalScreen() {
         </View>
         <View style={styles.buttonContainer}>
           <IconButton
-            title="Detalhes"
+            title="Medicamentos"
             color={GlobalStyles.colors.button}
             textColor={GlobalStyles.colors.text}
             fullWidth={true}
@@ -38,10 +84,10 @@ function JournalScreen() {
         </View>
       </View>
       <View style={styles.tabContent}>
-        {selectedTab === "resume" && <ResumeCard></ResumeCard>}
-        {selectedTab === "details" && (
-          <Text style={styles.text}>Conteúdo dos Detalhes</Text>
+        {selectedTab === "sensations" && (
+          <Text style={styles.text}>Conteudo de Sensações</Text>
         )}
+        {selectedTab === "medications" && <ResumeCard></ResumeCard>}
       </View>
     </>
   );

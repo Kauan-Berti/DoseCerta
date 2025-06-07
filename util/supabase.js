@@ -383,7 +383,6 @@ export async function fetchMedicationLogsForDate(treatmentId, selectedDate) {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user.id;
 
-  // No frontend, para o dia selecionado:
   const year = selectedDate.getFullYear();
   const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
   const day = String(selectedDate.getDate()).padStart(2, "0");
@@ -404,6 +403,39 @@ export async function fetchMedicationLogsForDate(treatmentId, selectedDate) {
     throw error;
   }
   console.log("Logs:", data);
+  return data;
+}
+
+export async function fetchMedicationLogsInRange(
+  treatmentId,
+  startDate,
+  endDate
+) {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
+
+  const startUTC = `${startDate.getFullYear()}-${String(
+    startDate.getMonth() + 1
+  ).padStart(2, "0")}-${String(startDate.getDate()).padStart(2, "0")}T00:00:00`;
+  const endUTC = `${endDate.getFullYear()}-${String(
+    endDate.getMonth() + 1
+  ).padStart(2, "0")}-${String(endDate.getDate()).padStart(
+    2,
+    "0"
+  )}T23:59:59.999`;
+
+  const { data, error } = await supabase
+    .from("medication_logs")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("treatment_id", treatmentId)
+    .gte("alert_time", startUTC)
+    .lte("alert_time", endUTC);
+
+  if (error) {
+    console.error("Erro ao buscar logs no intervalo:", error);
+    throw error;
+  }
   return data;
 }
 
