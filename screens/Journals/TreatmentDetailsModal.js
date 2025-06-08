@@ -9,9 +9,10 @@ function TreatmentDetailsModal({
   treatment,
   alerts,
   medication,
+  logs,
   animationType = "slide",
 }) {
-  function getLast30DaysData(alerts) {
+  function getLast30DaysData(alerts, logs) {
     const diasSemana = [
       "Domingo",
       "Segunda-feira",
@@ -21,39 +22,44 @@ function TreatmentDetailsModal({
       "Sexta-feira",
       "Sábado",
     ];
+    const diasSemanaAbbr = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
     const days = [];
     const today = new Date();
-    const diasSemanaAbbr = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
-    // Garante que alerts é sempre um array
     const alertsArray = Array.isArray(alerts) ? alerts : alerts ? [alerts] : [];
     for (let i = 0; i < 30; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       const abbr = diasSemanaAbbr[d.getDay()];
-      const diaSemana = [
-        "Domingo",
-        "Segunda-feira",
-        "Terça-feira",
-        "Quarta-feira",
-        "Quinta-feira",
-        "Sexta-feira",
-        "Sábado",
-      ][d.getDay()];
+      const diaSemana = diasSemana[d.getDay()];
       const dia = String(d.getDate()).padStart(2, "0");
       const mes = String(d.getMonth() + 1).padStart(2, "0");
       const ano = d.getFullYear();
+
+      // Filtra alertas para o dia da semana
       const alertsForDay = alertsArray.filter(
         (alert) => alert.days && alert.days.includes(abbr)
       );
+
+      // Filtra logs para o dia
+      const logsForDay = (logs || []).filter((log) => {
+        const alertDate = new Date(log.alert_time);
+        return (
+          alertDate.getDate() === d.getDate() &&
+          alertDate.getMonth() === d.getMonth() &&
+          alertDate.getFullYear() === d.getFullYear()
+        );
+      });
+
       days.push({
         label: `${diaSemana}, ${dia}/${mes}/${ano}`,
         date: new Date(d),
         alerts: alertsForDay,
+        logs: logsForDay,
       });
     }
     return days;
   }
-  const ultimos30Dias = getLast30DaysData(alerts);
+  const ultimos30Dias = getLast30DaysData(alerts, logs);
 
   function DetailsCard({ item }) {
     return (
@@ -68,13 +74,43 @@ function TreatmentDetailsModal({
         </View>
         <View style={styles.lineSeparator} />
         <View style={styles.cardContent}>
-          {/* Exemplo: listar horários dos alertas do dia */}
           {item.alerts.length > 0 ? (
-            item.alerts.map((alert, idx) => (
-              <Text style={styles.text} key={idx}>
-                Alerta: {alert.time}
-              </Text>
-            ))
+            item.alerts.map((alert, idx) => {
+              // Procura log para este alerta (mesmo alert_time)
+              const log = item.logs.find(
+                (l) =>
+                  l.alert_time &&
+                  alert.time &&
+                  new Date(l.alert_time).getHours() ===
+                    Number(alert.time.split(":")[0]) &&
+                  new Date(l.alert_time).getMinutes() ===
+                    Number(alert.time.split(":")[1])
+              );
+              // Formata o horário do alerta
+              const [h, m] = alert.time.split(":");
+              const fakeDate = new Date();
+              fakeDate.setHours(Number(h), Number(m), 0, 0);
+              const alertHour = fakeDate.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              return (
+                <Text style={styles.text} key={idx}>
+                  Alerta: {alertHour} -{" "}
+                  {log
+                    ? `Tomou: ${new Date(log.time_taken).toLocaleTimeString(
+                        [],
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          timeZone:
+                            Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        }
+                      )}`
+                    : "Não registrado"}
+                </Text>
+              );
+            })
           ) : (
             <Text style={styles.text}>Nenhum alerta para este dia</Text>
           )}

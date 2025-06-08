@@ -12,45 +12,46 @@ const weekDays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
 function getLast7DaysStatus(logs, alertDays, alerts) {
   const days = [];
   const today = new Date();
+  const TOLERANCE_HOURS = 1;
+
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
     const abbr = weekDays[d.getDay()];
 
-    // Se o dia não está em alertDays, status é "notNeed"
     if (!alertDays || !alertDays.includes(abbr)) {
       days.push({ day: abbr, status: "notNeed" });
       continue;
     }
 
-    // Filtra todos os alertas para esse dia da semana
     const alertsForDay = (alerts || []).filter((alert) =>
       alert.days.includes(abbr)
     );
 
-    // Para cada alerta do dia, deve haver um log dentro do intervalo tolerado
     const allAlertsOk = alertsForDay.every((alert) => {
-      // Monta o horário do alerta para o dia atual
       const [alertHour, alertMin, alertSec] = alert.time.split(":").map(Number);
-      const alertDate = new Date(d);
-      alertDate.setHours(alertHour, alertMin, alertSec, 0);
 
-      // Procura um log para o dia dentro do intervalo de 1h antes/depois do alerta
+      // Cria o horário do alerta em local time
+      const alertDate = new Date(
+        d.getFullYear(),
+        d.getMonth(),
+        d.getDate(),
+        alertHour,
+        alertMin,
+        alertSec || 0,
+        0
+      );
+
+      // Compara com logs (assumindo que log.time_taken está em ISO/UTC)
       return logs.some((log) => {
         const logDate = new Date(log.time_taken);
-        if (
-          logDate.getDate() === d.getDate() &&
-          logDate.getMonth() === d.getMonth() &&
-          logDate.getFullYear() === d.getFullYear()
-        ) {
-          const diffMs = Math.abs(logDate - alertDate);
-          const diffH = diffMs / (1000 * 60 * 60);
-          return diffH <= 1;
-        }
-        return false;
+        const diffMs = Math.abs(logDate.getTime() - alertDate.getTime());
+        const diffH = diffMs / (1000 * 60 * 60);
+        console.log(diffH);
+
+        return diffH <= TOLERANCE_HOURS;
       });
     });
-
     let status = allAlertsOk ? "ok" : "notOk";
     days.push({ day: abbr, status });
   }
@@ -68,6 +69,7 @@ function MedicationLogCard({ treatment, medication, alerts, logs }) {
     alertDays,
     Array.isArray(alerts) ? alerts : [alerts]
   );
+
   function renderDayItem({ item }) {
     let bgColor = GlobalStyles.colors.primary;
     if (item.status === "notNeed") bgColor = "#444";
@@ -134,6 +136,7 @@ function MedicationLogCard({ treatment, medication, alerts, logs }) {
         treatment={treatment}
         medication={medication}
         alerts={alerts}
+        logs={logs}
         animationType="slide" // ou "fade"
       />
     </View>
