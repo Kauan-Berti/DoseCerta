@@ -35,6 +35,15 @@ function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
   async function handleSave() {
     setIsSubmitting(true);
     setError(null);
+    // Ajusta datas para tratamento contínuo
+    let startDate = treatment.startDate;
+    let endDate = treatment.endDate;
+    if (treatment.isContinuous) {
+      const today = new Date();
+      // Formata para yyyy-mm-dd
+      startDate = today.toISOString().slice(0, 10);
+      endDate = null;
+    }
 
     try {
       // Validação do tratamento
@@ -49,16 +58,16 @@ function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
         // Criação de um novo tratamento
         savedTreatment = await storeTreatment({
           medicationId: medication.id,
-          startDate: treatment.startDate || null,
-          endDate: treatment.endDate || null,
+          startDate: startDate || null,
+          endDate: endDate || null,
           isContinuous: treatment.isContinuous,
         });
 
         appContext.addTreatment({
           id: savedTreatment.id,
           medicationId: medication.id,
-          startDate: treatment.startDate,
-          endDate: treatment.endDate,
+          startDate: startDate,
+          endDate: endDate,
           isContinuous: treatment.isContinuous,
         });
       } else {
@@ -67,16 +76,16 @@ function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
 
         savedTreatment = await updateTreatment(treatment.id, {
           medicationId: medication.id,
-          startDate: treatment.startDate,
-          endDate: treatment.endDate,
+          startDate: startDate,
+          endDate: endDate,
           isContinuous: treatment.isContinuous,
         });
 
         appContext.updateTreatment(treatment.id, {
           id: savedTreatment.id,
           medicationId: medication.id,
-          startDate: treatment.startDate,
-          endDate: treatment.endDate,
+          startDate: startDate,
+          endDate: endDate,
           isContinuous: treatment.isContinuous,
         });
       }

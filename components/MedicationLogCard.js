@@ -9,15 +9,22 @@ import { useState } from "react";
 
 const weekDays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
 
-function getLast7DaysStatus(logs, alertDays, alerts) {
+function getLast7DaysStatus(logs, alertDays, alerts, treatment) {
   const days = [];
   const today = new Date();
   const TOLERANCE_HOURS = 1;
+  const startDate = treatment?.startDate ? new Date(treatment.startDate) : null;
 
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
     const abbr = weekDays[d.getDay()];
+
+    // Se o dia é anterior ao início do tratamento, status = "noNeed"
+    if (startDate && d < startDate) {
+      days.push({ day: abbr, status: "noNeed" });
+      continue;
+    }
 
     // Verifica se algum alerta possui esse dia
     const alertsForDay = (alerts || []).filter((alert) =>
@@ -130,7 +137,8 @@ function MedicationLogCard({ treatment, medication, alerts, logs }) {
   const last7DaysStatus = getLast7DaysStatus(
     logs,
     alertDays,
-    Array.isArray(alerts) ? alerts : [alerts]
+    Array.isArray(alerts) ? alerts : [alerts],
+    treatment
   );
 
   function renderDayItem({ item }) {

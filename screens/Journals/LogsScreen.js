@@ -136,6 +136,7 @@ function LogsScreen({ selectedTab }) {
             />
           );
         }}
+        ListFooterComponent={<View style={{ height: 200 }} />} // ajuste a altura conforme o tamanho do seu BottomNavigation
       />
     </View>
   );

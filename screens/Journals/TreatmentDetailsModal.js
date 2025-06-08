@@ -2,6 +2,12 @@ import { View, Text, StyleSheet, Modal } from "react-native";
 import { GlobalStyles } from "../../constants/colors";
 import { FlatList } from "react-native-gesture-handler";
 import { Pill } from "phosphor-react-native";
+import {
+  CheckCircle,
+  WarningCircle,
+  Clock,
+  XCircle,
+} from "phosphor-react-native";
 
 function TreatmentDetailsModal({
   visible,
@@ -26,9 +32,16 @@ function TreatmentDetailsModal({
     const days = [];
     const today = new Date();
     const alertsArray = Array.isArray(alerts) ? alerts : alerts ? [alerts] : [];
+
+    const startDate = treatment?.startDate
+      ? new Date(treatment.startDate)
+      : null;
+
     for (let i = 0; i < 30; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
+
+      if (startDate && d < startDate) break;
       const abbr = diasSemanaAbbr[d.getDay()];
       const diaSemana = diasSemana[d.getDay()];
       const dia = String(d.getDate()).padStart(2, "0");
@@ -74,9 +87,29 @@ function TreatmentDetailsModal({
         </View>
         <View style={styles.lineSeparator} />
         <View style={styles.cardContent}>
-          {item.alerts.length > 0 ? (
+          {item.alerts.length === 0 ? (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 4,
+              }}
+            >
+              <Clock size={18} color="#aaa" style={{ marginRight: 4 }} />
+              <Text
+                style={[
+                  styles.text,
+                  { fontWeight: "bold", marginRight: 6, color: "#aaa" },
+                ]}
+              >
+                --
+              </Text>
+              <Text style={[styles.text, { color: "#aaa", marginLeft: 4 }]}>
+                Não necessário
+              </Text>
+            </View>
+          ) : (
             item.alerts.map((alert, idx) => {
-              // Procura log para este alerta (mesmo alert_time)
               const log = item.logs.find(
                 (l) =>
                   l.alert_time &&
@@ -86,7 +119,6 @@ function TreatmentDetailsModal({
                   new Date(l.alert_time).getMinutes() ===
                     Number(alert.time.split(":")[1])
               );
-              // Formata o horário do alerta
               const [h, m] = alert.time.split(":");
               const fakeDate = new Date();
               fakeDate.setHours(Number(h), Number(m), 0, 0);
@@ -94,29 +126,86 @@ function TreatmentDetailsModal({
                 hour: "2-digit",
                 minute: "2-digit",
               });
+
+              let statusIcon = null;
+              let statusColor = "#aaa";
+              let statusText = "Não registrado";
+
+              if (log) {
+                const logDateLocal = log.time_taken.endsWith("Z")
+                  ? new Date(log.time_taken)
+                  : new Date(log.time_taken + "Z");
+                const logAlertDate = new Date(log.alert_time);
+                const diffMs = Math.abs(
+                  logDateLocal.getTime() - logAlertDate.getTime()
+                );
+                const diffH = diffMs / (1000 * 60 * 60);
+
+                if (diffH <= 1) {
+                  statusIcon = (
+                    <CheckCircle size={18} color="#4CAF50" weight="bold" />
+                  );
+                  statusColor = "#4CAF50";
+                  statusText = ` ${logDateLocal.toLocaleDateString()} ${logDateLocal.toLocaleTimeString(
+                    [],
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }
+                  )}`;
+                } else {
+                  statusIcon = (
+                    <WarningCircle size={18} color="#FFC107" weight="bold" />
+                  );
+                  statusColor = "#FFC107";
+                  statusText = ` ${logDateLocal.toLocaleDateString()} ${logDateLocal.toLocaleTimeString(
+                    [],
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }
+                  )}`;
+                }
+              } else {
+                // Só fica vermelho se era necessário tomar (há alerta para o dia)
+                statusIcon = (
+                  <XCircle size={18} color="#F44336" weight="bold" />
+                );
+                statusColor = "#F44336";
+                statusText = "Não registrado";
+              }
+
               return (
-                <Text style={styles.text} key={idx}>
-                  Alerta: {alertHour} -{" "}
-                  {log
-                    ? (() => {
-                        // Garante que sempre será interpretado como UTC
-                        const logDateLocal = log.time_taken.endsWith("Z")
-                          ? new Date(log.time_taken)
-                          : new Date(log.time_taken + "Z");
-                        return `Tomou: ${logDateLocal.toLocaleDateString()} ${logDateLocal.toLocaleTimeString(
-                          [],
-                          {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )}`;
-                      })()
-                    : "Não registrado"}
-                </Text>
+                <View
+                  key={idx}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 4,
+                  }}
+                >
+                  <Clock
+                    size={18}
+                    color={GlobalStyles.colors.primary}
+                    style={{ marginRight: 4 }}
+                  />
+                  <Text
+                    style={[
+                      styles.text,
+                      { fontWeight: "bold", marginRight: 6 },
+                    ]}
+                  >
+                    {alertHour}
+                  </Text>
+                  {statusIcon}
+                  <Text
+                    style={[styles.text, { color: statusColor, marginLeft: 4 }]}
+                  >
+                    {statusText}
+                  </Text>
+                </View>
               );
             })
-          ) : (
-            <Text style={styles.text}>Nenhum alerta para este dia</Text>
           )}
         </View>
       </View>
@@ -135,11 +224,31 @@ function TreatmentDetailsModal({
         <View style={styles.titleContainer}>
           <Text style={styles.title}> {medication || "Medicamento"}</Text>
         </View>
+        <View style={styles.treatmentInfoContainer}>
+          <Text style={styles.treatmentInfoTitle}>Detalhes do Tratamento</Text>
+          <View style={styles.treatmentInfoRow}>
+            <Text style={styles.treatmentInfoLabel}>Início:</Text>
+            <Text style={styles.treatmentInfoValue}>
+              {treatment?.startDate
+                ? new Date(treatment.startDate).toLocaleDateString()
+                : "--"}
+            </Text>
+          </View>
+          <View style={styles.treatmentInfoRow}>
+            <Text style={styles.treatmentInfoLabel}>Fim:</Text>
+            <Text style={styles.treatmentInfoValue}>
+              {treatment?.endDate
+                ? new Date(treatment.endDate).toLocaleDateString()
+                : "Uso contínuo"}
+            </Text>
+          </View>
+        </View>
         <FlatList
           data={ultimos30Dias}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => <DetailsCard item={item} />}
           initialNumToRender={10}
+          ListFooterComponent={<View style={{ height: 300 }} />} // ajuste a altura conforme o tamanho do seu BottomNavigation
         />
       </View>
     </Modal>
@@ -155,6 +264,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: GlobalStyles.colors.text,
+    fontSize: 16,
   },
   title: {
     fontSize: 36,
@@ -204,5 +314,39 @@ const styles = StyleSheet.create({
   cardContent: {
     marginVertical: 12,
     marginHorizontal: 12,
+  },
+  treatmentInfoContainer: {
+    backgroundColor: GlobalStyles.colors.card,
+    borderRadius: 12,
+    padding: 18,
+    marginHorizontal: 8,
+    marginBottom: 14,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+  treatmentInfoTitle: {
+    fontWeight: "bold",
+    fontSize: 20,
+    color: GlobalStyles.colors.primary,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  treatmentInfoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  treatmentInfoLabel: {
+    fontWeight: "600",
+    color: GlobalStyles.colors.text,
+    fontSize: 16,
+  },
+  treatmentInfoValue: {
+    color: GlobalStyles.colors.text,
+    fontSize: 16,
   },
 });
