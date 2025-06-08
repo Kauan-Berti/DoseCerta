@@ -19,41 +19,104 @@ function getLast7DaysStatus(logs, alertDays, alerts) {
     d.setDate(today.getDate() - i);
     const abbr = weekDays[d.getDay()];
 
-    if (!alertDays || !alertDays.includes(abbr)) {
-      days.push({ day: abbr, status: "notNeed" });
-      continue;
-    }
-
+    // Verifica se algum alerta possui esse dia
     const alertsForDay = (alerts || []).filter((alert) =>
       alert.days.includes(abbr)
     );
 
-    const allAlertsOk = alertsForDay.every((alert) => {
-      const [alertHour, alertMin, alertSec] = alert.time.split(":").map(Number);
+    // console.log("\n==============================");
+    // console.log("Horário local do sistema:", new Date().toString());
+    // console.log("Horário UTC:", new Date().toISOString());
+    // console.log(`Dia: ${abbr} (${d.toLocaleDateString()})`);
+    //console.log(`Alertas para o dia (${alertsForDay.length}):`);
+    // alertsForDay.forEach((alert, idx) => {
+    //   console.log(`  [${idx + 1}] ${alert.time} (${alert.days.join(",")})`);
+    // });
 
-      // Cria o horário do alerta em local time
-      const alertDate = new Date(
-        d.getFullYear(),
-        d.getMonth(),
-        d.getDate(),
-        alertHour,
-        alertMin,
-        alertSec || 0,
-        0
-      );
+    if (!alertsForDay.length) {
+      // console.log("Nenhum alerta para esse dia, status: noNeed");
+      // console.log("==============================\n");
+      days.push({ day: abbr, status: "noNeed" });
+      continue;
+    }
 
-      // Compara com logs (assumindo que log.time_taken está em ISO/UTC)
-      return logs.some((log) => {
-        const logDate = new Date(log.time_taken);
-        const diffMs = Math.abs(logDate.getTime() - alertDate.getTime());
-        const diffH = diffMs / (1000 * 60 * 60);
-        console.log(diffH);
+    let allAlertsOk = true;
 
-        return diffH <= TOLERANCE_HOURS;
+    alertsForDay.forEach((alert, idx) => {
+      console.log(`--- ALERTA [${idx + 1}] ---`);
+      console.log(`  Horário: ${alert.time} (${alert.days.join(",")})`);
+
+      const log = logs.find((log) => {
+        // Monta a data/hora do alerta para o dia em questão
+        const [alertHour, alertMin, alertSec] = alert.time
+          .split(":")
+          .map(Number);
+        const alertDate = new Date(
+          d.getFullYear(),
+          d.getMonth(),
+          d.getDate(),
+          alertHour,
+          alertMin,
+          alertSec || 0,
+          0
+        );
+
+        // Data/hora do log.alert_time (também UTC, mas só usamos para log)
+        const logAlertDate = new Date(log.alert_time);
+
+        // Compara se são exatamente o mesmo dia e horário
+        return alertDate.getTime() === logAlertDate.getTime();
       });
+
+      if (log) {
+        const logDateLocal = log.time_taken.endsWith("Z")
+          ? new Date(log.time_taken)
+          : new Date(log.time_taken + "Z");
+        console.log(logDateLocal.toString()); // mostra no horário local
+        console.log(logDateLocal.toISOString()); // mostra sempre em UTC
+
+        console.log(
+          `    -> Log encontrado: ${logDateLocal} (alert_time: ${log.alert_time})`
+        );
+
+        const [alertHour, alertMin, alertSec] = alert.time
+          .split(":")
+          .map(Number);
+        const alertDate = new Date(
+          d.getFullYear(),
+          d.getMonth(),
+          d.getDate(),
+          alertHour,
+          alertMin,
+          alertSec || 0,
+          0
+        );
+
+        const diffMs = Math.abs(logDateLocal.getTime() - alertDate.getTime());
+        const diffH = diffMs / (1000 * 60 * 60);
+
+        console.log(`    Horário do alerta: ${alertDate.toLocaleString()}`);
+        console.log(`    Horário do log:    ${logDateLocal.toLocaleString()}`);
+        console.log(`    Diferença:         ${diffH.toFixed(2)}h`);
+
+        if (diffH > TOLERANCE_HOURS) {
+          allAlertsOk = false;
+          console.log(
+            `    -> Fora do intervalo de tolerância (${TOLERANCE_HOURS}h)`
+          );
+        } else {
+          console.log(`    -> Dentro do intervalo de tolerância`);
+        }
+      } else {
+        console.log(`    -> Nenhum log encontrado para esse alerta`);
+        allAlertsOk = false;
+        return;
+      }
     });
-    let status = allAlertsOk ? "ok" : "notOk";
-    days.push({ day: abbr, status });
+
+    console.log(`Status final do dia ${abbr}: ${allAlertsOk ? "ok" : "notOk"}`);
+    console.log("==============================\n");
+    days.push({ day: abbr, status: allAlertsOk ? "ok" : "notOk" });
   }
   return days;
 }
@@ -72,7 +135,7 @@ function MedicationLogCard({ treatment, medication, alerts, logs }) {
 
   function renderDayItem({ item }) {
     let bgColor = GlobalStyles.colors.primary;
-    if (item.status === "notNeed") bgColor = "#444";
+    if (item.status === "noNeed") bgColor = "#444";
     if (item.status === "ok") bgColor = GlobalStyles.colors.accent;
     if (item.status === "notOk") bgColor = GlobalStyles.colors.error;
     return (

@@ -98,15 +98,19 @@ function TreatmentDetailsModal({
                 <Text style={styles.text} key={idx}>
                   Alerta: {alertHour} -{" "}
                   {log
-                    ? `Tomou: ${new Date(log.time_taken).toLocaleTimeString(
-                        [],
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          timeZone:
-                            Intl.DateTimeFormat().resolvedOptions().timeZone,
-                        }
-                      )}`
+                    ? (() => {
+                        // Garante que sempre será interpretado como UTC
+                        const logDateLocal = log.time_taken.endsWith("Z")
+                          ? new Date(log.time_taken)
+                          : new Date(log.time_taken + "Z");
+                        return `Tomou: ${logDateLocal.toLocaleDateString()} ${logDateLocal.toLocaleTimeString(
+                          [],
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}`;
+                      })()
                     : "Não registrado"}
                 </Text>
               );
