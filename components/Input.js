@@ -21,10 +21,10 @@ function Input({ label, style, textInputConfig, invalid, keyboardType }) {
       )}
 
       <TextInput
-        style={StyleSheet.flatten(inputStyles)} // Garante que os estilos sejam mesclados corretamente
+        style={StyleSheet.flatten([...inputStyles, style])} // aplica também o style vindo da prop
         {...textInputConfig}
         placeholderTextColor={GlobalStyles.colors.disabledText}
-        keyboardType={keyboardType || "default"} // Adiciona o tipo de teclado padrão
+        keyboardType={keyboardType || "default"}
       />
     </View>
   );

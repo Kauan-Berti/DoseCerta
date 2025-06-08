@@ -3,6 +3,7 @@ import { GlobalStyles } from "../constants/colors";
 import IconButton from "../components/IconButton";
 import { useState } from "react";
 import LogsScreen from "./Journals/LogsScreen";
+import DiaryScreen from "./Journals/DiaryScreen";
 
 function JournalScreen() {
   const [selectedTab, setSelectedTab] = useState("treatments");
@@ -80,7 +81,7 @@ function JournalScreen() {
           <LogsScreen selectedTab={selectedTab} />
         )}
         {selectedTab === "diary" && (
-          <Text style={styles.text}>Conteudo de Diários</Text>
+          <DiaryScreen selectedTab={selectedTab}></DiaryScreen>
         )}
       </View>
     </>

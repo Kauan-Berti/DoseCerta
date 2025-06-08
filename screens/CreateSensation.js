@@ -1,14 +1,14 @@
 import { Text, View, StyleSheet } from "react-native";
 
-function CreateJournalEntry() {
+function CreateSensation() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>CreateJournalEntry</Text>
+      <Text style={styles.text}>CreateSensation</Text>
     </View>
   );
 }
 
-export default CreateJournalEntry;
+export default CreateSensation;
 
 const styles = StyleSheet.create({
   container: {

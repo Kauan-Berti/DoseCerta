@@ -30,6 +30,8 @@ import MedicationScreen from "./screens/MedicationScreen";
 import TreatmentScreen from "./screens/TreatmentScreen";
 import { TouchableOpacity } from "react-native";
 import JournalScreen from "./screens/JournalScreen";
+import CreateDiary from "./screens/CreateDiary";
+import CreateSensation from "./screens/CreateSensation";
 
 SplashScreen.preventAutoHideAsync(); //Aplicar quando o login estiver pronto
 
@@ -94,6 +96,7 @@ function AuthenticatedStack() {
         name="Add"
         component={AddStack}
         options={{
+          headerShown: false, // <-- Adicione esta linha!
           tabBarIcon: ({ color, size }) => {
             return <Plus color={color} size={size * 2} />;
           },
@@ -189,12 +192,35 @@ function AddStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: GlobalStyles.colors.primary,
+          height: 88,
+        },
+        headerTintColor: GlobalStyles.colors.card, // cor do texto/ícone
         contentStyle: { backgroundColor: GlobalStyles.colors.background },
       }}
     >
-      <Stack.Screen name="CreateMedication" component={CreateMedication} />
-      <Stack.Screen name="CreateTreatment" component={CreateTreatment} />
+      <Stack.Screen
+        name="CreateMedication"
+        component={CreateMedication}
+        options={{ title: "Novo Medicamento" }}
+      />
+      <Stack.Screen
+        name="CreateTreatment"
+        component={CreateTreatment}
+        options={{ title: "Novo Tratamento" }}
+      />
+      <Stack.Screen
+        name="CreateDiary"
+        component={CreateDiary}
+        options={{ title: "Novo Diário" }}
+      />
+      <Stack.Screen
+        name="CreateSensation"
+        component={CreateSensation}
+        options={{ title: "Nova Sensação" }}
+      />
     </Stack.Navigator>
   );
 }

@@ -32,47 +32,48 @@ function CustomTabBarButton({ children, onPress }) {
         animationType="slide"
         onRequestClose={toggleModal}
       >
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={toggleModal} // Fecha o modal ao clicar fora
-        >
-          <View style={styles.modalContent}>
-            <RoundButton
-              backgroundColor={GlobalStyles.colors.primary}
-              size={100}
-              icon="Notebook"
-              color={GlobalStyles.colors.button}
-              onPress={() => {
-                toggleModal();
-                navigation.navigate("Add", {
-                  screen: "CreateJournal",
-                });
-              }}
-            />
-            <RoundButton
-              backgroundColor={GlobalStyles.colors.primary}
-              size={100}
-              icon="Bell"
-              color={GlobalStyles.colors.button}
-              onPress={() => {
-                toggleModal();
-                navigation.navigate("Add", {
-                  screen: "CreateTreatment",
-                });
-              }}
-            />
-            <RoundButton
-              size={100}
-              icon="Pill"
-              color={GlobalStyles.colors.button}
-              backgroundColor={GlobalStyles.colors.primary}
-              onPress={() => {
-                toggleModal();
-                navigation.navigate("Add", {
-                  screen: "CreateMedication",
-                });
-              }}
-            />
+        <Pressable style={styles.modalOverlay} onPress={toggleModal}>
+          <View style={styles.semicircleContainer}>
+            {[
+              { icon: "Scroll", screen: "CreateDiary" },
+              { icon: "Bell", screen: "CreateTreatment" },
+              { icon: "Pill", screen: "CreateMedication" },
+              { icon: "Sparkle", screen: "CreateSensation" },
+            ].map((btn, idx, arr) => {
+              // Distribui os botões em um arco de 180°
+              const angle = Math.PI * (idx / (arr.length - 1)); // 0, PI/3, 2PI/3, PI
+              const radius = 110; // ajuste o raio conforme necessário
+              const btnSize = 80; // novo tamanho do botão
+
+              const x = Math.cos(angle - Math.PI) * radius;
+              const y = Math.sin(angle - Math.PI) * radius;
+
+              return (
+                <View
+                  key={btn.icon}
+                  style={{
+                    position: "absolute",
+                    left: "50%",
+                    bottom: 0,
+                    transform: [
+                      { translateX: x - btnSize / 2 },
+                      { translateY: y },
+                    ],
+                  }}
+                >
+                  <RoundButton
+                    backgroundColor={GlobalStyles.colors.primary}
+                    size={70}
+                    icon={btn.icon}
+                    color={GlobalStyles.colors.button}
+                    onPress={() => {
+                      toggleModal();
+                      navigation.navigate("Add", { screen: btn.screen });
+                    }}
+                  />
+                </View>
+              );
+            })}
           </View>
         </Pressable>
       </Modal>
@@ -123,5 +124,14 @@ const styles = StyleSheet.create({
     color: GlobalStyles.colors.text,
     marginBottom: 20,
     fontWeight: "bold",
+  },
+  semicircleContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 100, // ajuste conforme a altura do seu tab bar
+    height: 300, // ajuste conforme o raio
+    alignItems: "center",
+    justifyContent: "flex-end",
   },
 });
