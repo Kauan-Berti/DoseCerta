@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   },
   button: {
     paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 8,
     backgroundColor: GlobalStyles.colors.button,
     borderColor: GlobalStyles.colors.border,
     borderRadius: 8,

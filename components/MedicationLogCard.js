@@ -2,6 +2,10 @@ import { View, Text, StyleSheet } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import { FlatList } from "react-native-gesture-handler";
 import RoundToggle from "./RoundToggle";
+import IconButton from "./IconButton";
+import RoundButton from "./RoundButton";
+import TreatmentDetailsModal from "../screens/Journals/TreatmentDetailsModal";
+import { useState } from "react";
 
 const weekDays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
 
@@ -54,11 +58,14 @@ function getLast7DaysStatus(logs, alertDays, alerts) {
 }
 
 function MedicationLogCard({ treatment, medication, alerts, logs }) {
-  console.log(logs);
-  console.log(alerts);
+  const [modalVisible, setModalVisible] = useState(false);
+  const alertDays = Array.isArray(alerts)
+    ? Array.from(new Set(alerts.flatMap((a) => a.days)))
+    : alerts?.days || [];
+
   const last7DaysStatus = getLast7DaysStatus(
     logs,
-    alerts?.days,
+    alertDays,
     Array.isArray(alerts) ? alerts : [alerts]
   );
   function renderDayItem({ item }) {
@@ -85,12 +92,28 @@ function MedicationLogCard({ treatment, medication, alerts, logs }) {
     );
   }
 
+  function openDetailsModal() {
+    setModalVisible(true);
+  }
+
   //const last7Days = weekDays();
 
   return (
     <View style={styles.cardContainer}>
       <View style={styles.contentContainer}>
-        <Text style={styles.text}> {medication}</Text>
+        <View style={styles.topContainer}>
+          <Text style={styles.title}> {medication}</Text>
+          <RoundButton
+            icon="ArrowRight"
+            size={28}
+            color={GlobalStyles.colors.card}
+            borderColor={GlobalStyles.colors.lightYellow}
+            backgroundColor={GlobalStyles.colors.lightYellow}
+            onPress={openDetailsModal}
+          />
+        </View>
+        <View style={styles.lineSeparator} />
+
         <FlatList
           data={last7DaysStatus}
           horizontal
@@ -105,6 +128,14 @@ function MedicationLogCard({ treatment, medication, alerts, logs }) {
           }}
         />
       </View>
+      <TreatmentDetailsModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        treatment={treatment}
+        medication={medication}
+        alerts={alerts}
+        animationType="slide" // ou "fade"
+      />
     </View>
   );
 }
@@ -113,10 +144,15 @@ export default MedicationLogCard;
 
 const styles = StyleSheet.create({
   cardContainer: {
-    height: 150,
     backgroundColor: GlobalStyles.colors.card,
     marginBottom: 12,
     alignSelf: "stretch",
+    borderRadius: 8,
+  },
+  title: {
+    color: GlobalStyles.colors.text,
+    fontWeight: "bold",
+    fontSize: 20,
   },
   contentContainer: {
     padding: 12,
@@ -127,11 +163,10 @@ const styles = StyleSheet.create({
   },
   dayItemText: {
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   dayItem: {
     padding: 6,
-    borderRadius: 6,
   },
   dayDisabled: {
     backgroundColor: "#444", // exemplo: cinza para não precisa tomar
@@ -144,5 +179,16 @@ const styles = StyleSheet.create({
   dayNotOk: {
     backgroundColor: GlobalStyles.colors.error, // exemplo: vermelho para não tomado
     borderColor: GlobalStyles.colors.error,
+  },
+  topContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  lineSeparator: {
+    height: 1,
+    width: "100%",
+    backgroundColor: GlobalStyles.colors.disabled,
+    marginVertical: 10,
   },
 });

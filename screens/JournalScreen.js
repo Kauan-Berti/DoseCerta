@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import IconButton from "../components/IconButton";
 import { useState } from "react";
@@ -13,26 +13,62 @@ function JournalScreen() {
   function onPressTreatments() {
     setSelectedTab("treatments");
   }
+  function onPressDiary() {
+    setSelectedTab("diary");
+  }
 
   return (
     <>
       <View style={styles.topButtonsContainer}>
         <View style={styles.buttonContainer}>
           <IconButton
+            title="Tratamentos"
+            color={
+              selectedTab == "treatments"
+                ? GlobalStyles.colors.primary
+                : GlobalStyles.colors.card
+            }
+            textColor={
+              selectedTab == "treatments"
+                ? GlobalStyles.colors.card
+                : GlobalStyles.colors.text
+            }
+            fullWidth={true}
+            onPress={onPressTreatments}
+          ></IconButton>
+        </View>
+        <View style={styles.buttonContainer}>
+          <IconButton
             title="Sensações"
-            color={GlobalStyles.colors.button}
-            textColor={GlobalStyles.colors.text}
+            color={
+              selectedTab == "sensations"
+                ? GlobalStyles.colors.primary
+                : GlobalStyles.colors.card
+            }
+            textColor={
+              selectedTab == "sensations"
+                ? GlobalStyles.colors.card
+                : GlobalStyles.colors.text
+            }
             fullWidth={true}
             onPress={onPressGraphics}
           ></IconButton>
         </View>
         <View style={styles.buttonContainer}>
           <IconButton
-            title="Tratamentos"
-            color={GlobalStyles.colors.button}
-            textColor={GlobalStyles.colors.text}
+            title="Diários"
+            color={
+              selectedTab == "diary"
+                ? GlobalStyles.colors.primary
+                : GlobalStyles.colors.card
+            }
+            textColor={
+              selectedTab == "diary"
+                ? GlobalStyles.colors.card
+                : GlobalStyles.colors.text
+            }
             fullWidth={true}
-            onPress={onPressTreatments}
+            onPress={onPressDiary}
           ></IconButton>
         </View>
       </View>
@@ -42,6 +78,9 @@ function JournalScreen() {
         )}
         {selectedTab === "treatments" && (
           <LogsScreen selectedTab={selectedTab} />
+        )}
+        {selectedTab === "diary" && (
+          <Text style={styles.text}>Conteudo de Diários</Text>
         )}
       </View>
     </>
@@ -53,11 +92,11 @@ export default JournalScreen;
 const styles = StyleSheet.create({
   topButtonsContainer: {
     flexDirection: "row",
-    gap: 10,
+    gap: 8,
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: "12",
-    marginHorizontal: "12",
+    marginTop: 12,
+    marginHorizontal: 12,
   },
   text: {
     fontSize: 20,

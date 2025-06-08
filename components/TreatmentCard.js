@@ -91,11 +91,11 @@ function TreatmentCard({ treatmentId, onEdit }) {
         </Text>
 
         <RoundButton
-          icon="ArrowSquareOut"
+          icon="ArrowRight"
           size={32}
-          color={GlobalStyles.colors.primary}
+          color={GlobalStyles.colors.card}
           borderColor={GlobalStyles.colors.card}
-          backgroundColor={GlobalStyles.colors.card}
+          backgroundColor={GlobalStyles.colors.lightYellow}
           onPress={handlePress}
         />
       </View>

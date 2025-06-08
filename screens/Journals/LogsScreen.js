@@ -87,7 +87,7 @@ function LogsScreen({ selectedTab }) {
           );
           return {
             treatmentId: treatment,
-            alerts: alerts.find((a) => a.treatmentId == treatment.id),
+            alerts: alerts.filter((a) => a.treatmentId == treatment.id),
             medication:
               medications.find((m) => m.id == treatment.medicationId)?.name ||
               "",
