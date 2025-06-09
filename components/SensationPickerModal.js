@@ -24,9 +24,10 @@ export default function SensationPickerModal({
         selectedSensations.filter((s) => s.id !== sensation.id)
       );
     } else {
+      const old = selectedSensations.find((s) => s.id === sensation.id);
       setSelectedSensations([
         ...selectedSensations,
-        { ...sensation, intensidade: 5 },
+        { ...sensation, intensidade: old?.intensidade ?? 5 },
       ]);
     }
   }
