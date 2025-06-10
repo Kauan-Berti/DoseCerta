@@ -23,6 +23,13 @@ import {
 } from "../services/sensationsService";
 import SensationPickerModal from "../components/SensationPickerModal";
 import SensationCard from "../components/SensationCard";
+import {
+  fetchSensationDiariesByDiaryId,
+  storeManySensationDiaries,
+  storeSensationDiary,
+  updateSensationDiary,
+  deleteSensationDiary,
+} from "../services/sensationDiariesService";
 
 function CreateDiary() {
   const [text, setText] = useState("");
@@ -36,27 +43,70 @@ function CreateDiary() {
 
   const navigation = useNavigation();
 
-  function setIntensidade(sensationId, value) {
+  function setIntensity(sensationId, value) {
     setSelectedSensations((prev) =>
-      prev.map((s) => (s.id === sensationId ? { ...s, intensidade: value } : s))
+      prev.map((s) =>
+        s.sensation_id === sensationId ? { ...s, intensidade: value } : s
+      )
     );
-    console.log(`${sensationId} ${value}`);
   }
 
   async function upsertDiary(diary) {
+    let savedDiary;
     if (diary.id) {
-      return await updateDiary(diary.id, diary);
+      savedDiary = await updateDiary(diary.id, diary);
     } else {
-      return await storeDiary(diary);
+      savedDiary = await storeDiary(diary);
     }
+
+    const diaryIdToUse = savedDiary.id ?? diary.id;
+
+    // 1. Busque as sensações antigas do diário
+    const oldSensationDiaries = await fetchSensationDiariesByDiaryId(
+      diaryIdToUse
+    );
+
+    // 2. Monte um Set com os ids das sensações atuais (já salvas)
+    const currentIds = new Set(
+      (diary.sensations || [])
+        .filter((s) => s.id) // só as já salvas
+        .map((s) => s.id)
+    );
+
+    // 3. Remova do banco as sensações que não estão mais presentes
+    await Promise.all(
+      oldSensationDiaries
+        .filter((sd) => !currentIds.has(sd.id))
+        .map((sd) => deleteSensationDiary(sd.id))
+    );
+
+    // 4. Atualize ou crie as sensações restantes normalmente
+    if (diary.sensations && diary.sensations.length > 0) {
+      await Promise.all(
+        diary.sensations.map(async (s) => {
+          if (s.id) {
+            await updateSensationDiary(s.id, {
+              intensity: s.intensidade ?? s.intensity ?? 5,
+            });
+          } else {
+            await storeSensationDiary({
+              sensation_id: s.sensation_id,
+              intensity: s.intensidade ?? s.intensity ?? 5,
+              diary_id: diaryIdToUse,
+            });
+          }
+        })
+      );
+    }
+
+    return savedDiary;
   }
 
   useFocusEffect(
     useCallback(() => {
       async function loadTodayDiary() {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const diary = await fetchDiaryByDate(today.toISOString());
+        const todayStr = new Date().toISOString();
+        const diary = await fetchDiaryByDate(todayStr);
         if (diary) {
           setText(diary.content || "");
           setDiaryId(diary.id);
@@ -81,6 +131,32 @@ function CreateDiary() {
     }, [])
   );
 
+  useEffect(() => {
+    async function fetchDiaryAndSensations() {
+      //console.log(diaryId);
+      if (!diaryId) return;
+
+      // Busca as sensações do diário
+      const sensationDiaries = await fetchSensationDiariesByDiaryId(diaryId);
+
+      // Atualiza as intensidades das sensações selecionadas
+      setSelectedSensations(
+        sensationDiaries.map((sd) => {
+          const sensation = sensations.find((s) => s.id === sd.sensation_id);
+          return {
+            id: sd.id, // <-- id do sensation_diaries (registro de ligação)
+            sensation_id: sd.sensation_id, // <-- id da sensação original
+            intensidade: sd.intensity,
+            description: sensation?.description ?? "",
+            category_id: sensation?.category_id,
+          };
+        })
+      );
+    }
+
+    fetchDiaryAndSensations();
+  }, [diaryId, sensations]);
+
   async function handleSave() {
     if (!text.trim()) return;
     setIsSaving(true);
@@ -102,6 +178,15 @@ function CreateDiary() {
       navigation.navigate("Alerts");
     }, 2000);
   }
+  function removeSensation(sensation) {
+    setSelectedSensations((prev) =>
+      prev.filter(
+        (item) =>
+          item.id !== sensation.id &&
+          item.sensation_id !== sensation.sensation_id
+      )
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -120,9 +205,10 @@ function CreateDiary() {
           <View style={styles.selectedSensationsContainer}>
             {selectedSensations.map((s) => (
               <SensationCard
-                key={s.id}
+                key={s.id ? `db-${s.id}` : `new-${s.sensation_id}`}
                 sensation={s}
-                onChange={setIntensidade}
+                onChange={setIntensity}
+                onRemove={removeSensation}
               />
             ))}
           </View>

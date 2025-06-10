@@ -18,16 +18,28 @@ export default function SensationPickerModal({
   onClose,
 }) {
   function toggleSensation(sensation) {
-    const exists = selectedSensations.find((s) => s.id === sensation.id);
+    const exists = selectedSensations.find(
+      (s) => s.sensation_id === sensation.id || s.id === sensation.id
+    );
     if (exists) {
       setSelectedSensations(
-        selectedSensations.filter((s) => s.id !== sensation.id)
+        selectedSensations.filter(
+          (s) => s.sensation_id !== sensation.id && s.id !== sensation.id
+        )
       );
     } else {
-      const old = selectedSensations.find((s) => s.id === sensation.id);
+      const old = selectedSensations.find(
+        (s) => s.sensation_id === sensation.id || s.id === sensation.id
+      );
       setSelectedSensations([
         ...selectedSensations,
-        { ...sensation, intensidade: old?.intensidade ?? 5 },
+        {
+          id: undefined, // <-- nova sensação, ainda não tem id do sensation_diaries
+          sensation_id: sensation.id, // <-- id da sensação original
+          intensidade: old?.intensidade ?? 5,
+          description: sensation.description,
+          category_id: sensation.category_id,
+        },
       ]);
     }
   }
@@ -57,7 +69,7 @@ export default function SensationPickerModal({
                   .filter((s) => s.category_id === cat.id)
                   .map((s) => {
                     const selected = selectedSensations.some(
-                      (sel) => sel.id === s.id
+                      (sel) => sel.sensation_id === s.id
                     );
                     return (
                       <Pressable

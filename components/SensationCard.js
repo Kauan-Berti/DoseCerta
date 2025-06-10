@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
 import { GlobalStyles } from "../constants/colors";
+import { Trash } from "phosphor-react-native";
 
-export default function SensationCard({ sensation, onChange }) {
+export default function SensationCard({ sensation, onChange, onRemove }) {
   const [tempValue, setTempValue] = useState(
     typeof sensation.intensidade === "number" ? sensation.intensidade : 5
   );
@@ -15,7 +16,7 @@ export default function SensationCard({ sensation, onChange }) {
 
   // Só atualiza o global ao soltar o dedo
   function handleSlidingComplete(value) {
-    onChange(sensation.id, value);
+    onChange(sensation.sensation_id, value);
   }
 
   // Atualiza o valor local se a prop mudar (ex: ao remover/adicionar sensação)
@@ -26,7 +27,16 @@ export default function SensationCard({ sensation, onChange }) {
   }, [sensation.intensidade]);
   return (
     <View style={styles.sensationCard}>
-      <Text style={styles.sensationName}>{sensation.description}</Text>
+      <View style={styles.cardHeader}>
+        <Text style={styles.sensationName}>{sensation.description}</Text>
+        <Trash
+          size={24}
+          color="#e53935"
+          weight="bold"
+          style={{ marginLeft: 8 }}
+          onPress={() => onRemove(sensation)}
+        />
+      </View>
       <View style={styles.sliderRow}>
         <Slider
           style={styles.slider}
@@ -103,5 +113,11 @@ const styles = StyleSheet.create({
   slider: {
     flex: 1,
     height: 50, // aumente a altura
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
   },
 });
