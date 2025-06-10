@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     color: GlobalStyles.colors.text,
   },
   modalItemTextSelected: {
-    color: "#fff",
+    color: GlobalStyles.colors.background,
     fontWeight: "bold",
   },
   modalCancel: {
