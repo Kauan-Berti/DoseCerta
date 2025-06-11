@@ -12,6 +12,7 @@ import { ScrollView } from "react-native"; // adicione este import
 import { fetchSensations } from "../services/sensationsService";
 import { Trash } from "phosphor-react-native";
 import { deleteSensation } from "../services/sensationsService";
+import { Alert } from "react-native";
 
 function CreateSensation() {
   const [categories, setCategories] = useState([]);
@@ -72,14 +73,26 @@ function CreateSensation() {
   );
 
   async function handleDeleteSensation(id) {
-    try {
-      await deleteSensation(id);
-      // Atualiza a lista após excluir
-      const data = await fetchSensations();
-      setSensations(data);
-    } catch (e) {
-      // Você pode exibir um alerta se quiser
-    }
+    Alert.alert(
+      "Excluir sensação",
+      "Tem certeza que deseja excluir esta sensação? Todos os registros criados usando ela também serão apagados.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteSensation(id);
+              const data = await fetchSensations();
+              setSensations(data);
+            } catch (e) {
+              // Você pode exibir um alerta de erro aqui, se quiser
+            }
+          },
+        },
+      ]
+    );
   }
 
   return (
