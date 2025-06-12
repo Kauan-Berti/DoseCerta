@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import AlertScreen from "./screens/AlertScreen";
 import LoginScreen from "./screens/LoginScreen";
+import PasswordResetScreen from "./screens/PasswordResetScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -172,6 +173,7 @@ function AuthStack() {
     >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
+      <Stack.Screen name="PasswordReset" component={PasswordResetScreen} />
     </Stack.Navigator>
   );
 }

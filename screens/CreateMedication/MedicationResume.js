@@ -5,7 +5,10 @@ import IconButton from "../../components/IconButton";
 import { useContext } from "react";
 import { AppContext } from "../../store/app-context";
 import { useState } from "react";
-import { storeMedication, updateMedication } from "../../services/medicationService";
+import {
+  storeMedication,
+  updateMedication,
+} from "../../services/medicationService";
 
 function MedicationResume({ onFinish, medicationData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,12 +41,6 @@ function MedicationResume({ onFinish, medicationData }) {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.imageContainer}>
-        <Image
-          style={styles.image}
-          source={require("../../assets/custom/image 1.png")}
-        />
-      </View>
       <View style={styles.contentContainer}>
         <Text style={styles.title}>{medicationData.name}</Text>
         <DoubleLabelBox title={"Forma"} text={medicationData.form} />

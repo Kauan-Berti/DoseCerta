@@ -115,3 +115,41 @@ export async function deleteDiary(id) {
     throw new Error("Não foi possível excluir o diario.");
   }
 }
+
+export async function fetchDiariesWithSensations() {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user.id;
+
+  const { data, error } = await supabase
+    .from("diaries")
+    .select(`
+      id,
+      date,
+      content,
+      sensation_diaries (
+        id,
+        intensity,
+        sensation_id,
+        sensation:sensation_id (
+          description
+        )
+      )
+    `)
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Erro ao buscar diarios:", error);
+    throw new Error("Não foi possível buscar os diarios.");
+  }
+
+  return data.map((item) => ({
+    id: item.id,
+    date: item.date,
+    content: item.content,
+    sensations: (item.sensation_diaries || []).map((sd) => ({
+      id: sd.id,
+      intensity: sd.intensity,
+      description: sd.sensation?.description ?? "",
+    })),
+  }));
+}

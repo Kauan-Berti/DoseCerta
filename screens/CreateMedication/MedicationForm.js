@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -5,27 +6,66 @@ import {
   ScrollView,
   Alert,
   KeyboardAvoidingView,
+  Modal,
+  TouchableOpacity,
+  Platform,
 } from "react-native";
 import Input from "../../components/Input";
-import { useEffect, useState } from "react";
-import { GlobalStyles } from "../../constants/colors";
 import IconButton from "../../components/IconButton";
 import Medication from "../../models/medication";
-import { Platform } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import { GlobalStyles } from "../../constants/colors";
+import {
+  Pill,
+  Syringe,
+  Drop,
+  TestTube,
+  PlusCircle,
+  ArchiveBox,
+  WarningCircle,
+  ArrowCircleRight,
+  ListMagnifyingGlass,
+} from "phosphor-react-native";
+
+const FORMS = [
+  {
+    label: "Comprimido",
+    value: "Comprimido",
+    icon: <Pill size={20} color={GlobalStyles.colors.primary} />,
+  },
+  {
+    label: "Pomada",
+    value: "Pomada",
+    icon: <Drop size={20} color={GlobalStyles.colors.primary} />,
+  },
+  {
+    label: "Xarope",
+    value: "Xarope",
+    icon: <TestTube size={20} color={GlobalStyles.colors.primary} />,
+  },
+  {
+    label: "Injeção",
+    value: "Injeção",
+    icon: <Syringe size={20} color={GlobalStyles.colors.primary} />,
+  },
+  {
+    label: "Outro",
+    value: "Outro",
+    icon: <PlusCircle size={20} color={GlobalStyles.colors.primary} />,
+  },
+];
+
+const UNIT_BY_FORM = {
+  Comprimido: "mg",
+  Pomada: "g",
+  Xarope: "ml",
+  Injeção: "ml",
+};
 
 function MedicationForm({ onNext, initialValues }) {
   const [formData, setFormData] = useState(
-    initialValues ||
-      new Medication(
-        0,
-        "", // Nome do medicamento
-        "", // Forma farmacêutica
-        "", // Unidade de medida
-        0, // Quantidade em estoque
-        0 // Quantidade mínima
-      ) // Usa os valores iniciais ou cria um novo medicamento
+    initialValues || new Medication(0, "", "", "", 0, 0)
   );
+  const [showFormModal, setShowFormModal] = useState(false);
 
   function handleInputChange(inputIdentifier, enteredValue) {
     setFormData((currentData) => ({
@@ -34,17 +74,26 @@ function MedicationForm({ onNext, initialValues }) {
     }));
   }
 
+  function handleFormSelect(formValue) {
+    setShowFormModal(false);
+    let unit = UNIT_BY_FORM[formValue] || "";
+    setFormData((currentData) => ({
+      ...currentData,
+      form: formValue,
+      unit: formValue === "Outro" ? "" : unit,
+    }));
+  }
+
   function handleNext() {
-    // Validação simples
     const { name, form, unit, amount, minAmount } = formData;
     if (!name || !form || !unit || !amount || !minAmount) {
       Alert.alert("Erro", "Por favor, preencha todos os campos obrigatórios.");
       return;
     }
-
-    // Avança para a próxima etapa
     onNext(formData);
   }
+
+  const isUnitEditable = formData.form === "Outro" || !formData.form;
 
   return (
     <KeyboardAvoidingView
@@ -69,21 +118,56 @@ function MedicationForm({ onNext, initialValues }) {
               onChangeText: (text) => handleInputChange("name", text),
             }}
           />
-
           <Text style={styles.label}>Forma farmacêutica</Text>
-          <Picker
-            selectedValue={formData.form}
-            onValueChange={(itemValue) => handleInputChange("form", itemValue)}
-            style={[styles.picker, styles.input]} // Aplica estilos consistentes
-            dropdownIconColor={GlobalStyles.colors.text} // Cor do ícone de dropdown
-            mode="dropdown"
+          <TouchableOpacity
+            style={styles.formSelector}
+            onPress={() => setShowFormModal(true)}
           >
-            <Picker.Item label="Selecione uma forma" value="" />
-            <Picker.Item label="Comprimido" value="Comprimido" />
-            <Picker.Item label="Pomada" value="Pomada" />
-            <Picker.Item label="Xarope" value="Xarope" />
-            <Picker.Item label="Injeção" value="Injeção" />
-          </Picker>
+            {FORMS.find((f) => f.value === formData.form)?.icon || (
+              <ListMagnifyingGlass
+                size={20}
+                color={GlobalStyles.colors.primary}
+              />
+            )}
+            <Text style={styles.formSelectorText}>
+              {formData.form
+                ? FORMS.find((f) => f.value === formData.form)?.label
+                : "Selecione uma forma"}
+            </Text>
+          </TouchableOpacity>
+          {/* Modal de seleção de forma farmacêutica */}
+          <Modal
+            visible={showFormModal}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setShowFormModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>
+                  Escolha a forma farmacêutica
+                </Text>
+                {FORMS.map((form) => (
+                  <TouchableOpacity
+                    key={form.value}
+                    style={styles.modalOption}
+                    onPress={() => handleFormSelect(form.value)}
+                  >
+                    {form.icon}
+                    <Text style={styles.modalOptionText}>{form.label}</Text>
+                  </TouchableOpacity>
+                ))}
+                <IconButton
+                  title="Cancelar"
+                  color={GlobalStyles.colors.background}
+                  textColor={GlobalStyles.colors.primary}
+                  icon="X"
+                  onPress={() => setShowFormModal(false)}
+                  style={styles.modalCancelButton}
+                />
+              </View>
+            </View>
+          </Modal>
           <Input
             label="Un. de medida"
             textInputConfig={{
@@ -93,13 +177,13 @@ function MedicationForm({ onNext, initialValues }) {
               maxLength: 10,
               value: formData.unit,
               onChangeText: (text) => handleInputChange("unit", text),
+              editable: isUnitEditable,
             }}
           />
           <Input
             label="Quantidade em estoque"
             textInputConfig={{
-              autoCapitalize: "sentences",
-              autoCorrect: false,
+              keyboardType: "numeric",
               maxLength: 10,
               value: formData.amount?.toString() ?? "",
               onChangeText: (text) => handleInputChange("amount", text),
@@ -108,8 +192,7 @@ function MedicationForm({ onNext, initialValues }) {
           <Input
             label="Quantidade mínima"
             textInputConfig={{
-              autoCapitalize: "sentences",
-              autoCorrect: false,
+              keyboardType: "numeric",
               maxLength: 10,
               value: formData.minAmount?.toString() ?? "",
               onChangeText: (text) => handleInputChange("minAmount", text),
@@ -121,7 +204,7 @@ function MedicationForm({ onNext, initialValues }) {
         <IconButton
           title={"Próximo"}
           color={GlobalStyles.colors.primary}
-          icon={"ArrowCircleRight"}
+          icon="ArrowCircleRight"
           onPress={handleNext}
         />
       </View>
@@ -135,7 +218,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: GlobalStyles.colors.background,
-    paddingBottom: 60,
+    paddingBottom: 100,
   },
   container: {
     paddingHorizontal: 10,
@@ -147,36 +230,76 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 20,
     color: GlobalStyles.colors.text,
+    marginBottom: 16,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     color: GlobalStyles.colors.text,
     marginBottom: 8,
     fontWeight: "bold",
+    marginTop: 8,
   },
-  picker: {
-    backgroundColor: GlobalStyles.colors.card, // Fundo consistente com o app
-    borderRadius: 8, // Bordas arredondadas
-    marginBottom: 16, // Espaçamento inferior
-    borderWidth: 1, // Borda fina
-    borderColor: GlobalStyles.colors.border, // Cor da borda
-    color: GlobalStyles.colors.text, // Cor do texto
-    paddingHorizontal: 10, // Espaçamento interno
-    height: 50, // Altura consistente com os inputs
+  formSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: GlobalStyles.colors.card,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: GlobalStyles.colors.border,
+    padding: 12,
+    marginBottom: 16,
+    marginTop: 2,
   },
-  input: {
-    fontSize: 16, // Tamanho do texto consistente
-    color: GlobalStyles.colors.text, // Cor do texto
+  formSelectorText: {
+    fontSize: 16,
+    color: GlobalStyles.colors.text,
+    marginLeft: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: GlobalStyles.colors.card,
+    borderRadius: 16,
+    padding: 24,
+    width: "85%",
+    alignItems: "stretch",
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: GlobalStyles.colors.primary,
+    marginBottom: 18,
+    textAlign: "center",
+  },
+  modalOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  modalOptionText: {
+    fontSize: 16,
+    marginLeft: 12,
+    color: GlobalStyles.colors.text,
+  },
+  modalCancelButton: {
+    marginTop: 18,
+    alignSelf: "center",
   },
   nextButtonContainer: {
-    position: "absolute",
-    bottom: 80,
-    right: 20,
-  },
-  label: {
-    fontSize: 12,
-    color: GlobalStyles.colors.textSecondary,
-    marginBottom: 4,
-    fontWeight: "bold",
+    marginTop: 12,
+    marginBottom: 40, // espaço para a bottom tab
+    alignItems: "flex-end",
+    paddingRight: 8,
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    alignSelf: "flex-end", // <-- Adicione esta linha
   },
 });

@@ -15,7 +15,7 @@ import { GlobalStyles } from "../../constants/colors";
 import { useState } from "react";
 import AuthForm from "./AuthForm";
 
-function AuthContent({ isLogin, onAuthenticate }) {
+function AuthContent({ isLogin, isPasswordReset, onAuthenticate }) {
   const navigator = useNavigation();
 
   const [credentialsInvalid, setCredentialsInvalid] = useState({
@@ -26,7 +26,9 @@ function AuthContent({ isLogin, onAuthenticate }) {
   });
 
   function switchAuthModeHandler() {
-    if (isLogin) {
+    if (isPasswordReset) {
+      navigator.replace("Login");
+    } else if (isLogin) {
       navigator.replace("Signup");
     } else {
       navigator.replace("Login");
@@ -73,18 +75,28 @@ function AuthContent({ isLogin, onAuthenticate }) {
               source={require("../../assets/custom/Logo.png")}
               style={styles.logo}
             />
+
             <AuthForm
               isLogin={isLogin}
+              isPasswordReset={isPasswordReset}
               onSubmit={submitHandler}
               credentialsInvalid={credentialsInvalid}
+              onPasswordReset={() => navigator.replace("PasswordReset")}
             />
+
             <View style={styles.buttons}>
               <IconButton
                 onPress={switchAuthModeHandler}
-                title={isLogin ? "Criar conta" : "Já tem uma conta?"}
+                title={
+                  isPasswordReset
+                    ? "Voltar"
+                    : isLogin
+                    ? "Criar conta"
+                    : "Já tem uma conta?"
+                }
                 textColor="white"
                 color={GlobalStyles.colors.button}
-              ></IconButton>
+              />
             </View>
           </View>
         </ScrollView>

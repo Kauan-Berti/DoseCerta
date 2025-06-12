@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import { GlobalStyles } from "../../constants/colors";
-import { fetchDiaries } from "../../services/diaryService";
+import { fetchDiariesWithSensations } from "../../services/diaryService";
 import { useState, useEffect } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { Scroll } from "phosphor-react-native";
@@ -25,7 +25,25 @@ function DiaryScreen({ selectedTab }) {
             })()}
           </Text>
         </View>
+
         <Text style={styles.cardContent}>{item.content}</Text>
+
+        {item.sensations && item.sensations.length > 0 && (
+          <View style={styles.sensationsContainer}>
+            <Text style={styles.sensationsTitle}>Sensações:</Text>
+            {item.sensations.map((s, idx) => (
+              <View key={s.id || idx} style={styles.sensationRow}>
+                <Text style={styles.sensationDot}>•</Text>
+                <Text style={styles.sensationItem}>
+                  {s.description}
+                  {typeof s.intensity === "number"
+                    ? ` (intensidade: ${s.intensity})`
+                    : ""}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     );
   }
@@ -33,7 +51,7 @@ function DiaryScreen({ selectedTab }) {
   useEffect(() => {
     if (selectedTab !== "diary") return;
     async function fetchDiariesFromAPI() {
-      setDiaries(await fetchDiaries());
+      setDiaries(await fetchDiariesWithSensations());
     }
     fetchDiariesFromAPI();
     //console.log("Diario selecionado");
@@ -89,5 +107,30 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 22,
     marginTop: 2,
+  },
+  sensationsContainer: {
+    marginTop: 10,
+  },
+  sensationsTitle: {
+    fontWeight: "bold",
+    color: GlobalStyles.colors.primary,
+    marginBottom: 2,
+  },
+  sensationItem: {
+    color: GlobalStyles.colors.text,
+    fontSize: 15,
+    marginLeft: 8,
+  },
+  sensationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 8,
+    marginBottom: 2,
+  },
+  sensationDot: {
+    color: GlobalStyles.colors.primary,
+    fontSize: 18,
+    marginRight: 6,
+    marginTop: 1,
   },
 });

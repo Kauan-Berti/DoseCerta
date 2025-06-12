@@ -4,12 +4,13 @@ import IconButton from "../components/IconButton";
 import { useState } from "react";
 import LogsScreen from "./Journals/LogsScreen";
 import DiaryScreen from "./Journals/DiaryScreen";
+import ShareScreen from "./Journals/ShareScreen";
 
 function JournalScreen() {
   const [selectedTab, setSelectedTab] = useState("treatments");
 
-  function onPressGraphics() {
-    setSelectedTab("sensations");
+  function onPressShare() {
+    setSelectedTab("share");
   }
   function onPressTreatments() {
     setSelectedTab("treatments");
@@ -38,23 +39,7 @@ function JournalScreen() {
             onPress={onPressTreatments}
           ></IconButton>
         </View>
-        <View style={styles.buttonContainer}>
-          <IconButton
-            title="Sensações"
-            color={
-              selectedTab == "sensations"
-                ? GlobalStyles.colors.primary
-                : GlobalStyles.colors.card
-            }
-            textColor={
-              selectedTab == "sensations"
-                ? GlobalStyles.colors.card
-                : GlobalStyles.colors.text
-            }
-            fullWidth={true}
-            onPress={onPressGraphics}
-          ></IconButton>
-        </View>
+
         <View style={styles.buttonContainer}>
           <IconButton
             title="Diários"
@@ -72,11 +57,26 @@ function JournalScreen() {
             onPress={onPressDiary}
           ></IconButton>
         </View>
+        <View style={styles.buttonContainer}>
+          <IconButton
+            title="Compartilhar"
+            color={
+              selectedTab == "share"
+                ? GlobalStyles.colors.primary
+                : GlobalStyles.colors.card
+            }
+            textColor={
+              selectedTab == "share"
+                ? GlobalStyles.colors.card
+                : GlobalStyles.colors.text
+            }
+            fullWidth={true}
+            onPress={onPressShare}
+          ></IconButton>
+        </View>
       </View>
       <View style={styles.tabContent}>
-        {selectedTab === "sensations" && (
-          <Text style={styles.text}>Conteudo de Sensações</Text>
-        )}
+        {selectedTab === "share" && <ShareScreen />}
         {selectedTab === "treatments" && (
           <LogsScreen selectedTab={selectedTab} />
         )}
