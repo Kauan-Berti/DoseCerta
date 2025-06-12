@@ -10,18 +10,21 @@ function AuthInput({
   isInvalid,
 }) {
   return (
-    <View style={styles.inputContainer}>
-      <TextInput
-        style={[styles.input, isInvalid && styles.inputInvalid]}
-        autoCapitalize="none"
-        keyboardType={keyboardType}
-        secureTextEntry={secure}
-        onChangeText={onUpdateValue}
-        value={value}
-        placeholder={label}
-        placeholderTextColor={GlobalStyles.colors.disabledText}
-      />
-    </View>
+    <>
+      {label && <Text style={styles.label}>{label}</Text>}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[styles.input, isInvalid && styles.inputInvalid]}
+          autoCapitalize="none"
+          keyboardType={keyboardType}
+          secureTextEntry={secure}
+          onChangeText={onUpdateValue}
+          value={value}
+          placeholder={label}
+          placeholderTextColor={GlobalStyles.colors.disabledText}
+        />
+      </View>
+    </>
   );
 }
 
@@ -30,13 +33,13 @@ export default AuthInput;
 const styles = StyleSheet.create({
   inputContainer: {
     marginVertical: 8,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: GlobalStyles.colors.border,
     borderRadius: 8,
   },
   label: {
-    color: "white",
-    marginBottom: 4,
+    color: GlobalStyles.colors.disabledText,
+    fontSize: 12,
   },
   labelInvalid: {
     color: GlobalStyles.colors.inputErrorBackground,

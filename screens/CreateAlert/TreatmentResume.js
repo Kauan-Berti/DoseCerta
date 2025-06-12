@@ -14,6 +14,7 @@ import {
   deleteAlert,
   storeAlert,
 } from "../../services/alertService";
+import DayOfWeek from "../../components/DayOfWeek";
 
 function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -161,7 +162,12 @@ function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
           <Text style={styles.text}>Observações: {item.observations}</Text>
         )}
         {item.days && (
-          <Text style={styles.text}>Dias: {item.days.join(", ")}</Text>
+          <DayOfWeek
+            defaultValues={item.days}
+            isButton={false}
+            style={{ marginTop: 8 }}
+            size={32}
+          />
         )}
       </View>
     );
@@ -169,13 +175,6 @@ function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
 
   const headerComponent = (
     <>
-      <View style={styles.imageContainer}>
-        <Image
-          style={styles.image}
-          source={require("../../assets/custom/image 1.png")}
-        />
-      </View>
-
       <Text style={styles.title}>{medication.name}</Text>
       {treatment.isContinuous ? (
         <View style={styles.continuousContainer}>
@@ -261,11 +260,12 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   title: {
-    fontSize: 20,
+    fontSize: 32,
     color: GlobalStyles.colors.text,
     textAlign: "center",
     fontWeight: "bold",
     marginBottom: 10,
+    marginTop: 20,
   },
   subtitle: {
     fontSize: 18,
