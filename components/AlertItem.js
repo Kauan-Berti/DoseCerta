@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { GlobalStyles } from "../constants/colors";
 import RoundButton from "./RoundButton";
+import DayOfWeek from "../components/DayOfWeek";
 
 function AlertItem({ time, dose, days, observations, id, onPress }) {
   return (
@@ -19,7 +20,12 @@ function AlertItem({ time, dose, days, observations, id, onPress }) {
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Dias:</Text>
-          <Text style={styles.value}>{days.join(", ")}</Text>
+          <DayOfWeek
+            defaultValues={days}
+            isButton={false}
+            size={28}
+            style={{ marginLeft: 8, flex: 1, backgroundColor: "transparent" }}
+          />
         </View>
         {observations && (
           <View style={styles.row}>

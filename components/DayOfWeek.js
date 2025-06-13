@@ -20,6 +20,16 @@ function DayOfWeek({
     if (onDaysChange && typeof onDaysChange === "function")
       onDaysChange(selectedDays);
   }, []);
+  useEffect(() => {
+    if (
+      Array.isArray(defaultValues) &&
+      defaultValues.length > 0 &&
+      JSON.stringify(defaultValues) !== JSON.stringify(selectedDays)
+    ) {
+      setSelectedDays(defaultValues);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValues]);
 
   function toggleDay(day) {
     setSelectedDays((currentDays) => {

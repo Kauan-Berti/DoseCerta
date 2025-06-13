@@ -8,14 +8,12 @@ export const signUp = async (email, password) => {
 
 // Função de login
 export const signIn = async ({ email, password }) => {
-  console.log("EMAIL:", email);
-  console.log("PASSWORD:", password);
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  console.log("DATA:", data);
-  console.log("ERROR:", error);
+  const payload = { email, password };
+  console.log("Payload enviado:", JSON.stringify(payload));
+  const response = await supabase.auth.signInWithPassword(payload);
+  console.log("RESPOSTA COMPLETA:", response); // Veja tudo que o Supabase retorna
+  // Se quiser manter compatibilidade:
+  const { data, error } = response;
   return { data, error };
 };
 

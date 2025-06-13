@@ -81,6 +81,20 @@ function CreateAlerts({ onNext, treatment = {}, alerts: initialAlerts }) {
   }
 
   function handleSubmitAlert(alertData) {
+    // Validação dos campos obrigatórios
+    if (
+      !alertData.time ||
+      !alertData.dose ||
+      !alertData.days ||
+      alertData.days.length === 0
+    ) {
+      ReactAlert.alert(
+        "Erro",
+        "Por favor, preencha todos os campos do alerta."
+      );
+      return;
+    }
+
     const normalizedAlertData = {
       ...alertData,
       time:
@@ -88,7 +102,6 @@ function CreateAlerts({ onNext, treatment = {}, alerts: initialAlerts }) {
           ? alertData.time.slice(0, 5)
           : alertData.time,
     };
-    ReactAlert.alert("Erro", "Por favor, preencha todos os campos do alerta.");
 
     setAlerts((currentAlerts) => {
       const alertExists = currentAlerts.some(
@@ -152,14 +165,16 @@ function CreateAlerts({ onNext, treatment = {}, alerts: initialAlerts }) {
 
   function renderAlertItem({ item }) {
     return (
-      <AlertItem
-        time={item.time}
-        dose={item.dose}
-        observations={item.observations}
-        id={item.id}
-        days={item.days}
-        onPress={() => handleEditAlert(item)}
-      />
+      <>
+        <AlertItem
+          time={item.time}
+          dose={item.dose}
+          observations={item.observations}
+          id={item.id}
+          days={item.days}
+          onPress={() => handleEditAlert(item)}
+        />
+      </>
     );
   }
 

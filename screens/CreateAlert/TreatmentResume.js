@@ -162,12 +162,15 @@ function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
           <Text style={styles.text}>Observações: {item.observations}</Text>
         )}
         {item.days && (
-          <DayOfWeek
-            defaultValues={item.days}
-            isButton={false}
-            style={{ marginTop: 8 }}
-            size={32}
-          />
+          <>
+            <Text style={styles.text}>Dias:</Text>
+            <DayOfWeek
+              defaultValues={item.days}
+              isButton={false}
+              style={{ marginTop: 8 }}
+              size={32}
+            />
+          </>
         )}
       </View>
     );
