@@ -49,3 +49,30 @@ export const insertProfile = async (userId) => {
   ]);
   return { error };
 };
+
+export const updateProfile = async (
+  userId,
+  { name, gender, height, weight, age }
+) => {
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      name,
+      gender,
+      height,
+      weight,
+      age,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", userId);
+  return { error };
+};
+
+export const fetchProfile = async (userId) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+  return { data, error };
+};
