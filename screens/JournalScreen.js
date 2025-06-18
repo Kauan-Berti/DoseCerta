@@ -27,14 +27,18 @@ function JournalScreen() {
             title="Tratamentos"
             color={
               selectedTab == "treatments"
-                ? GlobalStyles.colors.primary
+                ? GlobalStyles.colors.selectedTab
                 : GlobalStyles.colors.card
             }
             textColor={
               selectedTab == "treatments"
-                ? GlobalStyles.colors.card
+                ? GlobalStyles.colors.lightYellow
                 : GlobalStyles.colors.text
             }
+            borderColor={
+              selectedTab == "treatments" ? GlobalStyles.colors.primary : null
+            }
+            borderWidth={selectedTab == "treatments" ? 1 : 0}
             fullWidth={true}
             onPress={onPressTreatments}
           ></IconButton>
@@ -45,14 +49,18 @@ function JournalScreen() {
             title="Diários"
             color={
               selectedTab == "diary"
-                ? GlobalStyles.colors.primary
+                ? GlobalStyles.colors.selectedTab
                 : GlobalStyles.colors.card
             }
             textColor={
               selectedTab == "diary"
-                ? GlobalStyles.colors.card
+                ? GlobalStyles.colors.lightYellow
                 : GlobalStyles.colors.text
             }
+            borderColor={
+              selectedTab == "diary" ? GlobalStyles.colors.primary : null
+            }
+            borderWidth={selectedTab == "diary" ? 2 : 0}
             fullWidth={true}
             onPress={onPressDiary}
           ></IconButton>
@@ -62,14 +70,18 @@ function JournalScreen() {
             title="Compartilhar"
             color={
               selectedTab == "share"
-                ? GlobalStyles.colors.primary
+                ? GlobalStyles.colors.selectedTab
                 : GlobalStyles.colors.card
             }
             textColor={
               selectedTab == "share"
-                ? GlobalStyles.colors.card
+                ? GlobalStyles.colors.lightYellow
                 : GlobalStyles.colors.text
             }
+            borderColor={
+              selectedTab == "share" ? GlobalStyles.colors.primary : null
+            }
+            borderWidth={selectedTab == "share" ? 2 : 0}
             fullWidth={true}
             onPress={onPressShare}
           ></IconButton>
@@ -105,6 +117,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flex: 1,
+    paddingVertical: 6
   },
   tabContent: {
     flex: 1,

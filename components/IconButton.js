@@ -9,6 +9,8 @@ function IconButton({
   color = "black",
   textColor = "black",
   fullWidth = false,
+  borderColor = "trasparent",
+  borderWidth = 0,
 }) {
   const IconComponent = PhosphorIcons[icon];
   return (
@@ -19,7 +21,10 @@ function IconButton({
         onPress={onPress}
         style={({ pressed }) => [
           styles.button,
-          { backgroundColor: color },
+          {
+            backgroundColor: color,
+            borderColor: borderColor,
+          },
           fullWidth && styles.fullWidthButton,
           pressed && styles.pressed,
         ]}
@@ -52,7 +57,7 @@ const styles = StyleSheet.create({
     alignSelf: "stretch", // Faz o botão ocupar toda a largura disponível
   },
   button: {
-    paddingVertical: 10,
+    paddingVertical: 16,
     paddingHorizontal: 8,
     backgroundColor: GlobalStyles.colors.button,
     borderColor: GlobalStyles.colors.border,

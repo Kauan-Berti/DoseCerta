@@ -262,7 +262,7 @@ function Navigation() {
         ...DefaultTheme,
         colors: {
           ...DefaultTheme.colors,
-          background: GlobalStyles.colors.background,
+          background: GlobalStyles.colors.headerBackground,
         },
       }}
     >
@@ -314,7 +314,7 @@ export default function App() {
     <>
       <StatusBar style="dark" />
       <GestureHandlerRootView
-        style={{ flex: 1, backgroundColor: GlobalStyles.colors.background }}
+        style={{ flex: 1, backgroundColor: GlobalStyles.colors.headerBackground }}
       >
         <AuthContextProvider>
           <AppContextProvider>

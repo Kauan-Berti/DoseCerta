@@ -32,14 +32,17 @@ export default AuthInput;
 
 const styles = StyleSheet.create({
   inputContainer: {
-    marginVertical: 8,
+    marginTop: 4,
+    marginBottom: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
     borderWidth: 2,
     borderColor: GlobalStyles.colors.border,
     borderRadius: 8,
   },
   label: {
     color: GlobalStyles.colors.disabledText,
-    fontSize: 12,
+    fontSize: 14,
   },
   labelInvalid: {
     color: GlobalStyles.colors.inputErrorBackground,
@@ -49,7 +52,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     backgroundColor: GlobalStyles.colors.card,
     borderRadius: 4,
-    fontSize: 16,
+    fontSize: 18,
     color: "white",
   },
   inputInvalid: {

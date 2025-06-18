@@ -48,7 +48,7 @@ export default AlertCard;
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: 6,
+    marginVertical: 8,
     backgroundColor: GlobalStyles.colors.card,
     padding: 10,
     borderRadius: 8,
@@ -89,7 +89,8 @@ const styles = StyleSheet.create({
     height: 1,
     width: "100%",
     backgroundColor: GlobalStyles.colors.disabled,
-    marginVertical: 10,
+    marginTop: 8,
+    marginBottom: 16,
   },
   text: {
     fontSize: 16,
