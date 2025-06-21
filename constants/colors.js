@@ -11,7 +11,7 @@ export const GlobalStyles = {
     disabledText: "#8E8E93", // cor do texto dos botões desativados
     error: "#FF3B30", // erro (ícone de excluir)
     headerBackground:"#1E1E1E",
-    primary: "#FFD400", // botões, tabs, ícones principais
+    primary: "#EBC84C", // botões, tabs, ícones principais
     text: "#FFFFFF", // texto principal
     textSecondary: "#C7C7CC", // textos secundários e placeholders
     lightYellow: "#FEDE6F",
