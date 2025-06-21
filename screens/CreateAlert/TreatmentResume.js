@@ -228,14 +228,16 @@ function TreatmentResume({ onFinish, treatment, alerts, medication, origin }) {
   );
 
   return (
-    <FlatList
-      data={alerts}
-      keyExtractor={(item) => item.id}
-      renderItem={renderAlertItem}
-      ListHeaderComponent={headerComponent}
-      ListFooterComponent={footerComponent}
-      contentContainerStyle={styles.contentContainer}
-    />
+    <View style={styles.container}>
+      <FlatList
+        data={alerts}
+        keyExtractor={(item) => item.id}
+        renderItem={renderAlertItem}
+        ListHeaderComponent={headerComponent}
+        ListFooterComponent={footerComponent}
+        contentContainerStyle={styles.contentContainer}
+      />
+    </View>
   );
 }
 
@@ -244,8 +246,10 @@ export default TreatmentResume;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: GlobalStyles.colors.background,
-    paddingHorizontal: 10,
     flex: 1,
+
+    paddingLeft: 18,
+    paddingRight: 18,
   },
   imageContainer: {
     alignItems: "center",

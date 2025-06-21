@@ -143,7 +143,7 @@ function AuthForm({
               : "Criar Conta"
           }
           color={GlobalStyles.colors.primary}
-          size={24}
+          size={32}
           onPress={submitHandler}
         />
       </View>
@@ -155,12 +155,9 @@ export default AuthForm;
 
 const styles = StyleSheet.create({
   form: {
-    marginTop: 48,
-    padding: 16,
-    backgroundColor: GlobalStyles.colors.background,
-    borderRadius: 8,
-    justifyContent: "space-between",
-    height: 300,
+    paddingLeft: 18,
+    paddingRight: 18,
+    paddingTop: 18,
   },
   buttons: {
     flexDirection: "row",

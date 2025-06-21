@@ -24,7 +24,7 @@ function JournalScreen() {
       <View style={styles.topButtonsContainer}>
         <View style={styles.buttonContainer}>
           <IconButton
-            title="Tratamentos"
+            title="Tratamento"
             color={
               selectedTab == "treatments"
                 ? GlobalStyles.colors.selectedTab

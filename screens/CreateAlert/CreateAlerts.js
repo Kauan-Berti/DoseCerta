@@ -261,7 +261,7 @@ export default CreateAlerts;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: GlobalStyles.colors.background,
-    paddingHorizontal: 10,
+    paddingHorizontal: 18,
     flex: 1,
     marginBottom: 30,
   },

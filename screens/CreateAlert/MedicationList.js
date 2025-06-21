@@ -115,6 +115,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: GlobalStyles.colors.background,
+    paddingTop: 18,
+    paddingLeft: 18,
+    paddingRight: 18,
   },
   text: {
     fontSize: 18,

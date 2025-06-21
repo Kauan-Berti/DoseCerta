@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
   button: {
     paddingVertical: 16,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     backgroundColor: GlobalStyles.colors.button,
     borderColor: GlobalStyles.colors.border,
     borderRadius: 8,

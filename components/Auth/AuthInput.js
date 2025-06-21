@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   input: {
     paddingVertical: 8,
     paddingHorizontal: 6,
-    backgroundColor: GlobalStyles.colors.card,
+    backgroundColor: "transparent",
     borderRadius: 4,
     fontSize: 18,
     color: "white",

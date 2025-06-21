@@ -113,14 +113,15 @@ const styles = StyleSheet.create({
   authContent: {
     flex: 1,
     backgroundColor: GlobalStyles.colors.background,
+    paddingBottom: 40,
   },
   buttons: {
-    marginTop: 8,
+    marginTop: 34,
   },
   logo: {
     width: 200,
     height: 200,
-    marginTop: 125,
+    marginTop: 80,
     alignSelf: "center",
     resizeMode: "contain",
   },
