@@ -215,7 +215,7 @@ function CreateDiary() {
         )}
 
         <View style={styles.titleContainer}>
-          <Scroll color={GlobalStyles.colors.primary} />
+          <Scroll color={GlobalStyles.colors.text} />
           <Text style={styles.text}>Descreva o que sentiu durante o dia</Text>
         </View>
 
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: 12,
-    marginHorizontal: 8,
+    marginHorizontal: 18,
     justifyContent: "flex-start",
     alignItems: "center",
   },
@@ -295,11 +295,12 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   text: {
-    fontSize: 20,
-    color: GlobalStyles.colors.primary,
+    fontSize: 18,
+    color: GlobalStyles.colors.text,
     fontWeight: "bold",
   },
   titleContainer: {
+    marginTop: 24,
     flexDirection: "row",
     alignItems: "center",
     gap: 4,

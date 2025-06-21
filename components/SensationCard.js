@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 18,
     marginBottom: 14,
-    color: GlobalStyles.colors.primary,
+    color: GlobalStyles.colors.text,
     letterSpacing: 0.5,
   },
   sliderRow: {
@@ -96,7 +96,9 @@ const styles = StyleSheet.create({
     height: 40,
   },
   intensityBadge: {
-    backgroundColor: GlobalStyles.colors.primary,
+    backgroundColor: GlobalStyles.colors.card,
+    borderWidth:2,
+    borderColor: GlobalStyles.colors.divider,
     borderRadius: 20,
     width: 40,
     height: 40,
@@ -106,7 +108,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   intensityBadgeText: {
-    color: GlobalStyles.colors.card,
+    color: GlobalStyles.colors.text,
     fontWeight: "bold",
     fontSize: 18,
   },

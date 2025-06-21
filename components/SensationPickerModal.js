@@ -63,7 +63,10 @@ export default function SensationPickerModal({
             showsVerticalScrollIndicator={false}
           >
             {categories.map((cat) => (
-              <View key={cat.id} style={{ marginBottom: 12 }}>
+              <View
+                key={cat.id}
+                style={{ marginBottom: 20, borderBottomWidth: 1, borderColor:GlobalStyles.colors.divider }}
+              >
                 <Text style={styles.modalCategoryTitle}>{cat.name}</Text>
                 {sensations
                   .filter((s) => s.category_id === cat.id)
@@ -126,6 +129,7 @@ const styles = StyleSheet.create({
   },
   modalCategoryTitle: {
     fontWeight: "bold",
+    fontSize: 16,
     color: GlobalStyles.colors.primary,
     marginBottom: 4,
     marginTop: 8,
@@ -138,13 +142,12 @@ const styles = StyleSheet.create({
     backgroundColor: GlobalStyles.colors.card,
   },
   modalItemSelected: {
-    backgroundColor: GlobalStyles.colors.primary,
+    backgroundColor: GlobalStyles.colors.disabled,
   },
   modalItemText: {
     color: GlobalStyles.colors.text,
   },
   modalItemTextSelected: {
-    color: GlobalStyles.colors.background,
     fontWeight: "bold",
   },
   modalCancel: {

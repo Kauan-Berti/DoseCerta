@@ -10,11 +10,12 @@ export const GlobalStyles = {
     disabled: "#3A3A3C", // cor de fundo dos botões desativados
     disabledText: "#8E8E93", // cor do texto dos botões desativados
     error: "#FF3B30", // erro (ícone de excluir)
-    headerBackground:"#1E1E1E",
+    headerBackground: "#1E1E1E",
     primary: "#EBC84C", // botões, tabs, ícones principais
     text: "#FFFFFF", // texto principal
     textSecondary: "#C7C7CC", // textos secundários e placeholders
     lightYellow: "#FEDE6F",
     inputErrorBackground: "#ff8a84", // fundo do input de erro
+    divider: "#606060",
   },
 };
