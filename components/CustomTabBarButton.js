@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: -20,
     overflow: "hidden",
+
   },
   button: {
     alignItems: "center",

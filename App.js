@@ -50,15 +50,20 @@ function AuthenticatedStack() {
           height: 88,
         },
         tabBarStyle: {
-          backgroundColor: GlobalStyles.colors.primary,
-          borderTopWidth: 0,
+          backgroundColor: GlobalStyles.colors.background,
+          borderColor: GlobalStyles.colors.card,
+          borderTopLeftRadius: 12,
+          borderTopRightRadius: 12,
+          borderTopWidth: 2,
+          borderLeftWidth: 2,
+          borderRightWidth: 2,
           position: "absolute",
           height: 60,
           alignItems: "center",
           justifyContent: "center",
         },
-        tabBarActiveTintColor: GlobalStyles.colors.card,
-        tabBarInactiveTintColor: GlobalStyles.colors.background,
+        tabBarActiveTintColor: GlobalStyles.colors.primary,
+        tabBarInactiveTintColor: GlobalStyles.colors.lightYellow,
         tabBarShowLabel: false,
         headerRight: () => <ProfileHeaderButton />,
       }}
@@ -99,7 +104,9 @@ function AuthenticatedStack() {
         options={{
           headerShown: false, // <-- Adicione esta linha!
           tabBarIcon: ({ color, size }) => {
-            return <Plus color={color} size={size * 2} />;
+            return (
+              <Plus color={GlobalStyles.colors.background} size={size * 2} />
+            );
           },
           tabBarButton: (props) => <CustomTabBarButton {...props} />,
         }}
@@ -314,7 +321,10 @@ export default function App() {
     <>
       <StatusBar style="dark" />
       <GestureHandlerRootView
-        style={{ flex: 1, backgroundColor: GlobalStyles.colors.headerBackground }}
+        style={{
+          flex: 1,
+          backgroundColor: GlobalStyles.colors.headerBackground,
+        }}
       >
         <AuthContextProvider>
           <AppContextProvider>
