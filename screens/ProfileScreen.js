@@ -9,6 +9,7 @@ import {
   updateProfile,
   fetchProfile,
   updatePassword,
+  deleteAccount,
 } from "../services/authService";
 
 import {
@@ -33,6 +34,8 @@ function ProfileScreen() {
   const [age, setAge] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
 
   // Conta
   const [login, setLogin] = useState(
@@ -59,6 +62,31 @@ function ProfileScreen() {
     }
     fetchUser();
   }, []);
+
+  async function confirmDeleteAccountHandler() {
+    setIsSaving(true);
+    // Reautentica o usuário
+    const { error } = await signIn({ email: login, password: deletePassword });
+    if (error) {
+      setIsSaving(false);
+      Alert.alert("Erro", "Senha incorreta. Tente novamente.");
+      return;
+    }
+
+    const { error: deleteError } = await deleteAccount();
+    setIsSaving(false);
+    setShowDeleteModal(false);
+
+    if (deleteError) {
+      Alert.alert(
+        "Erro",
+        "Não foi possível excluir a conta. Tente novamente ou contate o suporte."
+      );
+    } else {
+      Alert.alert("Conta excluída", "Sua conta foi excluída com sucesso.");
+      authContext.logout();
+    }
+  }
 
   function logoutHandler() {
     authContext.logout();
@@ -261,6 +289,43 @@ function ProfileScreen() {
             </View>
           </View>
         </Modal>
+        <Modal
+          visible={showDeleteModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowDeleteModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                Confirme sua senha para excluir a conta
+              </Text>
+              <AuthInput
+                label="Senha"
+                value={deletePassword}
+                onUpdateValue={setDeletePassword}
+                secure
+                icon={<Key size={20} color={GlobalStyles.colors.primary} />}
+              />
+              <View style={{ flexDirection: "row", marginTop: 16, gap: 12 }}>
+                <IconButton
+                  title="Cancelar"
+                  color={GlobalStyles.colors.background}
+                  textColor={GlobalStyles.colors.primary}
+                  icon="X"
+                  onPress={() => setShowDeleteModal(false)}
+                />
+                <IconButton
+                  title="Excluir"
+                  color="#e53935"
+                  textColor="#fff"
+                  icon="Trash"
+                  onPress={confirmDeleteAccountHandler}
+                />
+              </View>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </>
   );
@@ -396,6 +461,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 12,
     fontWeight: "bold",
+    textAlign: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: GlobalStyles.colors.primary,
+    marginBottom: 16,
     textAlign: "center",
   },
 });

@@ -9,9 +9,7 @@ export const signUp = async (email, password) => {
 // Função de login
 export const signIn = async ({ email, password }) => {
   const payload = { email, password };
-  console.log("Payload enviado:", JSON.stringify(payload));
   const response = await supabase.auth.signInWithPassword(payload);
-  console.log("RESPOSTA COMPLETA:", response); // Veja tudo que o Supabase retorna
   // Se quiser manter compatibilidade:
   const { data, error } = response;
   return { data, error };
@@ -82,4 +80,33 @@ export const fetchProfile = async (userId) => {
     .eq("id", userId)
     .single();
   return { data, error };
+};
+
+export const deleteAccount = async () => {
+  // Obtém o token JWT do usuário autenticado
+  const { data, error } = await supabase.auth.getSession();
+  const { data: userData } = await supabase.auth.getUser();
+  if (error || !data?.session?.access_token || !userData?.user?.id) {
+    return { error: error || new Error("Usuário não autenticado") };
+  }
+
+  // Chama a Edge Function
+  const response = await fetch(
+    "https://jthcdqnkrwqlclnlljbb.supabase.co/functions/v1/delete-user-account",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${data.session.access_token}`,
+      },
+      body: JSON.stringify({ user_id: userData.user.id }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    return { error: new Error(errorText) };
+  }
+
+  return { error: null };
 };
