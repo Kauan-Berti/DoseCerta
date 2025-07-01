@@ -5,7 +5,11 @@ import IconButton from "../components/IconButton";
 import { AuthContext } from "../store/auth-context";
 import AuthInput from "../components/Auth/AuthInput";
 import { supabase } from "../services/supabase";
-import { updateProfile, fetchProfile } from "../services/authService";
+import {
+  updateProfile,
+  fetchProfile,
+  updatePassword,
+} from "../services/authService";
 
 import {
   User,
@@ -59,6 +63,27 @@ function ProfileScreen() {
   function logoutHandler() {
     authContext.logout();
   }
+  async function updatePasswordHandler() {
+    if (!password || !confirmPassword) {
+      Alert.alert("Erro", "Preencha ambos os campos de senha.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Erro", "As senhas não coincidem.");
+      return;
+    }
+    setIsSaving(true);
+    const { error } = await updatePassword(password);
+    setIsSaving(false);
+    if (error) {
+      Alert.alert("Erro", "Não foi possível atualizar a senha.");
+    } else {
+      setPassword("");
+      setConfirmPassword("");
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
+    }
+  }
 
   async function updateProfileHandler() {
     const { data: userData } = await supabase.auth.getUser();
@@ -85,10 +110,6 @@ function ProfileScreen() {
         setShowSuccess(false);
       }, 2000);
     }
-  }
-
-  function updatePasswordHandler() {
-    // Implemente a lógica de atualização de senha
   }
 
   function deleteAccountHandler() {

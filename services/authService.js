@@ -50,6 +50,13 @@ export const insertProfile = async (userId) => {
   return { error };
 };
 
+export const updatePassword = async (newPassword) => {
+  const { data, error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+  return { data, error };
+};
+
 export const updateProfile = async (
   userId,
   { name, gender, height, weight, age }
