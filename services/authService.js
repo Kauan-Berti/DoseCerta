@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 
 // Função de cadastro
-export const signUp = async (email, password) => {
+export const signUp = async ({ email, password }) => {
   const { data, error } = await supabase.auth.signUp({ email, password });
   return { data, error };
 };
