@@ -25,11 +25,14 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-font"],
+    "plugins": [
+      "expo-font"
+    ],
     "extra": {
       "eas": {
         "projectId": "a57982e7-f5ad-4055-acc7-feee907c0223"
       }
-    }
+    },
+    "owner": "dosecerta2025"
   }
 }

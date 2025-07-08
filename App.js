@@ -33,6 +33,13 @@ import { TouchableOpacity } from "react-native";
 import JournalScreen from "./screens/JournalScreen";
 import CreateDiary from "./screens/CreateDiary";
 import CreateSensation from "./screens/CreateSensation";
+import * as Notifications from "expo-notifications";
+import {
+  registerForNotifications,
+  setupNotificationChannel,
+  scheduleNotificationInMinutes,
+  scheduleNotificationInSeconds,
+} from "./helpers/notificationHelper";
 
 SplashScreen.preventAutoHideAsync(); //Aplicar quando o login estiver pronto
 
@@ -317,6 +324,25 @@ function Root() {
 }
 
 export default function App() {
+  useEffect(() => {
+    // Solicita permissões e configura o canal
+    registerForNotifications();
+    setupNotificationChannel();
+
+    // Agendar para 1 minuto depois de abrir
+    //scheduleNotificationInMinutes(1);
+    scheduleNotificationInSeconds(10);
+
+    // Lidar com toque na notificação
+    const sub = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        console.log("Usuário tocou na notificação", response);
+      }
+    );
+
+    return () => sub.remove();
+  }, []);
+
   return (
     <>
       <StatusBar style="dark" />
